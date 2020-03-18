@@ -1,9 +1,13 @@
 /**
  * name : message-constants/common.js
- * author : Akash Shah
- * Date : 09-Dec-2019
+ * author : Rakesh Kumar
+ * Date : 18-March-2019
  * Description : All common messages.
  */
 
 
-module.exports = {};
+module.exports = {
+
+    USER_CREATE_FORM:"userCreateForm"
+
+};

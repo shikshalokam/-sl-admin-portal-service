@@ -23,11 +23,19 @@ module.exports = class userCreationHelper {
             try {
 
                 let userProfileDocuments = 
-                await database.models.userProfile.find({
-
+                await database.models.forms.find({ 
                 });
-
-                return resolve(userProfileCreationData);
+                
+                if(userProfileDocuments){
+                    let response = {
+                        form:userProfileDocuments.value
+                    }
+                    return resolve(response);
+                }else{
+                    reject({ message:ConstantSourceNode.common.USER_CREATE_FORM + " not Found" });
+                }
+                
+                
 
             } catch (error) {
                 return reject(error);

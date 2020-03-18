@@ -103,34 +103,6 @@ let enviromentVariables = {
   "message" : "Enable/Disable rubric error message",
   "optional" : false
 },
-"CSV_REPORTS_PATH" : {
-  "message" : "Required csv reports path",
-  "optional" : false
-},
-"DISABLE_TOKEN_ON_OFF" : {
-  "message" : "",
-  "optional" : false
-},
-"DISABLE_TOKEN_DEFAULT_USERID" : {
-  "message" : "Required",
-  "optional" : false
-},
-"DISABLE_TOKEN_DEFAULT_USER_ROLE" : {
-  "message" : "ASSESSOR",
-  "optional" : false
-},
-"DISABLE_TOKEN_DEFAULT_USER_NAME" : {
-  "message" : "DISABLE_TOKEN_CHECK_DEFAULT_USER_NAME",
-  "optional" : false
-},
-"DISABLE_TOKEN_DEFAULT_USER_EMAIL" : {
-  "message" : "DISABLE_TOKEN_CHECK_DEFAULT_USER_EMAIL",
-  "optional" : false
-},
-"DISABLE_LEARNER_SERVICE_ON_OFF" : {
-  "message" : "Disable learner service",
-  "optional" : false
-},
 "USER_MANAGEMENT_HOST":{
   "message" : "Required",
   "optional" : false
