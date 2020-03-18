@@ -61,25 +61,25 @@ const serviceBaseUrl = process.env.APPLICATION_BASE_URL;
 
 
 //API documentation (apidoc)
-if (process.env.node_env == "development" || process.env.node_env == "local") {
-  app.use(express.static("apidoc"));
-  
-  if (process.env.node_env == "local") {
-    app.get(process.env.APIDOC_URL, (req, res) => {
-      let apidocPath = process.env.APIDOC_PATH + "/index.html";
+// if (process.env.NODE_ENV == "development" || process.env.NODE_ENV == "local") {
+//   app.use(express.static("apidoc"));
 
-      res.sendFile(path.join(__dirname, apidocPath));
-    });
-  } else {
-    app.get(process.env.APIDOC_URL, (req, res) => {
-      let urlArray = req.path.split("/");
-      urlArray.splice(0, 3);
-      let apidocPath = process.env.APIDOC_PATH + urlArray.join("/");
+//   if (process.env.NODE_ENV == "local") {
+//     app.get(process.env.APIDOC_URL, (req, res) => {
+//       let apidocPath = process.env.APIDOC_PATH + "/index.html";
 
-      res.sendFile(path.join(__dirname, apidocPath));
-    });
-  }
-}
+//       res.sendFile(path.join(__dirname, apidocPath));
+//     });
+//   } else {
+//     app.get(process.env.APIDOC_URL, (req, res) => {
+//       let urlArray = req.path.split("/");
+//       urlArray.splice(0, 3);
+//       let apidocPath = process.env.APIDOC_PATH + urlArray.join("/");
+
+//       res.sendFile(path.join(__dirname, apidocPath));
+//     });
+//   }
+// }
 
 // app.get(serviceBaseUrl+"web/*", function(req, res) {
 //   res.sendFile(path.join(__dirname, "/public/assessment/web/index.html"));

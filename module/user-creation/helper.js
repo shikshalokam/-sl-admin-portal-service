@@ -58,12 +58,16 @@ module.exports = class userCreationHelper {
 
             try {
 
-                let userProfileCreationData = 
-                await userManagementService.create(
-                    req.body
-                )
+                // let userProfileCreationData = 
+                // await userManagementService.create(
+                //     req.body
+                // )
 
-                return resolve(userProfileCreationData);
+                // console.log("req.body",req.body);
+                let userProfileCreationData = req.body;
+                userProfileCreationData['userId'] = "2be2fd94-f25e-4402-8e36-20907b45c650";
+
+                return resolve({ result :userProfileCreationData });
 
             } catch (error) {
                 return reject(error);

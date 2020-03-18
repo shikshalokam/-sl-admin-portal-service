@@ -113,7 +113,7 @@ module.exports = class PlatformUserRoles {
 
       try {
 
-        let getUserForm = await userCreationHelper.create();
+        let getUserForm = await userCreationHelper.create(req);
        
         return resolve(getUserForm);
 
