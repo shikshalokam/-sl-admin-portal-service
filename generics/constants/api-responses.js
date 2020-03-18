@@ -6,4 +6,6 @@
  */
 
 
-module.exports = {};
+module.exports = {
+    USER_CREATE_FORM_NOT_FOUND:"User Create Form Not Found"
+};

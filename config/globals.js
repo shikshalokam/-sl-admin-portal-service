@@ -15,6 +15,7 @@ module.exports = function () {
   global.GENERIC_HELPERS_PATH = ROOT_PATH + "/generics/helpers"
   global.MODULES_BASE_PATH = ROOT_PATH + "/module"
   global._ = require("lodash");
+  gen.utils = require(ROOT_PATH + "/generics/helpers/utils");
   global.config = require(".");
 
   global.httpStatusCode = 
@@ -23,7 +24,7 @@ module.exports = function () {
   global.ENABLE_DEBUG_LOGGING = process.env.ENABLE_DEBUG_LOGGING || "ON";
   global.ENABLE_BUNYAN_LOGGING = process.env.ENABLE_BUNYAN_LOGGING || "ON";
 
-  global.REQUEST_TIMEOUT_FOR_REPORTS = process.env.REQUEST_TIMEOUT_FOR_REPORTS;
+  // global.REQUEST_TIMEOUT_FOR_REPORTS = process.env.REQUEST_TIMEOUT_FOR_REPORTS;
 
   // boostrap all models
   global.models = requireAll({
@@ -34,13 +35,15 @@ module.exports = function () {
     }
   });
 
-  //load schema files
-  fs.readdirSync(ROOT_PATH + '/models/').forEach(function (file) {
-    if (file.match(/\.js$/) !== null) {
-      var name = file.replace('.js', '');
-      global[name + 'Schema'] = require(ROOT_PATH + '/models/' + file);
-    }
-  });
+
+   // load schema files
+   global.schemas = new Array
+   fs.readdirSync(ROOT_PATH + '/models/').forEach(function (file) {
+     if (file.match(/\.js$/) !== null) {
+       var name = file.replace('.js', '');
+       global.schemas[name] = require(ROOT_PATH + '/models/' + file);
+     }
+   });
 
   // boostrap all controllers
   global.controllers = requireAll({
@@ -51,16 +54,17 @@ module.exports = function () {
     }
   });
 
-    // Load all message constants
-    global.constants = {};
-    
-    fs.readdirSync(ROOT_PATH + "/generics/constants")
-    .forEach(function (file) {
-      if (file.match(/\.js$/) !== null) {
-        let name = file.replace('.js', '');
-        global.constants[name] = require(ROOT_PATH + "/generics/constants/" + file);
-      }
-    });
+// Load all message constants
+  global.constants = new Array
+  fs.readdirSync(ROOT_PATH + "/generics/constants")
+  .forEach(function (file) {
+    if (file.match(/\.js$/) !== null) {
+      let name = file.replace('.js', '');
+      name = gen.utils.hyphenCaseToCamelCase(name);
+      global.constants[name] = 
+      require(ROOT_PATH + "/generics/constants/" + file);
+    }
+  });
 
 
 };

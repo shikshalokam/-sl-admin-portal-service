@@ -5,7 +5,7 @@ require("./config/globals")();
 
 let environmentData = require("./envVariables")();
 
-if(!environmentData.success) {
+if (!environmentData.success) {
   log.warning("Server could not start . Not all environment variable is provided");
   process.exit();
 }
@@ -41,39 +41,53 @@ app.use(express.static("public"));
 
 fs.existsSync("logs") || fs.mkdirSync("logs");
 
-const serviceBaseUrl = process.env.APPLICATION_BASE_URL || "/integrations/";
+const serviceBaseUrl = process.env.APPLICATION_BASE_URL;
 
-const observationSubmissionsHtmlPath = process.env.OBSERVATION_SUBMISSIONS_HTML_PATH ? process.env.OBSERVATION_SUBMISSIONS_HTML_PATH : "observationSubmissions"
-app.use(express.static(observationSubmissionsHtmlPath));
-app.get(serviceBaseUrl+observationSubmissionsHtmlPath+"/*", (req, res) => {
-  let urlArray = req.path.split("/")
-  urlArray.splice(0,3)
-  res.sendFile(path.join(__dirname, "/public/"+observationSubmissionsHtmlPath+"/"+urlArray.join("/")));
-});
+// //API documentation (apidoc)
+// if (process.env.NODE_ENV == "development" || process.env.NODE_ENV == "local") {
+//   app.use(express.static("apidoc"));
+//   if(process.env.NODE_ENV == "local") {
+//     app.get("/apidoc", (req, res) => {
+//       res.sendFile(path.join(__dirname, "/public/apidoc/index.html"));
+//     });
+//   } else {
+//     app.get(serviceBaseUrl+"apidoc/*", (req, res) => {
+//       let urlArray = req.path.split("/")
+//       urlArray.splice(0,3)
+//       res.sendFile(path.join(__dirname, "/public/apidoc/"+urlArray.join("/")));
+//     });
+//   }
+// }
+
 
 //API documentation (apidoc)
-if (process.env.NODE_ENV == "development" || process.env.NODE_ENV == "local") {
+if (process.env.node_env == "development" || process.env.node_env == "local") {
   app.use(express.static("apidoc"));
-  if(process.env.NODE_ENV == "local") {
-    app.get("/apidoc", (req, res) => {
-      res.sendFile(path.join(__dirname, "/public/apidoc/index.html"));
+  
+  if (process.env.node_env == "local") {
+    app.get(process.env.APIDOC_URL, (req, res) => {
+      let apidocPath = process.env.APIDOC_PATH + "/index.html";
+
+      res.sendFile(path.join(__dirname, apidocPath));
     });
   } else {
-    app.get(serviceBaseUrl+"apidoc/*", (req, res) => {
-      let urlArray = req.path.split("/")
-      urlArray.splice(0,3)
-      res.sendFile(path.join(__dirname, "/public/apidoc/"+urlArray.join("/")));
+    app.get(process.env.APIDOC_URL, (req, res) => {
+      let urlArray = req.path.split("/");
+      urlArray.splice(0, 3);
+      let apidocPath = process.env.APIDOC_PATH + urlArray.join("/");
+
+      res.sendFile(path.join(__dirname, apidocPath));
     });
   }
 }
 
-  // app.get(serviceBaseUrl+"web/*", function(req, res) {
-  //   res.sendFile(path.join(__dirname, "/public/assessment/web/index.html"));
-  // });
+// app.get(serviceBaseUrl+"web/*", function(req, res) {
+//   res.sendFile(path.join(__dirname, "/public/assessment/web/index.html"));
+// });
 
-app.get(serviceBaseUrl + "web2/*", function (req, res) {
-  res.sendFile(path.join(__dirname, "/public" + serviceBaseUrl + "web2/index.html"));
-});
+// app.get(serviceBaseUrl + "web2/*", function (req, res) {
+//   res.sendFile(path.join(__dirname, "/public" + serviceBaseUrl + "web2/index.html"));
+// });
 
 var bunyan = require("bunyan");
 
@@ -102,7 +116,7 @@ global.loggerExceptionObj = bunyan.createLogger({
 });
 
 app.all("*", (req, res, next) => {
-  if(ENABLE_BUNYAN_LOGGING === "ON") {
+  if (ENABLE_BUNYAN_LOGGING === "ON") {
     loggerObj.info({
       method: req.method,
       url: req.url,
@@ -111,7 +125,7 @@ app.all("*", (req, res, next) => {
     });
   }
 
-  if(ENABLE_DEBUG_LOGGING === "ON") {
+  if (ENABLE_DEBUG_LOGGING === "ON") {
     log.info("-------Request log starts here------------------");
     log.info(
       "%s %s on %s from ",
@@ -125,7 +139,7 @@ app.all("*", (req, res, next) => {
     log.info("Request Files: ", req.files);
     log.info("-------Request log ends here------------------");
   }
-  
+
   next();
 });
 

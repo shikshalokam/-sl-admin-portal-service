@@ -38,7 +38,7 @@ module.exports = class PlatformUserRoles {
      * @apiVersion 1.0.0
      * @apiGroup Email
      * @apiHeader {String} X-authenticated-user-token Authenticity token
-     * @apiSampleRequest /admin/api/v1/platform-user-roles/jenkins
+     * @apiSampleRequest /admin/api/v1/platform-user-roles/getProfile
      * @apiUse successBody
      * @apiUse errorBody
      * @apiParamExample {json} Response:

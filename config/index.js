@@ -1,5 +1,5 @@
 /**
- * Project          : Integrations-services
+ * Project          : admin-portal-services
  * Module           : Configuration
  * Source filename  : index.js
  * Description      : Environment related configuration variables

@@ -23,10 +23,6 @@ let enviromentVariables = {
   "message" : "Enable or disable bunyan logging",
   "optional" : false
 },
-"REQUEST_TIMEOUT_FOR_REPORTS" : {
-  "message" : "Required Reports request timeout",
-  "optional" : false
-},
 "APPLICATION_BASE_URL" : {
   "message" : "Required Application base url",
   "optional" : false

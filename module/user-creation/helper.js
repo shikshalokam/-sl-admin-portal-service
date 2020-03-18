@@ -18,21 +18,22 @@ module.exports = class userCreationHelper {
    * @returns {json} Response consists of user creation form.
    */
 
-    static getForm( userId,token ) {
+    static getForm() {
         return new Promise(async (resolve, reject) => {
             try {
 
                 let userProfileDocuments = 
-                await database.models.forms.find({ 
+                await database.models.forms.findOne({ name: constants.common.USER_CREATE_FORM
                 });
-                
+
                 if(userProfileDocuments){
                     let response = {
                         form:userProfileDocuments.value
                     }
-                    return resolve(response);
+                    return resolve({ result:response });
                 }else{
-                    reject({ message:ConstantSourceNode.common.USER_CREATE_FORM + " not Found" });
+                    // apiResponses
+                    reject({ message:constants.apiResponses.USER_CREATE_FORM_NOT_FOUND });
                 }
                 
                 
@@ -42,5 +43,39 @@ module.exports = class userCreationHelper {
             }
         })
     }
+
+    /**
+   * create create.
+   * @method
+   * @name  create
+   * @param  {requestedData}  - requested body.
+   * @returns {json} Response consists of created user.
+   */
+
+  static create(req) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            try {
+
+                let userProfileCreationData = 
+                await userManagementService.create(
+                    req.body
+                )
+
+                return resolve(userProfileCreationData);
+
+            } catch (error) {
+                return reject(error);
+            }
+            
+            
+
+        } catch (error) {
+            return reject(error);
+        }
+    })
+}
+
 
 };

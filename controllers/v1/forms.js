@@ -1,7 +1,7 @@
 /**
  * name : forms.js
  * author : Rakesh Kumar
- * created-date : 07-March-2020
+ * created-date : 18-March-2020
  * Description : Forms information. 
  */
 
@@ -10,9 +10,9 @@
      * Forms
      * @class
  */
-module.exports = class Forms {
+module.exports = class Forms extends Abstract {
     constructor() {
-    //   super(schemas["forms"]);
+      super(schemas["forms"]);
     }
   
     static get name() {
