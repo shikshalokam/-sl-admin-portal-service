@@ -55,7 +55,54 @@ var platformUserProfile = function ( userId,token ) {
 
 }
 
+/**
+  * post create PlatForm User 
+  * @function
+  * @name createPlatFormUser
+  * @returns {Promise} returns a promise.
+*/
+
+var createPlatFormUser = function ( requestBody,token ) {
+
+    const platformUserRolesUrl = 
+    urlPrefix + constants.endpoints.PLATFORM_USER_CREATE;
+    
+    return new Promise(async (resolve, reject) => {
+        try {
+
+
+            let options = {
+                "headers":{
+                "content-type": "application/json",
+                "authorization" :  process.env.AUTHORIZATION,
+                "x-authenticated-user-token" : token,
+                "x-channel-id" : constants.SUNBIRD_ORGANISATION_ID 
+                },
+                json : requestBody
+            };
+            
+             request.post(platformUserRolesUrl,options,callback);
+            
+            function callback(err,data){
+                if( err ) {
+                    return reject({
+                        message : constants.apiResponses.SUNBIRD_SERVICE_DOWN
+                    });
+                } else {
+                    let dialCodeData = data.body;
+                    return resolve(dialCodeData);
+                }
+            }
+
+        } catch (error) {
+            return reject(error);
+        }
+    })
+
+}
+
 
 module.exports = {
-    platformUserProfile : platformUserProfile
+    platformUserProfile : platformUserProfile,
+    createPlatFormUser:createPlatFormUser
 };

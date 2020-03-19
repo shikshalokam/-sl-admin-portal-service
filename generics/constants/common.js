@@ -8,6 +8,7 @@
 
 module.exports = {
 
-    USER_CREATE_FORM:"userCreateForm"
+    USER_CREATE_FORM:"userCreateForm",
+    STATE_ENTITY_TYPE:"state"
 
 };

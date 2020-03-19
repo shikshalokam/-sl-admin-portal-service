@@ -8,11 +8,11 @@
 const userCreationHelper = require(MODULES_BASE_PATH + "/user-creation/helper.js");
 
 /**
-    * PlatformUserRoles
+    * userCreation
     * @class
 */
 
-module.exports = class PlatformUserRoles {
+module.exports = class userCreation {
   
    /**
      * @apiDefine errorBody
@@ -67,7 +67,7 @@ module.exports = class PlatformUserRoles {
 
       try {
 
-        let getUserForm = await userCreationHelper.getForm();
+        let getUserForm = await userCreationHelper.getForm(req);
        
         return resolve(getUserForm);
 
