@@ -80,7 +80,7 @@ var createPlatFormUser = function ( requestBody,token ) {
                 },
                 json : requestBody
             };
-            
+
              request.post(platformUserRolesUrl,options,callback);
             
             function callback(err,data){

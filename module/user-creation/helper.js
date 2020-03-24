@@ -67,25 +67,27 @@ module.exports = class userCreationHelper {
                          userProfileInfo.result.response.organisations){
                              organisations = userProfileInfo.result.response.organisations;
                     }
+
                    
                     let organisationList = [];
                     await Promise.all(organisations.map(async function(organisation){
                         let orgObj = {
-                            "organisationId":organisation.organisationId
+                            "label":organisation.organisationId,
+                            "value":organisation.organisationId
                         }
                         organisationList.push(orgObj);
                     }));
                    
-
+                   
                     stateListWithSubEntities.push(stateInfoWithSub);
                     let formsFields = [];
                     await Promise.all(userProfileDocuments.value.map(async function (fields) {
 
                         let inputFiled = fields;
-                        if (fields.label == "state") {
+                        if (fields.field == "state") {
                             inputFiled.options = states;
                         }
-                        if (fields.label == "organisations") {
+                        if (fields.field == "organisations") {
                             inputFiled.options = organisationList;
                         }
                         formsFields.push(inputFiled);
@@ -95,7 +97,6 @@ module.exports = class userCreationHelper {
                         let response = {
                             form: formsFields,
                             stateListWithSubEntities:stateListWithSubEntities,
-                            profileInfo:userProfileInfo.result.response.organisations
                         }
                         return resolve({ result: response });
                     } else {
@@ -126,6 +127,7 @@ module.exports = class userCreationHelper {
                         await userManagementService.createPlatFormUser(
                             req.body, req.userDetails.userToken
                         )
+
                     return resolve(userProfileCreationData);    
             } catch (error) {
                 return reject(error);
