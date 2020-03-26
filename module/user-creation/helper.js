@@ -30,9 +30,18 @@ module.exports = class userCreationHelper {
                         name: constants.common.USER_CREATE_FORM
                     });
 
+                if(!userProfileDocuments){
+                    reject({ message: constants.apiResponses.USER_CREATE_FORM_NOT_FOUND });
+                }
 
-                let stateInfo = await database.models.entities.find({ entityType: constants.common.STATE_ENTITY_TYPE },
-                    { entityTypeId: 1, _id: 1, metaInformation: 1, groups: 1, childHierarchyPath: 1 }).lean();
+                let stateInfo = await database.models.entities.find({
+                     entityType: constants.common.STATE_ENTITY_TYPE 
+                    },
+                    { entityTypeId: 1, _id: 1, 
+                      metaInformation: 1, 
+                      groups: 1,
+                      childHierarchyPath: 1 
+                    }).lean();
 
               
                 let states = [];
@@ -53,15 +62,12 @@ module.exports = class userCreationHelper {
                         });
                     }));
 
-
-                    let profileInfo = await sunBirdService.getUserProfileInfo(req.userDetails.userToken,req.userDetails.userId);
+                    let profileInfo = await sunBirdService.getUserProfileInfo(req.userDetails.userToken,
+                        req.userDetails.userId);
                
 
                     let organisations = [];
-
                     let userProfileInfo = JSON.parse(profileInfo);
-
-
                     if( userProfileInfo && userProfileInfo.result && 
                         userProfileInfo.result.response &&
                          userProfileInfo.result.response.organisations){
@@ -70,12 +76,26 @@ module.exports = class userCreationHelper {
 
                    
                     let organisationList = [];
+
+                    // console.log("organisations",organisations);
                     await Promise.all(organisations.map(async function(organisation){
                         let orgObj = {
                             "label":organisation.organisationId,
                             "value":organisation.organisationId
                         }
                         organisationList.push(orgObj);
+                    }));
+
+
+                    let allPlatFormRoles = await database.models.platformRolesExt.find({},{ code:1,title:1 });
+                    let roles = [];
+                    await Promise.all(allPlatFormRoles.map(async function(roleInfo){
+
+                        let roleObj = {
+                            label:roleInfo.title,
+                            value:roleInfo._id
+                        }
+                        roles.push(roleObj);
                     }));
                    
                    
@@ -87,8 +107,10 @@ module.exports = class userCreationHelper {
                         if (fields.field == "state") {
                             inputFiled.options = states;
                         }
-                        if (fields.field == "organisations") {
+                        else if (fields.field == "organisations") {
                             inputFiled.options = organisationList;
+                        }else if (fields.field == "roles") {
+                            inputFiled.options = roles;
                         }
                         formsFields.push(inputFiled);
 
@@ -99,9 +121,6 @@ module.exports = class userCreationHelper {
                             stateListWithSubEntities:stateListWithSubEntities,
                         }
                         return resolve({ result: response });
-                    } else {
-                        // apiResponses
-                        reject({ message: constants.apiResponses.USER_CREATE_FORM_NOT_FOUND });
                     }
                 }
 

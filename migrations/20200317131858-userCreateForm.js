@@ -6,7 +6,8 @@ module.exports = {
     if (!userCreateForm) {
 
       let allFields = [];
-      let inputFields = ["firstName", "lastName", "email", "phoneNumber", "userName", "password","state","organisations"];
+      let inputFields = ["firstName", "lastName", "email", "phoneNumber", 
+      "userName", "password","state","organisations","roles"];
       await Promise.all(inputFields.map(async function (fields) {
 
         let inputObj = {};
@@ -33,12 +34,6 @@ module.exports = {
         } else if (fields == "email") {
           inputObj.label = "Email";
           inputObj.input = "text";
-          // inputObj.validation.push({
-          //   name: "pattern",
-          //   validator: "",
-          //   message: "Please provide a valid Email"
-          // });
-
           validator = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
           message = "Please provide a valid Email";
 
@@ -46,27 +41,14 @@ module.exports = {
         } else if (fields == "phoneNumber") {
           inputObj.label = "Phone Number";
           inputObj.input = "text";
-
-          // inputObj.validation.push({
-          //   name: "pattern",
-          //   validator: "^((\+)?(\d{2}[-]))?(\d{10}){1}?$",
-          //   message: "Please provide a valid Phone Number"
-          // });
-
           validator = "^((\+)?(\d{2}[-]))?(\d{10}){1}?$";
           message = "Please provide a valid Phone Number";
 
-        } else if(fields =="state" || fields =="organisations" ){
+        } else if(fields =="state" || fields =="organisations" || fields =="roles" ){
 
           inputObj.label =fields.charAt(0).toUpperCase() + fields.slice(1);
           inputObj.input = "select";
           inputObj.options = [];
-          // inputObj.validation.push({
-          //   name: "pattern",
-          //   validator: "",
-          //   message: ""
-          // });
-
           validator = "";
           message = "";
 
@@ -82,11 +64,8 @@ module.exports = {
             inputObj.label = "User Name";
           }
           inputObj.input = "text";
-
-         
           validator = "^[A-Za-z]+$/";
           message = "Please provide a valid "+inputObj.label;
-         
 
         }
 
@@ -102,8 +81,6 @@ module.exports = {
           message:message
         }
         inputObj.validation.push(patternValidation);
-
-
         allFields.push(inputObj);
       }));
 
