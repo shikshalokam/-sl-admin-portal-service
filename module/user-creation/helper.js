@@ -25,6 +25,7 @@ module.exports = class userCreationHelper {
         return new Promise(async (resolve, reject) => {
             try {
 
+                
                 let userProfileDocuments =
                     await database.models.forms.findOne({
                         name: constants.common.USER_CREATE_FORM
@@ -62,29 +63,29 @@ module.exports = class userCreationHelper {
                         });
                     }));
 
-                    let profileInfo = await sunBirdService.getUserProfileInfo(req.userDetails.userToken,
-                        req.userDetails.userId);
+                    // let profileInfo = await sunBirdService.getUserProfileInfo(req.userDetails.userToken,
+                    //     req.userDetails.userId);
                
 
-                    let organisations = [];
-                    let userProfileInfo = JSON.parse(profileInfo);
-                    if( userProfileInfo && userProfileInfo.result && 
-                        userProfileInfo.result.response &&
-                         userProfileInfo.result.response.organisations){
-                             organisations = userProfileInfo.result.response.organisations;
-                    }
+                    // let organisations = [];
+                    // let userProfileInfo = JSON.parse(profileInfo);
+                    // if( userProfileInfo && userProfileInfo.result && 
+                    //     userProfileInfo.result.response &&
+                    //      userProfileInfo.result.response.organisations){
+                    //          organisations = userProfileInfo.result.response.organisations;
+                    // }
 
                    
                     let organisationList = [];
 
                     // console.log("organisations",organisations);
-                    await Promise.all(organisations.map(async function(organisation){
-                        let orgObj = {
-                            "label":organisation.organisationId,
-                            "value":organisation.organisationId
-                        }
-                        organisationList.push(orgObj);
-                    }));
+                    // await Promise.all(organisations.map(async function(organisation){
+                    //     let orgObj = {
+                    //         "label":organisation.organisationId,
+                    //         "value":organisation.organisationId
+                    //     }
+                    //     organisationList.push(orgObj);
+                    // }));
 
 
                     let allPlatFormRoles = await database.models.platformRolesExt.find({},{ code:1,title:1 });
@@ -108,7 +109,11 @@ module.exports = class userCreationHelper {
                             inputFiled.options = states;
                         }
                         else if (fields.field == "organisations") {
-                            inputFiled.options = organisationList;
+                            // inputFiled.options = organisationList;
+
+                            // console.log("req.params",req.params);
+                            inputFiled["value"] = req.params._id;
+
                         }else if (fields.field == "roles") {
                             inputFiled.options = roles;
                         }
@@ -175,7 +180,8 @@ module.exports = class userCreationHelper {
                 await database.models.entityTypes.findOne({
                     _id: entityTypeId
                 }, { immediateChildrenEntityType: 1 }).lean();
-            if (entityTypeDoc && entityTypeDoc.immediateChildrenEntityType && entityTypeDoc.immediateChildrenEntityType.length > 0) {
+            if (entityTypeDoc && entityTypeDoc.immediateChildrenEntityType &&
+                 entityTypeDoc.immediateChildrenEntityType.length > 0) {
 
                 Promise.all(entityTypeList.map(async function (types) {
                     if (entityTypeDoc.immediateChildrenEntityType.includes(types)) {

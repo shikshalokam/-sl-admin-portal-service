@@ -43,15 +43,10 @@ var organisationList = async function (token ) {
                     message : constants.apiResponses.SUNBIRD_SERVICE_DOWN
                 });
             } else {
-                let dialCodeData = data.body;
-                return resolve(dialCodeData);
+                return resolve(data.body);
             }
         }
     })
-
-    
-  
-    
 }
 
 
@@ -69,6 +64,7 @@ var getUserProfileInfo = function (token,userId) {
             "x-authenticated-user-token" : token,
             "x-channel-id" : constants.SUNBIRD_ORGANISATION_ID 
             }
+
         };
         
         request.get(createUserUrl,options,callback);
@@ -79,8 +75,7 @@ var getUserProfileInfo = function (token,userId) {
                     message : constants.apiResponses.SUNBIRD_SERVICE_DOWN
                 });
             } else {
-                let dialCodeData = data.body;
-                return resolve(dialCodeData);
+                return resolve(data.body);
             }
         }
     })
@@ -88,9 +83,46 @@ var getUserProfileInfo = function (token,userId) {
 
   }
 
+  var users = function (token,body) {
+    const userSearchAPI = 
+    process.env.sunbird_url+constants.endpoints.SUNBIRD_SEARCH_USER
+
+
+    return new Promise(async (resolve,reject)=>{
+        
+        let options = {
+            "headers":{
+            "content-type": "application/json",
+            "authorization" :  process.env.AUTHORIZATION,
+            "x-authenticated-user-token" : token,
+            "x-channel-id" : constants.SUNBIRD_ORGANISATION_ID 
+            },
+            json : body
+        };
+        
+        request.post(userSearchAPI,options,callback);
+        
+        function callback(err,data){
+            if( err ) {
+                return reject({
+                    message : constants.apiResponses.SUNBIRD_SERVICE_DOWN
+                });
+            } else {
+                // console.log("data.body",data.body);
+                return resolve(data.body);
+            }
+        }
+    })
+
+
+  }
+
+  
+
 
 
 module.exports = {
     organisationList : organisationList,
-    getUserProfileInfo:getUserProfileInfo
+    getUserProfileInfo:getUserProfileInfo,
+    users:users
 };

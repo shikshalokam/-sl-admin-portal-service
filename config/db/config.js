@@ -7,6 +7,7 @@ const mongoose_ttl = require("mongoose-ttl");
 let ObjectId = mongoose.Types.ObjectId;
 
 var DB = function(config) {
+
   mongoose.set('useCreateIndex', true)
   mongoose.set('useFindAndModify', false)
   mongoose.set('useUnifiedTopology', true)
