@@ -107,7 +107,7 @@ module.exports = {
 
     }));
 
-    // let dbRoles = await db.collection("platformRolesExt").insertMany(platFormRoles);
+    let dbRoles = await db.collection("platformRolesExt").insertMany(platFormRoles);
     db.collection('users').createIndex({ platformRole: 1 });
 
     let updateUserRoles = ["OBS_REVIEWER", "OBS_DESIGNER"];

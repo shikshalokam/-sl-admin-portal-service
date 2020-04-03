@@ -78,7 +78,6 @@ module.exports = class userCreationHelper {
                    
                     let organisationList = [];
 
-                    // console.log("organisations",organisations);
                     // await Promise.all(organisations.map(async function(organisation){
                     //     let orgObj = {
                     //         "label":organisation.organisationId,
@@ -111,7 +110,6 @@ module.exports = class userCreationHelper {
                         else if (fields.field == "organisations") {
                             // inputFiled.options = organisationList;
 
-                            // console.log("req.params",req.params);
                             inputFiled["value"] = req.params._id;
 
                         }else if (fields.field == "roles") {

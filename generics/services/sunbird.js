@@ -108,7 +108,6 @@ var getUserProfileInfo = function (token,userId) {
                     message : constants.apiResponses.SUNBIRD_SERVICE_DOWN
                 });
             } else {
-                // console.log("data.body",data.body);
                 return resolve(data.body);
             }
         }

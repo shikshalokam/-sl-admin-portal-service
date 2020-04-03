@@ -28,7 +28,6 @@ models.setDirectory(cassandraPath).bind(
     },
     function(err) {
         if(err) {
-            console.log("err",err);
             throw err; 
         }else{
             log.debug("Connected to Cassandra DB");
