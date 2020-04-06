@@ -5,20 +5,28 @@
  * Description : abstract class.
  */
 
- /**
-    * Abstract
-    * @class
+/**
+   * Abstract
+   * @class
 */
 
 let Abstract = class Abstract {
   constructor(schema) {
-    this.model = database.createModel(schema);
-    this.schema = schema.name;
+
+    if (schema.table_name && schema.table_name == "organisation") {
+      this.model = cassandraDatabase.createModel(schema);
+      this.schema = schema.name;
+    
+    } else {
+      this.model = database.createModel(schema);
+      this.schema = schema.name;
+    }
     this.httpStatus = {
       ok: 200,
       notFound: 404,
       badRequest: 400
     };
+
   }
 
   //insert
@@ -188,7 +196,7 @@ let Abstract = class Abstract {
       });
     });
   }
-  
+
   _getSelectedFields(fields) {
     // Removed below line from layer
     //let f = fields !== undefined ? fields.replace(/,/g, " ") : "";
@@ -217,9 +225,9 @@ let Abstract = class Abstract {
     if (query.searchText && query.searchFields) {
       let search = [];
       let searchText = query["searchText"].split(",");
-      query["searchFields"].split(",").forEach(function(field) {
+      query["searchFields"].split(",").forEach(function (field) {
         var dict = {};
-        searchText.forEach(function(text) {
+        searchText.forEach(function (text) {
           dict[field] = new RegExp(text, "i");
           search.push(dict);
         });
