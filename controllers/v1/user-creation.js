@@ -46,7 +46,7 @@ module.exports = class userCreation {
      * @api {get} /admin/api/v1/user-creation/getForm/:userId 
      * User Creation Form.
      * @apiVersion 1.0.0
-     * @apiGroup User
+     * @apiGroup User Creation
      * @apiHeader {String} X-authenticated-user-token Authenticity token
      * @apiSampleRequest /admin/api/v1/user-creation/getForm/8f6d6fd2-c069-41f1-b94d-ad2befcc964b
      * @apiUse successBody
@@ -54,9 +54,10 @@ module.exports = class userCreation {
      * @apiParamExample {json} Response:
      * 
      *   {
-     *   "status": 200,
-     *  "result": {
-     *  "form": [
+     * "message" : "User creation form fetched successfully",
+     * "status": 200,
+     * "result": {
+     * "form": [
      *       {
      *          "field": "email",
      *           "value": "",
@@ -115,7 +116,7 @@ module.exports = class userCreation {
     
 
    /**
-   * Get user-creation form
+   * Get user creation form
    * @method
    * @name getForm
    * @param  {req}  - requested data.
@@ -149,43 +150,45 @@ module.exports = class userCreation {
       }
     });
   }
-
-
-
-    /**
-     * @api {get} /admin/api/v1/user-creation/create 
-     * to create user 
-     * @apiVersion 1.0.0
-     * @apiGroup User
-     * @apiHeader {String} X-authenticated-user-token Authenticity token
-     * @apiSampleRequest /admin/api/v1/user-creation/create
-     * @apiUse successBody
-     * @apiUse errorBodyuser
-     * @apiParamExample {json} Response:
-     * {
-     *  "message": "User created successfully",
-     *  "status": 200,
-     *   "result": {
-     *   "response": "SUCCESS",
-     *   "userId": "f1f36b2b-1fd8-46fb-92a0-69753cee01ba"
-     *   }
-     *   }
+  
+  /**
+   * @api {get} /admin/api/v1/user-creation/create 
+   * to create user 
+   * @apiVersion 1.0.0
+   * @apiGroup User Creation
+   * @apiHeader {String} X-authenticated-user-token Authenticity token
+   * @apiSampleRequest /admin/api/v1/user-creation/create
+   * @apiUse successBody
+   * @apiUse errorBodyuser
+   * @apiParamExample {json} Response:
+   * {
+   *  "message": "User created successfully",
+   *  "status": 200,
+   *   "result": {
+   *   "response": "SUCCESS",
+   *   "userId": "f1f36b2b-1fd8-46fb-92a0-69753cee01ba"
+   *   }
+   *   }
   */
 
-   /**
+  /**
    * create User
    * @method
    * @name create
    * @param  {req}  - requested data.
    * @returns {json} Response consists of created user details
-   */
+  */
 
   create(req) {
     return new Promise(async (resolve, reject) => {
 
       try {
 
-        let getUserForm = await userCreationHelper.create(req);
+        let getUserForm = 
+        await userCreationHelper.create(
+          req.body,
+          req.userDetails.userToken
+        );
        
         return resolve(getUserForm);
 
