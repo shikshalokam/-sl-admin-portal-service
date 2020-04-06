@@ -61,10 +61,7 @@ module.exports = {
             inputObj.input = "select";
             inputObj.options = [];
             
-            if( fields === "organisations"){
-              inputObj.visible = false;
-            }
-
+          
         } else {
           validator = inputObj.validation[1].validator;
           message = "Please Provide Valid "+inputObj.label;

@@ -70,15 +70,27 @@ module.exports = class platFormUserProfileHelper {
 
                 let profileData = await _checkUserAdminAccess(req.userDetails.userToken, req.userDetails.id);
                 if (profileData && profileData.allowed) {
+
+                    
+                   if( req.query.pageNo){
+                    req.query.pageNo = req.query.pageNo - 1;
+                   }
                     let bodyOfRequest = {
                         "request": {
                             "filters": {
-                                "organisations.organisationId": req.params._id
+                                "organisations.organisationId": req.params._id,
                             },
                             "limit": req.query.pageSize ? parseInt(req.query.pageSize) : 10,
-                            "offset": req.query.pageNo ? parseInt(req.query.pageSize) : 1
+                            "offset": req.query.pageNo ? parseInt(req.query.pageSize) : 0
                         }
                     }
+
+                    if(req.query.search){
+                        bodyOfRequest.request['query']=req.query.search;
+                    }
+
+                    
+
                     let usersList =
                         await sunBirdService.users(req.userDetails.userToken, bodyOfRequest);
                     if (usersList.responseCode == "OK") {

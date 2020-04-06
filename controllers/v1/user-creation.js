@@ -44,7 +44,7 @@ module.exports = class userCreation {
 
    /**
      * @api {get} /admin/api/v1/user-creation/getForm 
-     * Get platform user profile information.
+     * To get the user creation dynamic Form from db.
      * @apiVersion 1.0.0
      * @apiGroup User
      * @apiHeader {String} X-authenticated-user-token Authenticity token
@@ -52,7 +52,67 @@ module.exports = class userCreation {
      * @apiUse successBody
      * @apiUse errorBody
      * @apiParamExample {json} Response:
-  */
+     * 
+     *   {
+     *   "status": 200,
+     *  "result": {
+     *  "form": [
+     *       {
+     *          "field": "email",
+     *           "value": "",
+     *          "visible": true,
+     *           "editable": true,
+     *           "validation": [
+     *               {
+     *                   "name": "required",
+     *                   "validator": "required",
+     *                   "message": "Email required"
+     *               },
+     *               {
+     *                   "name": "pattern",
+     *                   "validator": "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$",
+     *                   "message": "Please provide a valid Email"
+     *               }
+     *           ],
+     *           "label": "Email",
+     *           "input": "text"
+     *       },
+     *    
+     *       {
+     *           "field": "userName",
+     *           "value": "",
+     *           "visible": true,
+     *           "editable": true,
+     *           "validation": [
+     *               {
+     *                   "name": "required",
+     *                   "validator": "required",
+     *                   "message": "User Name required"
+     *               },
+     *               {
+     *                   "name": "pattern",
+     *                   "validator": "^[A-Za-z]+$/",
+     *                   "message": "Please provide a valid User Name"
+     *               }
+     *           ],
+     *           "label": "User Name",
+     *           "input": "text"
+     *       }
+     *   ],
+     *   "stateListWithSubEntities": [
+     *       {
+     *           "5da829874c67d63cca1bd9d0": [
+     *               "district",
+     *               "block",
+     *               "cluster",
+     *               "school"
+     *           ]
+     *       }
+     *   ]
+     *   }
+     *  }
+     **/
+    
 
    /**
    * Get user-creation form
@@ -67,7 +127,8 @@ module.exports = class userCreation {
 
       try {
 
-        let getUserForm = await userCreationHelper.getForm(req);
+        let getUserForm = await userCreationHelper.getForm(req.userDetails.userToken,
+          req.userDetails.userId);
        
         return resolve(getUserForm);
 
@@ -87,6 +148,8 @@ module.exports = class userCreation {
   }
 
 
+   
+
 
     /**
      * @api {get} /admin/api/v1/user-creation/create 
@@ -98,6 +161,14 @@ module.exports = class userCreation {
      * @apiUse successBody
      * @apiUse errorBodyuser
      * @apiParamExample {json} Response:
+     * {
+     *  "message": "User created successfully",
+     *  "status": 200,
+     *   "result": {
+     *   "response": "SUCCESS",
+     *   "userId": "f1f36b2b-1fd8-46fb-92a0-69753cee01ba"
+     *   }
+     *   }
   */
 
    /**

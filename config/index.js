@@ -21,9 +21,7 @@ let db_connect = function (configData) {
 };
 
 let cassandra_connect = function (configData) {
-  global.cassandraDatabase = require("./db/cassandra-config")(configData.db.connection.cassandra);
-  // global.ObjectId = database.ObjectId;
-  // global.Abstract = require("../generics/abstract");
+  global.cassandraDatabase = require("./db/cassandra")(configData.db.connection.cassandra);
 };
 
 
@@ -55,9 +53,6 @@ const configuration = {
   URLPrefix: process.env.URL_PREFIX,
   webUrl: process.env.WEB_URL
 };
-CASSANDRA_DB  = "127.0.0.1"
-CASSANDRA_HOST = "9043"
-KEYSPACE = "sunbird"
 
 db_connect(configuration);
 cassandra_connect(configuration);

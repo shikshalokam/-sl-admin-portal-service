@@ -7,7 +7,7 @@ let fs = require("fs");
 let path = require("path");
 
 let DB = function(config){
-let cassandraPath = path.join(__dirname, '../../cassandra_models')
+let cassandraPath = path.join(__dirname, '../../models/cassandra')
 
 models.setDirectory(cassandraPath).bind(
     {

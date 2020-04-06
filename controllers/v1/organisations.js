@@ -41,6 +41,17 @@ module.exports = class organisations {
      * @apiUse successBody
      * @apiUse errorBody
      * @apiParamExample {json} Response:
+     * 
+     * {
+     *   "message": "Organisation list fetched Successfully",
+     *   "status": 200,
+     *    "result": [ 
+     *     {  
+     *         "value": "0125747659358699520",
+     *          "label": "ShikshaLokamDev"
+     *     }
+     *  ]
+     * }
   */
 
    /**
@@ -81,6 +92,22 @@ module.exports = class organisations {
      * @apiUse successBody
      * @apiUse errorBody
      * @apiParamExample {json} Response:
+     * 
+     * {
+     *   "message": "Organisation list fetched Successfully",
+     *   "status": 200,
+     *    "result": {
+     *      "count": 1,
+     *       "usersList": [ {
+     *            "lastName": "",
+     *             "email": "",
+     *             "firstName": "abcd", 
+     *          }
+     *       ]
+     *    }   
+     * }
+     * 
+     * 
   */
 
    /**

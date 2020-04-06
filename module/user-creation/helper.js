@@ -21,11 +21,10 @@ module.exports = class userCreationHelper {
    * @returns {json} Response consists of user creation form.
    */
 
-    static getForm(req) {
+    static getForm(userId,token) {
         return new Promise(async (resolve, reject) => {
             try {
 
-                
                 let userProfileDocuments =
                     await database.models.forms.findOne({
                         name: constants.common.USER_CREATE_FORM
@@ -63,34 +62,37 @@ module.exports = class userCreationHelper {
                         });
                     }));
 
-                    // let profileInfo = await sunBirdService.getUserProfileInfo(req.userDetails.userToken,
-                    //     req.userDetails.userId);
+                    let profileInfo = await sunBirdService.getUserProfileInfo(userId,token);
                
 
-                    // let organisations = [];
-                    // let userProfileInfo = JSON.parse(profileInfo);
-                    // if( userProfileInfo && userProfileInfo.result && 
-                    //     userProfileInfo.result.response &&
-                    //      userProfileInfo.result.response.organisations){
-                    //          organisations = userProfileInfo.result.response.organisations;
-                    // }
+                    let organisations = [];
+                    let userProfileInfo = JSON.parse(profileInfo);
+                    if( userProfileInfo && userProfileInfo.result && 
+                        userProfileInfo.result.response &&
+                         userProfileInfo.result.response.organisations){
+                             organisations = userProfileInfo.result.response.organisations;
+                    }
 
                    
                     let organisationList = [];
+                    await Promise.all(organisations.map(async function(organisation){
+                        let organisationDetails = await cassandraDatabase.models.organisation.findOneAsync(
+                            { id: organisation.organisationId },
+                            { raw: true });
+                         if(organisationDetails){
+                            let orgObj = {
+                                "label":organisationDetails.orgname,
+                                "value":organisation.organisationId
+                            }
+                            organisationList.push(orgObj);
+                         }   
+                    }));
 
-                    // await Promise.all(organisations.map(async function(organisation){
-                    //     let orgObj = {
-                    //         "label":organisation.organisationId,
-                    //         "value":organisation.organisationId
-                    //     }
-                    //     organisationList.push(orgObj);
-                    // }));
 
-
-                    let allPlatFormRoles = await database.models.platformRolesExt.find({},{ code:1,title:1 });
+                    let allPlatFormRoles = await database.models.platformRolesExt.find({},
+                        { code:1,title:1 });
                     let roles = [];
                     await Promise.all(allPlatFormRoles.map(async function(roleInfo){
-
                         let roleObj = {
                             label:roleInfo.title,
                             value:roleInfo._id
@@ -108,15 +110,12 @@ module.exports = class userCreationHelper {
                             inputFiled.options = states;
                         }
                         else if (fields.field == "organisations") {
-                            // inputFiled.options = organisationList;
-
-                            inputFiled["value"] = req.params._id;
+                            inputFiled.options = organisationList;
 
                         }else if (fields.field == "roles") {
                             inputFiled.options = roles;
                         }
                         formsFields.push(inputFiled);
-
                     }));
                     if (userProfileDocuments) {
                         let response = {
