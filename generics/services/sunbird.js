@@ -8,18 +8,16 @@
 //dependencies
 
 const request = require('request');
-const shikshalokamService = require(ROOT_PATH+"/generics/helpers/shikshalokam");
 
 /**
   * create user
   * @function
   * @name createUser
-  * @param requestBody - body data for creating user.
   * @param token - Logged in user token.
   * @returns {Promise}
 */
 
-var organisationList = async function (token ) {
+var organisationList = async function ( token ) {
 
     const createUserUrl = 
     process.env.sunbird_url+constants.endpoints.SUNBIRD_ORGANISATION_LIST;
@@ -27,11 +25,11 @@ var organisationList = async function (token ) {
     return new Promise(async (resolve,reject)=>{
         
         let options = {
-            "headers":{
-            "content-type": "application/json",
+            "headers" : {
+            "content-type" : "application/json",
             "authorization" :  process.env.AUTHORIZATION,
             "x-authenticated-user-token" : token,
-            "x-channel-id" : constants.SUNBIRD_ORGANISATION_ID 
+            "x-channel-id" : process.env.SUNBIRD_ORGANISATION_ID 
             }
         };
         
@@ -49,8 +47,16 @@ var organisationList = async function (token ) {
     })
 }
 
+/**
+  * Get the user profile information.
+  * @function
+  * @name getUserProfileInfo
+  * @param userId - Logged in user Id.
+  * @param token - Logged in user token.
+  * @returns {JSON} - user profile information.
+*/
 
-var getUserProfileInfo = function (token,userId) {
+var getUserProfileInfo = function ( token,userId ) {
     const createUserUrl = 
     process.env.sunbird_url+constants.endpoints.SUNBIRD_USER_READ+"/"+userId;
 
@@ -62,7 +68,7 @@ var getUserProfileInfo = function (token,userId) {
             "content-type": "application/json",
             "authorization" :  process.env.AUTHORIZATION,
             "x-authenticated-user-token" : token,
-            "x-channel-id" : constants.SUNBIRD_ORGANISATION_ID 
+            "x-channel-id" : process.env.SUNBIRD_ORGANISATION_ID 
             }
 
         };
@@ -79,11 +85,18 @@ var getUserProfileInfo = function (token,userId) {
             }
         }
     })
+}
 
+/**
+  * Get users.
+  * @function
+  * @name users
+  * @param body - body data.
+  * @param token - Logged in user token.
+  * @returns {JSON} - All users data.
+*/
 
-  }
-
-  var users = function (token,body) {
+var users = function ( token,body ) {
     const userSearchAPI = 
     process.env.sunbird_url+constants.endpoints.SUNBIRD_SEARCH_USER
 
@@ -95,7 +108,7 @@ var getUserProfileInfo = function (token,userId) {
             "content-type": "application/json",
             "authorization" :  process.env.AUTHORIZATION,
             "x-authenticated-user-token" : token,
-            "x-channel-id" : constants.SUNBIRD_ORGANISATION_ID 
+            "x-channel-id" : process.env.SUNBIRD_ORGANISATION_ID 
             },
             json : body
         };
@@ -112,16 +125,10 @@ var getUserProfileInfo = function (token,userId) {
             }
         }
     })
-
-
-  }
-
-  
-
-
+}
 
 module.exports = {
     organisationList : organisationList,
-    getUserProfileInfo:getUserProfileInfo,
-    users:users
+    getUserProfileInfo : getUserProfileInfo,
+    users : users
 };

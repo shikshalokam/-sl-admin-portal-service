@@ -76,7 +76,7 @@ var createPlatFormUser = function ( requestBody,token ) {
                 "content-type": "application/json",
                 "authorization" :  process.env.AUTHORIZATION,
                 "x-authenticated-user-token" : token,
-                "x-channel-id" : constants.SUNBIRD_ORGANISATION_ID 
+                "x-channel-id" : process.env.SUNBIRD_ORGANISATION_ID 
                 },
                 json : requestBody
             };

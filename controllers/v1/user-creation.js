@@ -43,12 +43,12 @@ module.exports = class userCreation {
 */
 
    /**
-     * @api {get} /admin/api/v1/user-creation/getForm 
-     * To get the user creation dynamic Form from db.
+     * @api {get} /admin/api/v1/user-creation/getForm/:userId 
+     * User Creation Form.
      * @apiVersion 1.0.0
      * @apiGroup User
      * @apiHeader {String} X-authenticated-user-token Authenticity token
-     * @apiSampleRequest /admin/api/v1/user-creation/getForm
+     * @apiSampleRequest /admin/api/v1/user-creation/getForm/8f6d6fd2-c069-41f1-b94d-ad2befcc964b
      * @apiUse successBody
      * @apiUse errorBody
      * @apiParamExample {json} Response:
@@ -70,7 +70,7 @@ module.exports = class userCreation {
      *               },
      *               {
      *                   "name": "pattern",
-     *                   "validator": "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$",
+     *                   "validator": "",
      *                   "message": "Please provide a valid Email"
      *               }
      *           ],
@@ -101,7 +101,7 @@ module.exports = class userCreation {
      *   ],
      *   "stateListWithSubEntities": [
      *       {
-     *           "5da829874c67d63cca1bd9d0": [
+     *           "5da829874c67d63cca1bd9d2": [
      *               "district",
      *               "block",
      *               "cluster",
@@ -127,8 +127,11 @@ module.exports = class userCreation {
 
       try {
 
-        let getUserForm = await userCreationHelper.getForm(req.userDetails.userToken,
-          req.userDetails.userId);
+        let getUserForm = 
+        await userCreationHelper.getForm(
+          req.userDetails.userToken,
+          req.params._id ? req.params._id : req.userDetails.userId
+        );
        
         return resolve(getUserForm);
 
@@ -147,8 +150,6 @@ module.exports = class userCreation {
     });
   }
 
-
-   
 
 
     /**
