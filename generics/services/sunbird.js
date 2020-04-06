@@ -28,8 +28,7 @@ var organisationList = async function ( token ) {
             "headers" : {
             "content-type" : "application/json",
             "authorization" :  process.env.AUTHORIZATION,
-            "x-authenticated-user-token" : token,
-            "x-channel-id" : process.env.SUNBIRD_ORGANISATION_ID 
+            "x-authenticated-user-token" : token
             }
         };
         
@@ -67,8 +66,7 @@ var getUserProfileInfo = function ( token,userId ) {
             "headers":{
             "content-type": "application/json",
             "authorization" :  process.env.AUTHORIZATION,
-            "x-authenticated-user-token" : token,
-            "x-channel-id" : process.env.SUNBIRD_ORGANISATION_ID 
+            "x-authenticated-user-token" : token
             }
 
         };
@@ -108,7 +106,6 @@ var users = function ( token,body ) {
             "content-type": "application/json",
             "authorization" :  process.env.AUTHORIZATION,
             "x-authenticated-user-token" : token,
-            "x-channel-id" : process.env.SUNBIRD_ORGANISATION_ID 
             },
             json : body
         };

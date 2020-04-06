@@ -21,7 +21,9 @@ var DB = function(config) {
     log.debug("Connected to DB");
   });
 
-  var createModel = function(opts) {
+  var createModel = function(opts) {  
+
+    
     if (typeof opts.schema.__proto__.instanceOfSchema === "undefined") {
       var schema = mongoose.Schema(opts.schema, opts.options);
     } else {

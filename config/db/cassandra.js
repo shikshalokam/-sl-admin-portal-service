@@ -1,50 +1,33 @@
-var models = require('express-cassandra');
+var ExpressCassandra = require('express-cassandra');
 
-//Tell express-cassandra to use the models-directory, and
-//use bind() to load the models using cassandra configurations.
-
-let fs = require("fs");
-let path = require("path");
-
-let DB = function(config){
-let cassandraPath = path.join(__dirname, '../../models/cassandra')
-
-models.setDirectory(cassandraPath).bind(
-    {
+var DB = function (config) {
+    var models = ExpressCassandra.createClient({
         clientOptions: {
             contactPoints: [config.host],
             protocolOptions: { port: config.port },
             keyspace: config.keyspace,
-            queryOptions: {consistency: models.consistencies.one}
+            queryOptions: { consistency: ExpressCassandra.consistencies.one }
         },
         ormOptions: {
-            defaultReplicationStrategy : {
+            defaultReplicationStrategy: {
                 class: 'SimpleStrategy',
                 replication_factor: 1
             },
-            migration: 'safe'
-            
+            migration: 'safe',
         }
-    },
-    function(err) {
-        if(err) {
-            throw err; 
-        }else{
+    });
+
+    var createModel = function (opts) {
+        var MyModel = models.loadSchema(opts.table_name, opts);
+        MyModel.syncDB(function (err, result) {
+            if (err) throw err;
             log.debug("Connected to Cassandra DB");
-        }
-        
-        // You'll now have a `person` table in cassandra created against the model
-        // schema you've defined earlier and you can now access the model instance
-        // in `models.instance.Person` object containing supported orm operations.
+        });
+        return models.instance;
     }
-);
-
-return {
-    // database: db,
-    models: models.instance,
-    // ObjectId: ObjectId,
-    // models: db.models
-  };
+    return {
+        models: models.instance,
+        createModel: createModel,
+    };
 };
-
 module.exports = DB;

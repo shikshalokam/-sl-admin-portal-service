@@ -22,6 +22,9 @@ let db_connect = function (configData) {
 
 let cassandra_connect = function (configData) {
   global.cassandraDatabase = require("./db/cassandra")(configData.db.connection.cassandra);
+  if(!global.Abstract){
+    global.Abstract = require("../generics/abstract");
+  }
 };
 
 
