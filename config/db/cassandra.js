@@ -18,7 +18,7 @@ var DB = function (config) {
     });
 
     var createModel = function (opts) {
-        var MyModel = models.loadSchema(opts.table_name, opts);
+        var MyModel = models.loadSchema(opts.name, opts.schema);
         MyModel.syncDB(function (err, result) {
             if (err) throw err;
             log.debug("Connected to Cassandra DB");

@@ -1,5 +1,5 @@
 module.exports = {
-    
+    schema:{
         fields:{
             id : "text",
             addressid   : "text",
@@ -42,6 +42,8 @@ module.exports = {
           
         },
         key:["id"],
-        table_name: "organisation",
         indexes:["orgtype","orgname","channel","provider","orgcode","status","externalid"]
+    },
+    name:"organisation",
+    db_type:"cassandra"
 }

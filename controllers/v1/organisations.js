@@ -12,7 +12,7 @@ const organisationsHelper = require(MODULES_BASE_PATH + "/organisations/helper.j
     * @class
 */
 
-module.exports = class organisations extends Abstract {
+module.exports = class Organisations extends Abstract {
 
   constructor() {
       super(schemas["organisation"]);

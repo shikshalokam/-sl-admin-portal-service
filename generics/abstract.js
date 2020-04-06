@@ -13,7 +13,7 @@
 let Abstract = class Abstract {
   constructor(schema) {
 
-    if (schema.table_name && schema.table_name == "organisation") {
+    if (schema.db_type && schema.db_type =="cassandra") {
       this.model = cassandraDatabase.createModel(schema);
       this.schema = schema.name;
     
