@@ -6,7 +6,7 @@
  */
 
 let sunBirdService =
-    require(ROOT_PATH + "/generics/services/sunbird");
+    require(ROOT_PATH + "/generics/services/sunbird"); 
 
 module.exports = class platFormUserProfileHelper {
 
@@ -17,16 +17,14 @@ module.exports = class platFormUserProfileHelper {
     * @returns {json} Response consists of organisations.
    */
 
-    static list(req) {
+    static list(req,pageSize,pageNo) {
         return new Promise(async (resolve, reject) => {
             try {
 
                 let userId = req.userDetails.id;
                 let token = req.userDetails.userToken;
 
-                let pageNo = req.query.pageNo ? req.query.pageNo : 1;
-                let pageSize = req.query.pageSize ? req.query.pageSize : 50;
-
+              
                 let profileData = await _checkUserAdminAccess(token, userId);
 
                 if (profileData && profileData.allowed) {
@@ -46,10 +44,16 @@ module.exports = class platFormUserProfileHelper {
                                 });
                         }));
                     } else {
-                        return reject({ message: constants.apiResponses.NO_ORG_FOUND });
+                        return resolve({ 
+                            status: httpStatusCode["bad_request"].status,
+                            message: constants.apiResponses.NO_ORG_FOUND 
+                        });
                     }
                 } else {
-                    return reject({ message: constants.apiResponses.INVALID_ACCESS });
+                    return resolve({  
+                        status: httpStatusCode["bad_request"].status, 
+                        message: constants.apiResponses.INVALID_ACCESS 
+                    });
                 }
             } catch (error) {
                 return reject(error);
@@ -64,49 +68,73 @@ module.exports = class platFormUserProfileHelper {
     * @returns {json} Response consists of organisations.
    */
 
-    static users(req) {
+    static users(req, pageSize, pageNo) {
         return new Promise(async (resolve, reject) => {
             try {
+
+                let response;
 
                 let profileData = await _checkUserAdminAccess(req.userDetails.userToken, req.userDetails.id);
                 if (profileData && profileData.allowed) {
 
-                    
-                   if( req.query.pageNo){
-                    req.query.pageNo = req.query.pageNo - 1;
-                   }
+                   
+                    if(pageNo){
+                        pageNo = pageNo -1;
+                    }
                     let bodyOfRequest = {
                         "request": {
                             "filters": {
                                 "organisations.organisationId": req.params._id,
                             },
-                            "limit": req.query.pageSize ? parseInt(req.query.pageSize) : 10,
-                            "offset": req.query.pageNo ? parseInt(req.query.pageSize) : 0
+                            "limit": pageSize,
+                            "offset": pageNo
                         }
                     }
-
-                    if(req.query.search){
-                        bodyOfRequest.request['query']=req.query.search;
+                    if (req.query.search) {
+                        bodyOfRequest.request['query'] = req.query.search;
                     }
 
-                    
 
                     let usersList =
                         await sunBirdService.users(req.userDetails.userToken, bodyOfRequest);
-                    if (usersList.responseCode == "OK") {
+                    if (usersList.responseCode == constants.common.RESPONSE_OK) {
 
-                        let responseObj = {
-                            count: usersList.result.response.count,
-                            usersList: usersList.result.response.content
+                        let userInfo = [];
+                        await Promise.all(usersList.result.response.content.map( function(userItem){
+                            let resultObj = {
+                                firstName:userItem.firstName,
+                                lastName:userItem.lastName,
+                                email:userItem.email,
+                                id:userItem.id,
+                                address:userItem.address,
+                                createdDate:userItem.createdDate,
+                                gender:userItem.gender
+                            }
+                            userInfo.push(resultObj);
+                        }));
+
+                        
+                        response = {
+                            "result": {
+                                count: usersList.result.response.count,
+                                usersList: userInfo
+                            },
+                            message: constants.apiResponses.USERS_LIST_FETCHED
                         }
-                        return resolve({ result: responseObj, message: constants.apiResponses.USERS_LIST_FETCHED });
                     } else {
-                        return resolve({ message: constants.apiResponses.USER_LIST_NOT_FOUND });
+                        response = {
+                            status: httpStatusCode["bad_request"].status,
+                            message: constants.apiResponses.USER_LIST_NOT_FOUND
+                        };
                     }
 
                 } else {
-                    return reject({ message: constants.apiResponses.INVALID_ACCESS });
+                    response = {
+                        status: httpStatusCode["bad_request"].status,
+                        message: constants.apiResponses.INVALID_ACCESS
+                    }
                 }
+                return resolve(response);
 
             } catch (error) {
                 return reject(error);
@@ -116,6 +144,14 @@ module.exports = class platFormUserProfileHelper {
 
 };
 
+
+/**
+   * check the user has permission for Org odmin or user admin
+   * @method
+   * @name _checkUserAdminAccess
+    * @returns {json} Response consists of profile data and user permission as boolean.
+   */
+
 function _checkUserAdminAccess(token, userId) {
 
     return new Promise(async (resolve, reject) => {
@@ -123,8 +159,10 @@ function _checkUserAdminAccess(token, userId) {
             let profileInfo =
                 await sunBirdService.getUserProfileInfo(token, userId);
 
+            let response;
+
             let profileData = JSON.parse(profileInfo);
-            if (profileData.responseCode == "OK") {
+            if (profileData.responseCode ==  constants.common.RESPONSE_OK) {
 
                 if (profileData.result && profileData.result.response
                     && profileData.result.response.roles) {
@@ -136,16 +174,22 @@ function _checkUserAdminAccess(token, userId) {
                             return resolve(profileData);
                         }
                     }));
-
-                    return resolve(profileData);
+                    response = profileData;
                 } else {
-                    return reject({ message: constants.apiResponses.INVALID_ACCESS });
+                    response = {
+                        status: httpStatusCode["bad_request"].status,
+                        message: constants.apiResponses.INVALID_ACCESS
+                    };
                 }
 
             } else {
-                return reject({ message: constants.apiResponses.USER_INFO_NOT_FOUND });
+                response = {
+                    status: httpStatusCode["bad_request"].status,
+                    message: constants.apiResponses.USER_INFO_NOT_FOUND
+                };
             }
 
+            return resolve(response);
         } catch (error) {
             return reject(error);
         }

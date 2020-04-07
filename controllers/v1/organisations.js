@@ -33,12 +33,12 @@ module.exports = class Organisations extends Abstract {
 */
 
    /**
-     * @api {get} /admin/api/v1/organisations/list 
+     * @api {get} /admin-service/api/v1/organisations/list 
      * Get platform organisations list.
      * @apiVersion 1.0.0
      * @apiGroup Organisations
      * @apiHeader {String} X-authenticated-user-token Authenticity token
-     * @apiSampleRequest /admin/api/v1/organisations/list 
+     * @apiSampleRequest /admin-service/api/v1/organisations/list 
      * @apiUse successBody
      * @apiUse errorBody
      * @apiParamExample {json} Response:
@@ -67,7 +67,7 @@ module.exports = class Organisations extends Abstract {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let organisationList = await organisationsHelper.list(req);
+        let organisationList = await organisationsHelper.list(req,req.pageSize,req.pageNo);
         return resolve(organisationList);
 
       } catch(error) {
@@ -84,12 +84,12 @@ module.exports = class Organisations extends Abstract {
   }
 
      /**
-     * @api {get} /admin/api/v1/organisations/users 
+     * @api {get} /admin-service/api/v1/organisations/users 
      * Get platform users list for organisation.
      * @apiVersion 1.0.0
      * @apiGroup Organisations
      * @apiHeader {String} X-authenticated-user-token Authenticity token
-     * @apiSampleRequest /admin/api/v1/organisations/users/:organisationId
+     * @apiSampleRequest /admin-service/api/v1/organisations/users/:organisationId
      * @apiUse successBody
      * @apiUse errorBody
      * @apiParamExample {json} Response:
@@ -122,7 +122,7 @@ module.exports = class Organisations extends Abstract {
   users(req) {
     return new Promise(async (resolve, reject) => {
       try {
-        let organisationList = await organisationsHelper.users(req);
+        let organisationList = await organisationsHelper.users(req,req.pageSize,req.pageNo);
         return resolve(organisationList);
 
       } catch(error) {

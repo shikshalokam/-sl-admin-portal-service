@@ -43,12 +43,12 @@ module.exports = class userCreation {
 */
 
    /**
-     * @api {get} /admin/api/v1/user-creation/getForm/:userId 
+     * @api {get} /admin-service/api/v1/user-creation/getForm/:userId 
      * User Creation Form.
      * @apiVersion 1.0.0
      * @apiGroup User Creation
      * @apiHeader {String} X-authenticated-user-token Authenticity token
-     * @apiSampleRequest /admin/api/v1/user-creation/getForm/8f6d6fd2-c069-41f1-b94d-ad2befcc964b
+     * @apiSampleRequest /admin-service/api/v1/user-creation/getForm/8f6d6fd2-c069-41f1-b94d-ad2befcc964b
      * @apiUse successBody
      * @apiUse errorBody
      * @apiParamExample {json} Response:
@@ -152,12 +152,12 @@ module.exports = class userCreation {
   }
   
   /**
-   * @api {get} /admin/api/v1/user-creation/create 
+   * @api {get} /admin-service/api/v1/user-creation/create 
    * to create user 
    * @apiVersion 1.0.0
    * @apiGroup User Creation
    * @apiHeader {String} X-authenticated-user-token Authenticity token
-   * @apiSampleRequest /admin/api/v1/user-creation/create
+   * @apiSampleRequest /admin-service/api/v1/user-creation/create
    * @apiUse successBody
    * @apiUse errorBodyuser
    * @apiParamExample {json} Response:
