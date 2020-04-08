@@ -6,7 +6,7 @@
  */
 
 let sunBirdService =
-    require(ROOT_PATH + "/generics/services/sunbird"); 
+    require(ROOT_PATH + "/generics/services/sunbird");
 
 module.exports = class platFormUserProfileHelper {
 
@@ -17,14 +17,11 @@ module.exports = class platFormUserProfileHelper {
     * @returns {json} Response consists of organisations.
    */
 
-    static list(req,pageSize,pageNo) {
+    static list(token, userId, pageSize, pageNo) {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let userId = req.userDetails.id;
-                let token = req.userDetails.userToken;
 
-              
                 let profileData = await _checkUserAdminAccess(token, userId);
 
                 if (profileData && profileData.allowed) {
@@ -44,15 +41,15 @@ module.exports = class platFormUserProfileHelper {
                                 });
                         }));
                     } else {
-                        return resolve({ 
+                        return resolve({
                             status: httpStatusCode["bad_request"].status,
-                            message: constants.apiResponses.NO_ORG_FOUND 
+                            message: constants.apiResponses.NO_ORG_FOUND
                         });
                     }
                 } else {
-                    return resolve({  
-                        status: httpStatusCode["bad_request"].status, 
-                        message: constants.apiResponses.INVALID_ACCESS 
+                    return resolve({
+                        status: httpStatusCode["bad_request"].status,
+                        message: constants.apiResponses.INVALID_ACCESS
                     });
                 }
             } catch (error) {
@@ -68,52 +65,51 @@ module.exports = class platFormUserProfileHelper {
     * @returns {json} Response consists of organisations.
    */
 
-    static users(req, pageSize, pageNo) {
+    static users(token, userId, organisationId, pageSize, pageNo, searchText) {
         return new Promise(async (resolve, reject) => {
             try {
 
                 let response;
-
-                let profileData = await _checkUserAdminAccess(req.userDetails.userToken, req.userDetails.id);
+                let profileData = await _checkUserAdminAccess(token, userId);
                 if (profileData && profileData.allowed) {
 
-                   
-                    if(pageNo){
-                        pageNo = pageNo -1;
+
+                    if (pageNo) {
+                        pageNo = pageNo - 1;
                     }
                     let bodyOfRequest = {
                         "request": {
                             "filters": {
-                                "organisations.organisationId": req.params._id,
+                                "organisations.organisationId": organisationId,
                             },
                             "limit": pageSize,
                             "offset": pageNo
                         }
                     }
-                    if (req.query.search) {
-                        bodyOfRequest.request['query'] = req.query.search;
+                    if (searchText) {
+                        bodyOfRequest.request['query'] = searchText;
                     }
 
 
                     let usersList =
-                        await sunBirdService.users(req.userDetails.userToken, bodyOfRequest);
+                        await sunBirdService.users(token, bodyOfRequest);
                     if (usersList.responseCode == constants.common.RESPONSE_OK) {
 
                         let userInfo = [];
-                        await Promise.all(usersList.result.response.content.map( function(userItem){
+                        await Promise.all(usersList.result.response.content.map(function (userItem) {
                             let resultObj = {
-                                firstName:userItem.firstName,
-                                lastName:userItem.lastName,
-                                email:userItem.email,
-                                id:userItem.id,
-                                address:userItem.address,
-                                createdDate:userItem.createdDate,
-                                gender:userItem.gender
+                                firstName: userItem.firstName,
+                                lastName: userItem.lastName,
+                                email: userItem.email,
+                                id: userItem.id,
+                                address: userItem.address,
+                                createdDate: userItem.createdDate,
+                                gender: userItem.gender
                             }
                             userInfo.push(resultObj);
                         }));
 
-                        
+
                         response = {
                             "result": {
                                 count: usersList.result.response.count,
@@ -142,6 +138,29 @@ module.exports = class platFormUserProfileHelper {
         })
     }
 
+     /**
+   * Get download userList
+   * @method
+   * @name list
+    * @returns {json} Response consists of organisations.
+   */
+
+   static downloadUsers(token, userId, organisationId, pageSize, pageNo, searchText) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+
+            let csvData = await this.users(token, userId, organisationId, pageSize, pageNo, searchText);
+
+            resolve(csvData);
+
+        }
+         catch (error) {
+            return reject(error);
+        }
+    });
+    }
+
 };
 
 
@@ -162,7 +181,7 @@ function _checkUserAdminAccess(token, userId) {
             let response;
 
             let profileData = JSON.parse(profileInfo);
-            if (profileData.responseCode ==  constants.common.RESPONSE_OK) {
+            if (profileData.responseCode == constants.common.RESPONSE_OK) {
 
                 if (profileData.result && profileData.result.response
                     && profileData.result.response.roles) {
@@ -176,6 +195,7 @@ function _checkUserAdminAccess(token, userId) {
                     }));
                     response = profileData;
                 } else {
+
                     response = {
                         status: httpStatusCode["bad_request"].status,
                         message: constants.apiResponses.INVALID_ACCESS
@@ -194,4 +214,8 @@ function _checkUserAdminAccess(token, userId) {
             return reject(error);
         }
     })
+
+    
+
+    
 }

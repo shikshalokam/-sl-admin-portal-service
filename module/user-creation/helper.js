@@ -125,21 +125,24 @@ module.exports = class UserCreationHelper {
                     code:1,
                     title:1 
                 });
+                
+                let roles  = [];
 
                 if ( platformRoles.length > 0 ) {
                     
-                    platformRoles = platformRoles.map(platformRole=>{
+                   await Promise.all(platformRoles.map(platformRole=>{
                         roles.push({
                             label : platformRole.title,
                             value : platformRole._id
                         })
-                    });
+                    }));
 
                 }  
                 
                 stateListWithSubEntities.push(stateInfoWithSub);
                 
                 let forms = [];
+                
 
                 formData[0].value.map(
                     async function (fields) {
@@ -147,12 +150,12 @@ module.exports = class UserCreationHelper {
                         if (fields.field == "state") {
                             fields.options = states;
                         } else if (fields.field == "organisations") {
-                            fields.options = organisationList;
+                            fields.options = organisations;
 
                         } else if (fields.field == "roles") {
                             fields.options = roles;
                         }
-                        forms.push(inputFiled);
+                        forms.push(fields);
                 });
                 
                 return resolve({

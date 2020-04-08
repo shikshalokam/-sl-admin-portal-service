@@ -10,7 +10,7 @@
      * Forms
      * @class
  */
-module.exports = class Forms extends Abstract {
+module.exports = class PlatformRolesExt extends Abstract {
     constructor() {
       super(schemas["platformRolesExt"]);
     }

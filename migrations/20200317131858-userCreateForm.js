@@ -25,7 +25,7 @@ module.exports = {
 					"message" : ""
         },{
 					"name" : "pattern",
-					"validator" : "^[A-Za-z]+$/",
+					"validator" : "([a-zA-Z]{3,30}\s*)+",
 					"message" : ""
         }]
       };
@@ -58,7 +58,12 @@ module.exports = {
           fields === "roles" 
           ) {
 
-            inputObj.input = "select";
+            if(fields =="roles"){
+              inputObj.input = "multiselect";
+            }else{
+              inputObj.input = "select";
+              }
+
             inputObj.options = [];
             
           

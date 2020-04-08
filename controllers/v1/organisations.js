@@ -6,6 +6,7 @@
  */
 
 const organisationsHelper = require(MODULES_BASE_PATH + "/organisations/helper.js");
+const csvFileStream = require(ROOT_PATH + "/generics/file-stream");
 
 /**
     * organisations
@@ -15,7 +16,7 @@ const organisationsHelper = require(MODULES_BASE_PATH + "/organisations/helper.j
 module.exports = class Organisations extends Abstract {
 
   constructor() {
-      super(schemas["organisation"]);
+    super(schemas["organisation"]);
   }
 
   static get name() {
@@ -27,116 +28,201 @@ module.exports = class Organisations extends Abstract {
 * @apiError {String} status 4XX,5XX
 * @apiError {String} message Error
 */ /**
-* @apiDefine successBody
-* @apiSuccess {String} status 200
-* @apiSuccess {String} result Data
-*/
-
-   /**
-     * @api {get} /admin-service/api/v1/organisations/list 
-     * Get platform organisations list.
-     * @apiVersion 1.0.0
-     * @apiGroup Organisations
-     * @apiHeader {String} X-authenticated-user-token Authenticity token
-     * @apiSampleRequest /admin-service/api/v1/organisations/list 
-     * @apiUse successBody
-     * @apiUse errorBody
-     * @apiParamExample {json} Response:
-     * 
-     * {
-     *   "message": "Organisation list fetched Successfully",
-     *   "status": 200,
-     *    "result": [ 
-     *     {  
-     *         "value": "0125747659358699520",
-     *          "label": "ShikshaLokamDev"
-     *     }
-     *  ]
-     * }
+  * @apiDefine successBody
+  * @apiSuccess {String} status 200
+  * @apiSuccess {String} result Data
   */
 
-   /**
-   * Get organisation list
-   * @method
-   * @name list
-   * @param  {req}  - requested data.
-   * @returns {json} Response consists of platform organisation list
-   */
+  /**
+    * @api {get} /admin-service/api/v1/organisations/list 
+    * Get platform organisations list.
+    * @apiVersion 1.0.0
+    * @apiGroup Organisations
+    * @apiHeader {String} X-authenticated-user-token Authenticity token
+    * @apiSampleRequest /admin-service/api/v1/organisations/list 
+    * @apiUse successBody
+    * @apiUse errorBody
+    * @apiParamExample {json} Response:
+    * 
+    * {
+    *   "message": "Organisation list fetched Successfully",
+    *   "status": 200,
+    *    "result": [ 
+    *     {  
+    *         "value": "0125747659358699520",
+    *          "label": "ShikshaLokamDev"
+    *     }
+    *  ]
+    * }
+ */
+
+  /**
+  * Get organisation list
+  * @method
+  * @name list
+  * @param  {req}  - requested data.
+  * @returns {json} Response consists of platform organisation list
+  */
 
   list(req) {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let organisationList = await organisationsHelper.list(req,req.pageSize,req.pageNo);
+
+
+        let organisationList = await organisationsHelper.list(
+          req.userDetails.userToken,
+          (req.params._id && req.params._id != "") ? req.params._id : req.userDetails.userId,
+          req.pageSize,
+          req.pageNo);
         return resolve(organisationList);
 
-      } catch(error) {
+      } catch (error) {
         return reject({
-          status: 
-          error.status || 
-          httpStatusCode["internal_server_error"].status,
-          message: 
-          error.message || 
-          httpStatusCode["internal_server_error"].message
+          status:
+            error.status ||
+            httpStatusCode["internal_server_error"].status,
+          message:
+            error.message ||
+            httpStatusCode["internal_server_error"].message
         });
       }
     });
   }
 
-     /**
-     * @api {get} /admin-service/api/v1/organisations/users 
-     * Get platform users list for organisation.
-     * @apiVersion 1.0.0
-     * @apiGroup Organisations
-     * @apiHeader {String} X-authenticated-user-token Authenticity token
-     * @apiSampleRequest /admin-service/api/v1/organisations/users/:organisationId
-     * @apiUse successBody
-     * @apiUse errorBody
-     * @apiParamExample {json} Response:
-     * 
-     * {
-     *   "message": "Organisation list fetched Successfully",
-     *   "status": 200,
-     *    "result": {
-     *      "count": 1,
-     *       "usersList": [ {
-     *            "lastName": "",
-     *             "email": "",
-     *             "firstName": "abcd", 
-     *          }
-     *       ]
-     *    }   
-     * }
-     * 
-     * 
-  */
+  /**
+  * @api {get} /admin-service/api/v1/organisations/users 
+  * Get platform users list for organisation.
+  * @apiVersion 1.0.0
+  * @apiGroup Organisations
+  * @apiHeader {String} X-authenticated-user-token Authenticity token
+  * @apiSampleRequest /admin-service/api/v1/organisations/users/:organisationId
+  * @apiUse successBody
+  * @apiUse errorBody
+  * @apiParamExample {json} Response:
+  * 
+  * {
+  *   "message": "Organisation list fetched Successfully",
+  *   "status": 200,
+  *    "result": {
+  *      "count": 1,
+  *       "usersList": [ {
+  *            "lastName": "",
+  *             "email": "",
+  *             "firstName": "abcd", 
+  *          }
+  *       ]
+  *    }   
+  * }
+  * 
+  * 
+*/
 
-   /**
-   * Get platform users list for organisation.
-   * @method
-   * @name list
-   * @param  {req}  - requested data.
-   * @returns {json} Response consists of platform organisation list
-   */
+  /**
+  * Get platform users list for organisation.
+  * @method
+  * @name list
+  * @param  {req}  - requested data.
+  * @returns {json} Response consists of platform organisation list
+  */
 
   users(req) {
     return new Promise(async (resolve, reject) => {
       try {
-        let organisationList = await organisationsHelper.users(req,req.pageSize,req.pageNo);
+        let organisationList = await organisationsHelper.users(
+          req.userDetails.userToken,
+          req.userDetails.userId,
+          req.params._id,
+          req.pageSize,
+          req.pageNo,
+          req.searchText);
         return resolve(organisationList);
 
-      } catch(error) {
+      } catch (error) {
         return reject({
-          status: 
-          error.status || 
-          httpStatusCode["internal_server_error"].status,
-          message: 
-          error.message || 
-          httpStatusCode["internal_server_error"].message
+          status:
+            error.status ||
+            httpStatusCode["internal_server_error"].status,
+          message:
+            error.message ||
+            httpStatusCode["internal_server_error"].message
         });
       }
     });
   }
+
+  /**
+ * @api {get} /admin-service/api/v1/organisations/downloadUsers/:organisationId 
+ * Get csv download users list for organisation.
+ * @apiVersion 1.0.0
+ * @apiGroup Organisations
+ * @apiHeader {String} X-authenticated-user-token Authenticity token
+ * @apiSampleRequest /admin-service/api/v1/organisations/downloadUsers/:organisationId
+ * @apiUse successBody
+ * @apiUse errorBody
+ * @apiParamExample {json} Response:
+ * 
+ * 
+ * 
+*/
+
+  /**
+  * Get Download users list for organisation.
+  * @method
+  * @name list
+  * @param  {req}  - requested data.
+  * @returns {json} Response consists of csv downladable file
+  */
+
+  downloadUsers(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let csvData = await organisationsHelper.downloadUsers(
+          req.userDetails.userToken,
+          req.userDetails.userId,
+          req.params._id,
+          req.pageSize,
+          req.pageNo,
+          req.searchText);
+
+        const fileName = `file-new`;
+        let fileStream = new csvFileStream(fileName);
+        let input = fileStream.initStream();
+
+
+        // console.log("csvData",csvData.result.usersList);
+
+        (async function () {
+        await Prmoise.all(csvData.result.usersList.map(async userMap => {
+            input.push(userMap);
+          }))
+
+      });
+
+          (async function () {
+            return resolve({
+              isResponseAStream: true,
+              fileNameWithPath: fileStream.fileNameWithPath()
+            });
+          })();
+
+        // input.push(null);
+
+
+      } catch (error) {
+        return reject({
+          status:
+            error.status ||
+            httpStatusCode["internal_server_error"].status,
+          message:
+            error.message ||
+            httpStatusCode["internal_server_error"].message
+        });
+      }
+    });
+  }
+
+
 
 
 };

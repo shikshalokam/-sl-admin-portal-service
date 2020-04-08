@@ -77,9 +77,34 @@ function checkIfStringIsUrl(str) {
   return pattern.test(str);
 }
 
+
+
+ /**
+  * check whether the data is present in env.
+  * @function
+  * @name checkIfEnvDataExistsOrNot
+  * @param {String} str 
+  * @returns {String} returns a env data if found else default value. 
+*/
+
+function checkIfEnvDataExistsOrNot(data){
+  
+  let value;
+
+  if(process.env[data] && process.env[data] !== ""){
+    value  = process.env[data]
+  } else {
+    let defaultEnv = "DEFAULT_"+data;
+    value = process.env[defaultEnv]
+  }
+
+  return value;
+}
+
 module.exports = {
   camelCaseToTitleCase : camelCaseToTitleCase,
   lowerCase : lowerCase,
   checkIfStringIsUrl : checkIfStringIsUrl,
-  hyphenCaseToCamelCase : hyphenCaseToCamelCase
+  hyphenCaseToCamelCase : hyphenCaseToCamelCase,
+  checkIfEnvDataExistsOrNot:checkIfEnvDataExistsOrNot
 };
