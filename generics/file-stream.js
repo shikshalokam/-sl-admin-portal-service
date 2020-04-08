@@ -9,7 +9,7 @@ const json2Csv = require('json2csv').Transform;
 const stream = require("stream");
 const fs = require("fs");
 const moment = require("moment-timezone");
-const DEFAULT_REPORTS_PATH = gen.utils.checkIfEnvDataExistsOrNot("DEFAULT_REPORTS_PATH");
+const DEFAULT_REPORTS_PATH = process.env.DEFAULT_REPORTS_PATH;
 
 /**
     * FileStream

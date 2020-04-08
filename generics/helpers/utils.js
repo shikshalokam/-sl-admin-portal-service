@@ -77,34 +77,23 @@ function checkIfStringIsUrl(str) {
   return pattern.test(str);
 }
 
-
-
  /**
-  * check whether the data is present in env.
+  * Convert camel case to capitalize case.
   * @function
-  * @name checkIfEnvDataExistsOrNot
+  * @name camelCaseToCapitalizeCase
   * @param {String} str 
-  * @returns {String} returns a env data if found else default value. 
+  * @returns {String} Capitalize string 
 */
 
-function checkIfEnvDataExistsOrNot(data){
-  
-  let value;
-
-  if(process.env[data] && process.env[data] !== ""){
-    value  = process.env[data]
-  } else {
-    let defaultEnv = "DEFAULT_"+data;
-    value = process.env[defaultEnv]
-  }
-
-  return value;
+function camelCaseToCapitalizeCase(str) {
+  let capitalize = str.replace( /([A-Z])/g, " $1" );
+  return capitalize.charAt(0).toUpperCase() + capitalize.slice(1);
 }
 
 module.exports = {
   camelCaseToTitleCase : camelCaseToTitleCase,
   lowerCase : lowerCase,
   checkIfStringIsUrl : checkIfStringIsUrl,
-  hyphenCaseToCamelCase : hyphenCaseToCamelCase,
-  checkIfEnvDataExistsOrNot:checkIfEnvDataExistsOrNot
+  hyphenCaseToCamelCase : hyphenCaseToCamelCase,  
+  camelCaseToCapitalizeCase : camelCaseToCapitalizeCase
 };
