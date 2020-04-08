@@ -28,10 +28,10 @@ module.exports = class Organisations extends Abstract {
 * @apiError {String} status 4XX,5XX
 * @apiError {String} message Error
 */ /**
-  * @apiDefine successBody
-  * @apiSuccess {String} status 200
-  * @apiSuccess {String} result Data
-  */
+    * @apiDefine successBody
+    * @apiSuccess {String} status 200
+    * @apiSuccess {String} result Data
+    */
 
   /**
     * @api {get} /admin-service/api/v1/organisations/list 
@@ -185,29 +185,19 @@ module.exports = class Organisations extends Abstract {
           req.pageNo,
           req.searchText);
 
-        const fileName = `file-new`;
+        const fileName = `users-list`;
         let fileStream = new csvFileStream(fileName);
         let input = fileStream.initStream();
 
 
-        // console.log("csvData",csvData.result.usersList);
+        csvData.result.usersList.map(async userMap => {
+          input.push(userMap);
+        })
 
-        (async function () {
-        await Prmoise.all(csvData.result.usersList.map(async userMap => {
-            input.push(userMap);
-          }))
-
-      });
-
-          (async function () {
-            return resolve({
-              isResponseAStream: true,
-              fileNameWithPath: fileStream.fileNameWithPath()
-            });
-          })();
-
-        // input.push(null);
-
+        return resolve({
+          isResponseAStream: true,
+          fileNameWithPath: fileStream.fileNameWithPath()
+        });
 
       } catch (error) {
         return reject({
