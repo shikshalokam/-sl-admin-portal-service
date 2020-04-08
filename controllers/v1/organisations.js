@@ -178,12 +178,10 @@ module.exports = class Organisations extends Abstract {
     return new Promise(async (resolve, reject) => {
       try {
         let csvData = await organisationsHelper.downloadUsers(
+          req.body,
           req.userDetails.userToken,
           req.userDetails.userId,
-          req.params._id,
-          req.pageSize,
-          req.pageNo,
-          req.searchText);
+         );
 
         const fileName = `users-list`;
         let fileStream = new csvFileStream(fileName);

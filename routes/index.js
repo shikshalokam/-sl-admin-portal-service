@@ -62,7 +62,7 @@ module.exports = function (app) {
                 'Content-disposition', 
                 'attachment; filename=' + result.fileNameWithPath.split('/').pop()
               );
-              res.set('Content-Type', 'application/octet-stream');
+              res.set('Content-Type', 'text/csv');
               fs.createReadStream(result.fileNameWithPath).pipe(res);
 
             } else {

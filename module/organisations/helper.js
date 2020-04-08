@@ -65,7 +65,7 @@ module.exports = class platFormUserProfileHelper {
     * @returns {json} Response consists of organisations.
    */
 
-    static users(token, userId, organisationId, pageSize, pageNo, searchText) {
+    static users(token, userId, organisationId, pageSize, pageNo, searchText,requestedUsers=[]) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -89,7 +89,12 @@ module.exports = class platFormUserProfileHelper {
                     if (searchText) {
                         bodyOfRequest.request['query'] = searchText;
                     }
+                    console.log("requestedUsers",requestedUsers);
+                    if(requestedUsers.length > 0){
+                        bodyOfRequest.request['filters']["id"] = requestedUsers;
+                    }
 
+                    console.log("bodyOfRequest",bodyOfRequest);
 
                     let usersList =
                         await sunBirdService.users(token, bodyOfRequest);
@@ -142,15 +147,14 @@ module.exports = class platFormUserProfileHelper {
    * Get download userList
    * @method
    * @name list
-    * @returns {json} Response consists of organisations.
+    * @returns {json} Response consists of users list.
    */
 
-   static downloadUsers(token, userId, organisationId, pageSize, pageNo, searchText) {
+   static downloadUsers(requestBody,token,userId) {
     return new Promise(async (resolve, reject) => {
         try {
 
-
-            let csvData = await this.users(token, userId, organisationId, pageSize, pageNo, searchText);
+            let csvData = await this.users(token, userId, requestBody.organisationId,requestBody.limit,requestBody.page, requestBody.searchText,requestBody.usersList);
 
             resolve(csvData);
 
