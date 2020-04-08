@@ -9,8 +9,8 @@ module.exports = {
 
       let allFields = [];
       
-      let inputFields = ["firstName", "lastName", "email", "phoneNumber", 
-      "userName", "password","state","organisations","roles"];
+      let inputFields = ["organisation","firstName", "lastName", "email", "phoneNumber", 
+      "userName", "password","roles","state"];
 
       let inputField = {
         "field" : "",
