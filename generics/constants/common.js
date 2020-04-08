@@ -10,7 +10,7 @@ module.exports = {
 
     USER_CREATE_FORM:"userCreateForm",
     STATE_ENTITY_TYPE:"state",
-    ORG_ADMIN_ALLOWED_ROLES : ["ORG_ADMIN","PUBLIC"],
+    ORG_ADMIN_ALLOWED_ROLES : ["ORG_ADMIN","ADMIN"],
     RESPONSE_OK : "OK"
 
 };
