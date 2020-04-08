@@ -9,7 +9,7 @@ const json2Csv = require('json2csv').Transform;
 const stream = require("stream");
 const fs = require("fs");
 const moment = require("moment-timezone");
-const DEFAULT_REPORTS_PATH = gen.utils.checkIfEnvDataExistsOrNot("DEFAULT_REPORTS_PATH");
+const DEFAULT_REPORTS_PATH = process.env.DEFAULT_REPORTS_PATH;
 
 /**
     * FileStream
@@ -22,7 +22,6 @@ let FileStream = class FileStream {
     const currentDate = new Date();
     const fileExtensionWithTime = moment(currentDate).tz("Asia/Kolkata").format("YYYY_MM_DD_HH_mm_SS") + ".csv";
 
-    console.log("fileExtensionWithTime",fileExtensionWithTime);
     if(!process.env.CSV_REPORTS_PATH){
       process.env.CSV_REPORTS_PATH = DEFAULT_REPORTS_PATH;
     }

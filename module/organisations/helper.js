@@ -71,8 +71,8 @@ module.exports = class platFormUserProfileHelper {
 
                 let response;
                 let profileData = await _checkUserAdminAccess(token, userId);
+                
                 if (profileData && profileData.allowed) {
-
 
                     if (pageNo) {
                         pageNo = pageNo - 1;
@@ -89,15 +89,14 @@ module.exports = class platFormUserProfileHelper {
                     if (searchText) {
                         bodyOfRequest.request['query'] = searchText;
                     }
-                    console.log("requestedUsers",requestedUsers);
+                 
                     if(requestedUsers.length > 0){
                         bodyOfRequest.request['filters']["id"] = requestedUsers;
                     }
 
-                    console.log("bodyOfRequest",bodyOfRequest);
-
                     let usersList =
                         await sunBirdService.users(token, bodyOfRequest);
+
                     if (usersList.responseCode == constants.common.RESPONSE_OK) {
 
                         let userInfo = [];
@@ -114,11 +113,13 @@ module.exports = class platFormUserProfileHelper {
                             userInfo.push(resultObj);
                         }));
 
+                        let columns = _userColumn();
 
                         response = {
                             "result": {
-                                count: usersList.result.response.count,
-                                usersList: userInfo
+                                count : usersList.result.response.count,
+                                columns : columns,
+                                data : userInfo
                             },
                             message: constants.apiResponses.USERS_LIST_FETCHED
                         }
@@ -173,7 +174,7 @@ module.exports = class platFormUserProfileHelper {
    * @method
    * @name _checkUserAdminAccess
     * @returns {json} Response consists of profile data and user permission as boolean.
-   */
+*/
 
 function _checkUserAdminAccess(token, userId) {
 
@@ -222,4 +223,75 @@ function _checkUserAdminAccess(token, userId) {
     
 
     
+}
+
+/**
+   * 
+   * @method
+   * @name _userColumn
+   * @returns {json} - User columns data
+*/
+
+function _userColumn() {
+
+    let columns = [
+        'select', 
+        'firstName', 
+        'lastName', 
+        'gender', 
+        'role' ,
+        'email', 
+        'action'
+    ];
+
+    let defaultColumn = {
+        "type" : "column",
+        "visible" : true
+    }
+
+    let result = [];
+
+    for( let column = 0 ; column < columns.length ; column++) {
+        let obj = {...defaultColumn};
+        let field = columns[column];
+        
+        obj["label"] = gen.utils.camelCaseToCapitalizeCase(field);
+        obj["key"] = field
+
+        if( field === "action" ) {
+            obj["type"] = "action";
+            obj["actions"] = _actions();
+        } else if( field === "select" ) {
+            obj["key"] = "id";
+            obj["visible"] = false;
+        }
+
+        result.push(obj);
+
+    }
+    return result;
+}
+
+/**
+   * User columns action data.
+   * @method
+   * @name _actions 
+   * @returns {json}
+*/
+
+function _actions() {
+
+    let actions = ["view","edit"];
+    let actionsColumn = [];
+
+    for(let action = 0 ; action < actions.length ; action++ ) {
+        actionsColumn.push({
+            key : actions[action],
+            label : gen.utils.camelCaseToCapitalizeCase(actions[action]),
+            visible : true,
+            icon : actions[action]
+        })
+    }
+
+    return actionsColumn;
 }

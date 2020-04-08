@@ -188,7 +188,7 @@ module.exports = class Organisations extends Abstract {
         let input = fileStream.initStream();
 
 
-        csvData.result.usersList.map(async userMap => {
+        csvData.result.data.map(async userMap => {
           input.push(userMap);
         })
 
