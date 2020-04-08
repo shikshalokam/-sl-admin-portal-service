@@ -72,6 +72,7 @@ module.exports = class platFormUserProfileHelper {
                 let response;
                 let profileData = await _checkUserAdminAccess(token, userId);
                 
+                
                 if (profileData && profileData.allowed) {
 
                     if (pageNo) {
@@ -193,7 +194,8 @@ function _checkUserAdminAccess(token, userId) {
 
                     profileData['allowed'] = false;
                     await Promise.all(profileData.result.response.roles.map(async function (role) {
-                        if (constants.common.ORG_ADMIN_ALLOWED_ROLES.includes(role)) {
+                        // console.log("role.code",role.code)
+                        if (constants.common.ORG_ADMIN_ALLOWED_ROLES.includes(role.code)) {
                             profileData['allowed'] = true;
                             return resolve(profileData);
                         }
