@@ -149,7 +149,7 @@ module.exports = class UserCreationHelper {
 
                         if (fields.field == "state") {
                             fields.options = states;
-                        } else if (fields.field == "organisations") {
+                        } else if (fields.field == "organisation") {
                             fields.options = organisations;
 
                         } else if (fields.field == "roles") {
