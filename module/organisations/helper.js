@@ -80,6 +80,8 @@ module.exports = class platFormUserProfileHelper {
                 let profileData = await _checkUserAdminAccess(token, userId,organisationId);
 
 
+                let offset = pageSize * ( pageNo -1 );
+
                 if (profileData && profileData.allowed) {
 
                     let bodyOfRequest = {
@@ -88,7 +90,7 @@ module.exports = class platFormUserProfileHelper {
                                 "organisations.organisationId": organisationId,
                             },
                             "limit": pageSize,
-                            "offset": pageNo
+                            "offset": offset
                         }
                     }
                     if (searchText) {
