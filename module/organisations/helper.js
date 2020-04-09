@@ -339,8 +339,9 @@ function _getOrganisationDetailsById(orgId) {
 
     });
 
+}
 
-    /**
+  /**
    * to get _getProfileData of user
    * @method
    * @name _getProfileData
@@ -360,7 +361,5 @@ function _getProfileData(token, userId) {
             return reject(error);
         }
     });
-}
-
 }
 
