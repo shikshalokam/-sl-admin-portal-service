@@ -28,10 +28,10 @@ module.exports = class Organisations extends Abstract {
 * @apiError {String} status 4XX,5XX
 * @apiError {String} message Error
 */ /**
-    * @apiDefine successBody
-    * @apiSuccess {String} status 200
-    * @apiSuccess {String} result Data
-    */
+      * @apiDefine successBody
+      * @apiSuccess {String} status 200
+      * @apiSuccess {String} result Data
+      */
 
   /**
     * @api {get} /admin-service/api/v1/organisations/list 
@@ -181,16 +181,23 @@ module.exports = class Organisations extends Abstract {
           req.body,
           req.userDetails.userToken,
           req.userDetails.userId,
-         );
+        );
 
         const fileName = `users-list`;
         let fileStream = new csvFileStream(fileName);
         let input = fileStream.initStream();
 
 
-        csvData.result.data.map(async userMap => {
-          input.push(userMap);
-        })
+
+
+
+        if (csvData && csvData.result && csvData.result.data) {
+          csvData.result.data.map(async userMap => {
+            input.push(userMap);
+          })
+        }else{
+          return resolve(csvData);
+        }
 
         return resolve({
           isResponseAStream: true,
