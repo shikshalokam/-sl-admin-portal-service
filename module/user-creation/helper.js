@@ -198,6 +198,31 @@ module.exports = class UserCreationHelper {
         })
     }
 
+      /**
+   * update.
+   * @method
+   * @name  update
+   * @param  {requestedData}  - requested body.
+   * @returns {json} Response consists of updated user details.
+   */
+
+  static update( requestedBodyData, userToken ) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            
+            let updateUser =
+            await userManagementService.updatePlatFormUser(
+                requestedBodyData,
+                userToken
+            );
+                
+            return resolve(updateUser);    
+        } catch (error) {
+            return reject(error);
+        }
+    })
+}
+
 
 };
 

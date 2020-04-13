@@ -79,20 +79,25 @@ module.exports = class platFormUserProfileHelper {
                 let response;
                 let profileData = await _checkUserAdminAccess(token, userId,organisationId);
 
-
                 let offset = pageSize * ( pageNo -1 );
-
                 if (profileData && profileData.allowed) {
 
                     let bodyOfRequest = {
                         "request": {
                             "filters": {
                                 "organisations.organisationId": organisationId,
-                            },
-                            "limit": pageSize,
-                            "offset": offset
+                            }
                         }
                     }
+
+                    if(pageNo){
+                        bodyOfRequest.request['offset'] = offset; 
+                    }
+
+                    if(pageSize){
+                        bodyOfRequest.request['limit'] = pageSize; 
+                    }
+
                     if (searchText) {
                         bodyOfRequest.request['query'] = searchText;
                     }
@@ -109,10 +114,16 @@ module.exports = class platFormUserProfileHelper {
                         let userInfo = [];
                         await Promise.all(usersList.result.response.content.map(async function (userItem) {
 
-                            let rolesOfUser;
+                            let rolesOfUser ="";
                              await Promise.all(userItem.organisations.map(async orgInfo=>{
                                 if(orgInfo.organisationId==organisationId){
-                                    rolesOfUser = orgInfo.roles;
+                                    
+                                    let orgRoles = (orgInfo.roles).toString();
+                                    if(rolesOfUser==""){
+                                        rolesOfUser = orgRoles;
+                                    }else{
+                                        rolesOfUser = rolesOfUser +","+ orgRoles
+                                    }
                                 }
                             }));
 

@@ -100,8 +100,53 @@ var createPlatFormUser = function ( requestBody,token ) {
 
 }
 
+/**
+  * to update PlatForm User data
+  * @function
+  * @name updatePlatFormUser
+  * @returns {Promise} returns a promise.
+*/
+
+var updatePlatFormUser = function ( requestBody,token ) {
+
+    const platformUserUpdateUrl = 
+    urlPrefix + constants.endpoints.PLATFORM_USER_UPDATE;
+    
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            let options = {
+                "headers":{
+                "content-type": "application/json",
+                "authorization" :  process.env.AUTHORIZATION,
+                "x-authenticated-user-token" : token,
+                },
+                json : requestBody
+            };
+
+             request.post(platformUserUpdateUrl,options,callback);
+            
+            function callback(err,data){
+                if( err ) {
+                    return reject({
+                        message : constants.apiResponses.SUNBIRD_SERVICE_DOWN
+                    });
+                } else {
+                    let dialCodeData = data.body;
+                    return resolve(dialCodeData);
+                }
+            }
+
+        } catch (error) {
+            return reject(error);
+        }
+    })
+
+}
+
 
 module.exports = {
     platformUserProfile : platformUserProfile,
-    createPlatFormUser:createPlatFormUser
+    createPlatFormUser:createPlatFormUser,
+    updatePlatFormUser:updatePlatFormUser
 };

@@ -207,4 +207,54 @@ module.exports = class userCreation {
     });
   }
 
+
+
+   /**
+   * @api {get} /admin-service/api/v1/user-creation/update 
+   * to update user details
+   * @apiVersion 1.0.0
+   * @apiGroup User Creation
+   * @apiHeader {String} X-authenticated-user-token Authenticity token
+   * @apiSampleRequest /admin-service/api/v1/user-creation/update
+   * @apiUse successBody
+   * @apiUse errorBodyuser
+   * @apiParamExample {json} Response:
+  */
+
+  /**
+   * update User
+   * @method
+   * @name create
+   * @param  {req}  - requested data.
+   * @returns {json} Response consists updated user details
+  */
+
+ update(req) {
+  return new Promise(async (resolve, reject) => {
+
+    try {
+
+      let getUserForm = 
+      await userCreationHelper.update(
+        req.body,
+        req.userDetails.userToken
+      );
+     
+      return resolve(getUserForm);
+
+    } catch(error) {
+      
+      return reject({
+        status: 
+        error.status || 
+        httpStatusCode["internal_server_error"].status,
+
+        message: 
+        error.message || 
+        httpStatusCode["internal_server_error"].message
+      });
+    }
+  });
+}
+
 };
