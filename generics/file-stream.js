@@ -57,6 +57,8 @@ let FileStream = class FileStream {
     try {
    
       if(!fs.existsSync(filePath)){
+
+        console.log("filePath",filePath);
          fs.mkdirSync(filePath, { recursive: true });
       }
       
