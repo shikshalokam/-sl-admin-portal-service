@@ -17,11 +17,18 @@ var DB = function (config) {
         }
     });
 
+    let connection =false;
     var createModel = function (opts) {
+        
         var MyModel = models.loadSchema(opts.name, opts.schema);
         MyModel.syncDB(function (err, result) {
             if (err) throw err;
-            log.debug("Connected to Cassandra DB");
+        
+            if(!connection){
+                connection = true;
+                log.debug("Connected to Cassandra DB");
+            }
+            
         });
         return models.instance;
     }

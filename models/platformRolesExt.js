@@ -7,7 +7,8 @@ module.exports = {
       updatedBy : String,
       status : String,
       isDeleted: Boolean,
-      role:Object
+      role:Object,
+      isHidden:Boolean
     }
   };
   

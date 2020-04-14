@@ -121,22 +121,37 @@ module.exports = class UserCreationHelper {
                 }
 
                 let platformRoles = 
-                await database.models.platformRolesExt.find({},{ 
+                await database.models.platformRolesExt.find({ isHidden:false},{ 
                     code:1,
                     title:1 
-                });
-                
-                let roles  = [];
+                }).lean();
 
+                let roles  = [];
+                let sunBirdRoles = 
+                await cassandraDatabase.models.role.findAsync(
+                    { 
+                        status:1
+                    },{ 
+                       select:["id","name"], raw: true ,allow_filtering: true
+                });
+
+                if(sunBirdRoles){
+                    sunBirdRoles.map(function(sunBirdrole){
+                        roles.push({
+                            label : sunBirdrole.name,
+                            value : sunBirdrole.id
+                        })
+                    });
+                }
+                
                 if ( platformRoles.length > 0 ) {
                     
                    await Promise.all(platformRoles.map(platformRole=>{
                         roles.push({
                             label : platformRole.title,
-                            value : platformRole._id
+                            value : platformRole.code
                         })
                     }));
-
                 }  
                 
                 stateListWithSubEntities.push(stateInfoWithSub);

@@ -7,8 +7,7 @@
 
 module.exports = {
     PLATFORM_USER_PROFILE : "/platformUserRoles/getProfile",
-    SUNBIRD_CREATE_USER  : "/api/user/v1/create",
-    PLATFORM_USER_CREATE : "/platformUserRoles/create",
+    PLATFORM_USER_CREATE : "/platformUserRoles/Create",
     PLATFORM_USER_UPDATE : "/platformUserRoles/update",
     SUNBIRD_ORGANISATION_LIST : "/api/org/v1/type/list",
     SUNBIRD_USER_READ: "/api/user/v1/read",

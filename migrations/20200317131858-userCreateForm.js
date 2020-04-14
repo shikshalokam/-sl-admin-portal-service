@@ -1,46 +1,46 @@
 module.exports = {
   async up(db) {
     global.migrationMsg = "User creation form"
-    
+
     let userCreateForm =
-    await db.collection('forms').findOne({ name: "userCreateForm" });
+      await db.collection('forms').findOne({ name: "userCreateForm" });
 
     if (!userCreateForm) {
 
       let allFields = [];
-      
-      let inputFields = ["organisation","firstName", "lastName", "email", "phoneNumber", 
-      "userName", "password","roles","state"];
+
+      let inputFields = ["organisation", "firstName", "lastName", "email", "phoneNumber",
+        "userName", "password", "roles", "state", "gender"];
 
       let inputField = {
-        "field" : "",
-        "value" : "",
-        "visible" : true,
-        "editable" : true,
-        "label" : "",
-        "input" : "text",
-        "validation" : [{
-          "name" : "required",
-					"validator" : "required",
-					"message" : ""
-        },{
-					"name" : "pattern",
-					"validator" : "([a-zA-Z]{3,30}\s*)+",
-					"message" : ""
+        "field": "",
+        "value": "",
+        "visible": true,
+        "editable": true,
+        "label": "",
+        "input": "text",
+        "validation": [{
+          "name": "required",
+          "validator": "required",
+          "message": ""
+        }, {
+          "name": "pattern",
+          "validator": "([a-zA-Z]{3,30}\s*)+",
+          "message": ""
         }]
       };
 
       await Promise.all(inputFields.map(async function (fields) {
 
         let inputObj = JSON.parse(JSON.stringify(inputField));
-        let field = fields.replace( /([A-Z])/g, " $1" );
+        let field = fields.replace(/([A-Z])/g, " $1");
         inputObj.label = field.charAt(0).toUpperCase() + field.slice(1);
         inputObj.field = fields;
 
         let message = "";
         let validator = "";
 
-        if ( fields == "password" ) {
+        if (fields == "password") {
           inputObj.input = fields;
           validator = "^(?=.*\d).{4,8}$";
           message = "Minimum four charaters required";
@@ -52,29 +52,49 @@ module.exports = {
           validator = "(0/91)?[7-9][0-9]{9}";
           message = "Please provide a valid Phone Number";
 
-        } else if(
-          fields === "state" || 
-          fields === "organisations" ||
-          fields === "roles" 
-          ) {
+        } else if (
+          fields === "state" ||
+          fields === "organisation" ||
+          fields === "roles" ||
+          fields === "gender"
+        ) {
+          inputObj.options = [];
 
-            if(fields =="roles"){
-              inputObj.input = "multiselect";
-            }else{
-              inputObj.input = "select";
-              }
-
-            inputObj.options = [];
-            
+          if (fields == "gender") {
+              inputObj.options=[
+                {
+                  "label": "Male",
+                  "value": "M"
+                }, {
+                  "label": "FeMale",
+                  "value": "F"
+                }]
+          }
           
+          if (fields == "roles") {
+            inputObj.input = "multiselect";
+          } else {
+            inputObj.input = "select";
+          }
+
+
         } else {
           validator = inputObj.validation[1].validator;
-          message = "Please Provide Valid "+inputObj.label;
+          message = "Please Provide Valid " + inputObj.label;
         }
 
-        inputObj.validation[0].message = inputObj.label+" required";
-        inputObj.validation[1].message = message;
-        inputObj.validation[1].validator = validator;
+
+       
+        inputObj.validation[0].message = inputObj.label + " required";
+     
+
+        if( fields === "state" || fields === "organisation" || fields === "gender"){
+          delete inputObj.validation[1];
+        }else{
+          inputObj.validation[1].message = message;
+          inputObj.validation[1].validator = validator;
+        }
+
         allFields.push(inputObj);
 
       }));
