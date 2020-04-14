@@ -10,7 +10,7 @@ module.exports = {
       let allFields = [];
 
       let inputFields = ["organisation", "firstName", "lastName", "email", "phoneNumber",
-        "userName", "password", "roles", "state", "gender"];
+        "userName", "password","confirmPassword","gender","roles", "state", ];
 
       let inputField = {
         "field": "",
@@ -40,8 +40,12 @@ module.exports = {
         let message = "";
         let validator = "";
 
-        if (fields == "password") {
+        if (fields == "password" || fields == "confirmPassword") {
           inputObj.input = fields;
+          if(fields == "confirmPassword"){
+            inputObj.input = "text";
+          }
+          
           validator = "^(?=.*\d).{4,8}$";
           message = "Minimum four charaters required";
         } else if (fields == "email") {
@@ -76,18 +80,11 @@ module.exports = {
           } else {
             inputObj.input = "select";
           }
-
-
         } else {
           validator = inputObj.validation[1].validator;
           message = "Please Provide Valid " + inputObj.label;
         }
-
-
-       
         inputObj.validation[0].message = inputObj.label + " required";
-     
-
         if( fields === "state" || fields === "organisation" || fields === "gender"){
           delete inputObj.validation[1];
         }else{
