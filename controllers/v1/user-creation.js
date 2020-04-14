@@ -130,8 +130,9 @@ module.exports = class userCreation {
 
         let getUserForm = 
         await userCreationHelper.getForm(
+          req.params._id ? req.params._id : req.userDetails.userId,
           req.userDetails.userToken,
-          req.params._id ? req.params._id : req.userDetails.userId
+          
         );
        
         return resolve(getUserForm);

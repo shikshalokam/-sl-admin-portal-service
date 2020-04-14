@@ -82,15 +82,55 @@ module.exports = class UserCreationHelper {
                         value: state._id
                     });
                 }));
+                if(states){
+                    states = states.sort(gen.utils.sortArrayOfObjects('label'));
+                }
+                
 
                 let profileInfo = 
-                await sunBirdService.getUserProfileInfo(userId,token);
+                await sunBirdService.getUserProfileInfo(token,userId);
 
                 let organisations = [];
 
                 let userProfileInfo = JSON.parse(profileInfo);
                 
-                if( 
+
+                let profileRoles;
+                if(userProfileInfo &&  
+                    userProfileInfo.result &&
+                     userProfileInfo.result.response &&
+                     userProfileInfo.result.response.roles
+                ){
+                    profileRoles = userProfileInfo.result.response.roles;
+                }
+
+                let userCustomeRole = await database.models.platformUserRolesExt.findOne({ userId: userId }, { roles: 1 });
+
+                if (userCustomeRole && userCustomeRole.roles && userCustomeRole.roles.length > 0) {
+                    userCustomeRole.roles.map(customRole => {
+                        if (!profileRoles.includes(customRole.code)) {
+                            profileRoles.push(customRole.code)
+                        }
+                    })
+                }
+              
+                if (profileRoles.includes(constants.common.PLATFROM_ADMIN_ROLE)) {
+
+                    let organisationsDoc = await cassandraDatabase.models.organisation.findAsync({ }, 
+                        { raw: true, select: ["orgname", "id"] });
+                    if (organisationsDoc) {
+                        await Promise.all(organisationsDoc.map(function (orgInfo) {
+
+                            let orgDetails = {
+                                label: orgInfo.orgname,
+                                value: orgInfo.id
+                            }
+                            organisations.push(orgDetails);
+                        }));
+                    }
+
+                }
+                else if( 
                     userProfileInfo && 
                     userProfileInfo.result && 
                     userProfileInfo.result.response &&
@@ -118,6 +158,10 @@ module.exports = class UserCreationHelper {
                          }   
 
                     }));
+                }
+
+                if(organisations){
+                    organisations = organisations.sort(gen.utils.sortArrayOfObjects('label'));
                 }
 
                 let platformRoles = 
@@ -153,7 +197,13 @@ module.exports = class UserCreationHelper {
                         })
                     }));
                 }  
+
+
+                if(roles){
+                    roles = roles.sort(gen.utils.sortArrayOfObjects("label"));
+                }
                 
+
                 stateListWithSubEntities.push(stateInfoWithSub);
                 
                 let forms = [];
@@ -164,6 +214,7 @@ module.exports = class UserCreationHelper {
 
                         if (fields.field == "state") {
                             fields.options = states;
+
                         } else if (fields.field == "organisation") {
                             fields.options = organisations;
 

@@ -24,16 +24,38 @@ module.exports = class platFormUserProfileHelper {
 
                 let profileData = await _getProfileData(token, userId);
                 if (profileData) {
-                    if (profileData.result.response.organisations) {
 
-                        // console.log("profileData.result",profileData.result);
+                    let organisationsList = [];
+
+                    let roles = profileData.result.response.roles;
+                    let userCustomeRole = await database.models.platformUserRolesExt.findOne({ userId: userId }, { roles: 1 });
+
+                    if (userCustomeRole && userCustomeRole.roles && userCustomeRole.roles.length > 0) {
+                        userCustomeRole.roles.map(customRole => {
+                            if (!roles.includes(customRole.code)) {
+                                roles.push(customRole.code)
+                            }
+                        })
+                    }
+                    if (roles.includes(constants.common.PLATFROM_ADMIN_ROLE)) {
+
+                        let organisationsDoc = await cassandraDatabase.models.organisation.findAsync({ }, 
+                            { raw: true, select: ["orgname", "id"] });
+                        if (organisationsDoc) {
+                            await Promise.all(organisationsDoc.map(function (orgInfo) {
+
+                                let orgDetails = {
+                                    label: orgInfo.orgname,
+                                    value: orgInfo.id
+                                }
+                                organisationsList.push(orgDetails);
+                            }));
+                        }
+
+                    } else if (profileData.result.response.organisations) {
                         let orgList = profileData.result.response.organisations;
-                        let organisationsList = [];
                         await Promise.all(orgList.map(async function (orgInfo) {
-
-
-                            if (profileData.result.response.roles.includes(constants.common.ORG_ADMIN_ROLE) ||
-                                profileData.result.response.roles.includes(constants.common.SYSTEM_ADMIN_ROLE) ||
+                            if (roles.includes(constants.common.ORG_ADMIN_ROLE) ||
                                 orgInfo.roles.includes(constants.common.ORG_ADMIN_ROLE)) {
                                 let result = await _getOrganisationDetailsById(orgInfo.organisationId);
                                 let orgDetails = { value: orgInfo.organisationId, label: result.orgname };
@@ -41,11 +63,14 @@ module.exports = class platFormUserProfileHelper {
                                 organisationsList.push(orgDetails);
                             }
                         }));
-                        if (organisationsList.length > 0) {
-                            organisationsList = organisationsList.slice((pageNo - 1) * pageSize, pageNo * pageSize);
-                        }
 
-                        return resolve({ result: organisationsList, message: constants.apiResponses.ORG_INFO_FETCHED });
+                    }
+                    if (organisationsList.length > 0) {
+                        organisationsList = organisationsList.slice((pageNo - 1) * pageSize, pageNo * pageSize);
+
+                        let sortedOrganisations = organisationsList.sort(gen.utils.sortArrayOfObjects('label'));
+                        
+                        return resolve({ result: sortedOrganisations, message: constants.apiResponses.ORG_INFO_FETCHED });
 
                     } else {
                         return resolve({
@@ -77,9 +102,9 @@ module.exports = class platFormUserProfileHelper {
             try {
 
                 let response;
-                let profileData = await _checkUserAdminAccess(token, userId,organisationId);
+                let profileData = await _checkUserAdminAccess(token, userId, organisationId);
 
-                let offset = pageSize * ( pageNo -1 );
+                let offset = pageSize * (pageNo - 1);
                 if (profileData && profileData.allowed) {
 
                     let bodyOfRequest = {
@@ -90,18 +115,15 @@ module.exports = class platFormUserProfileHelper {
                         }
                     }
 
-                    if(pageNo){
-                        bodyOfRequest.request['offset'] = offset; 
+                    if (pageNo) {
+                        bodyOfRequest.request['offset'] = offset;
                     }
-
-                    if(pageSize){
-                        bodyOfRequest.request['limit'] = pageSize; 
+                    if (pageSize) {
+                        bodyOfRequest.request['limit'] = pageSize;
                     }
-
                     if (searchText) {
                         bodyOfRequest.request['query'] = searchText;
                     }
-
                     if (requestedUsers.length > 0) {
                         bodyOfRequest.request['filters']["id"] = requestedUsers;
                     }
@@ -114,15 +136,15 @@ module.exports = class platFormUserProfileHelper {
                         let userInfo = [];
                         await Promise.all(usersList.result.response.content.map(async function (userItem) {
 
-                            let rolesOfUser ="";
-                             await Promise.all(userItem.organisations.map(async orgInfo=>{
-                                if(orgInfo.organisationId==organisationId){
-                                    
+                            let rolesOfUser = "";
+                            await Promise.all(userItem.organisations.map(async orgInfo => {
+                                if (orgInfo.organisationId == organisationId) {
+
                                     let orgRoles = (orgInfo.roles).toString();
-                                    if(rolesOfUser==""){
+                                    if (rolesOfUser == "") {
                                         rolesOfUser = orgRoles;
-                                    }else{
-                                        rolesOfUser = rolesOfUser +","+ orgRoles
+                                    } else {
+                                        rolesOfUser = rolesOfUser + "," + orgRoles
                                     }
                                 }
                             }));
@@ -133,7 +155,7 @@ module.exports = class platFormUserProfileHelper {
                                 email: userItem.email,
                                 id: userItem.id,
                                 gender: userItem.gender,
-                                role:rolesOfUser
+                                role: rolesOfUser
                             }
                             userInfo.push(resultObj);
                         }));
@@ -201,7 +223,7 @@ module.exports = class platFormUserProfileHelper {
     * @returns {json} Response consists of profile data and user permission as boolean.
 */
 
-function _checkUserAdminAccess(token, userId,organisationId) {
+function _checkUserAdminAccess(token, userId, organisationId) {
 
     return new Promise(async (resolve, reject) => {
         try {
@@ -218,16 +240,16 @@ function _checkUserAdminAccess(token, userId,organisationId) {
 
                     profileData['allowed'] = false;
                     await Promise.all(profileData.result.response.roles.map(async function (role) {
-                        if (role == constants.common.ORG_ADMIN_ROLE || 
-                            role == constants.common.SYSTEM_ADMIN_ROLE) {
+                        if (role == constants.common.ORG_ADMIN_ROLE ||
+                            role == constants.common.PLATFROM_ADMIN_ROLE) {
                             profileData['allowed'] = true;
                             return resolve(profileData);
-                        }else{
-                            if(profileData.result.response.organisations){
-                                await Promise.all(profileData.result.response.organisations.map(async org =>{
-                                    if(org.organisationId==organisationId
-                                         && org.roles.includes(constants.common.ORG_ADMIN_ROLE) ){
-                                            profileData['allowed'] = true;  
+                        } else {
+                            if (profileData.result.response.organisations) {
+                                await Promise.all(profileData.result.response.organisations.map(async org => {
+                                    if (org.organisationId == organisationId
+                                        && org.roles.includes(constants.common.ORG_ADMIN_ROLE)) {
+                                        profileData['allowed'] = true;
                                     }
                                 }))
                             }
@@ -352,11 +374,11 @@ function _getOrganisationDetailsById(orgId) {
 
 }
 
-  /**
-   * to get _getProfileData of user
-   * @method
-   * @name _getProfileData
-    * @returns {json} Response consists of profile data a
+/**
+ * to get _getProfileData of user
+ * @method
+ * @name _getProfileData
+  * @returns {json} Response consists of profile data a
 */
 
 function _getProfileData(token, userId) {
@@ -365,8 +387,8 @@ function _getProfileData(token, userId) {
             let profileInfo =
                 await sunBirdService.getUserProfileInfo(token, userId);
 
-                let profileData = JSON.parse(profileInfo);
-                return resolve(profileData);
+            let profileData = JSON.parse(profileInfo);
+            return resolve(profileData);
 
         } catch (error) {
             return reject(error);
