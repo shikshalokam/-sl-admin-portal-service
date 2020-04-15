@@ -181,10 +181,14 @@ module.exports = class UserCreationHelper {
 
                 if(sunBirdRoles){
                     sunBirdRoles.map(function(sunBirdrole){
-                        roles.push({
-                            label : sunBirdrole.name,
-                            value : sunBirdrole.id
-                        })
+
+                         if(sunBirdrole.id != constants.common.PUBLIC_ROLE){
+                            roles.push({
+                                label : sunBirdrole.name,
+                                value : sunBirdrole.id
+                            })
+                         }
+                        
                     });
                 }
                 

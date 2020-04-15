@@ -149,10 +149,10 @@ module.exports = class platFormUserProfileHelper {
                                 }
                             }));
 
+                           
                             let resultObj = {
                                 firstName: userItem.firstName,
                                 lastName: userItem.lastName,
-                                email: userItem.email,
                                 id: userItem.id,
                                 gender: userItem.gender,
                                 role: rolesOfUser
@@ -315,7 +315,6 @@ function _userColumn() {
         'lastName',
         'gender',
         'role',
-        'email',
         'action'
     ];
 

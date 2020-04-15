@@ -56,7 +56,10 @@ module.exports = {
           validator = "(0/91)?[7-9][0-9]{9}";
           message = "Please provide a valid Phone Number";
 
-        } else if (
+        }else if(fields == "userName"){
+          validator = "^[a-z0-9_-]{3,15}$";
+          message = "Please provide a valid User Name";
+        }else if (
           fields === "state" ||
           fields === "organisation" ||
           fields === "roles" ||
@@ -70,7 +73,7 @@ module.exports = {
                   "label": "Male",
                   "value": "M"
                 }, {
-                  "label": "FeMale",
+                  "label": "Female",
                   "value": "F"
                 }]
           }
