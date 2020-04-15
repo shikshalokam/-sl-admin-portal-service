@@ -133,6 +133,25 @@ module.exports = class platFormUserProfileHelper {
 
                     if (usersList.responseCode == constants.common.RESPONSE_OK) {
 
+
+                        let sunBirdRoles = 
+                        await cassandraDatabase.models.role.findAsync(
+                            { 
+                                status:1
+                            },{ 
+                               select:["id","name"], raw: true ,allow_filtering: true
+                        });
+        
+                        let allRoles = {
+
+                        };
+                        if(sunBirdRoles){
+                            sunBirdRoles.map(function(sunBirdrole){
+                                allRoles[sunBirdrole.id] = sunBirdrole.name;
+                            });
+                        }
+
+
                         let userInfo = [];
                         await Promise.all(usersList.result.response.content.map(async function (userItem) {
 
@@ -142,13 +161,12 @@ module.exports = class platFormUserProfileHelper {
 
                                     let orgRoles = (orgInfo.roles).toString();
                                     if (rolesOfUser == "") {
-                                        rolesOfUser = orgRoles;
+                                        rolesOfUser = allRoles[orgRoles];
                                     } else {
-                                        rolesOfUser = rolesOfUser + "," + orgRoles
+                                        rolesOfUser = rolesOfUser + "," + allRoles[orgRoles]
                                     }
                                 }
                             }));
-
                            
                             let resultObj = {
                                 firstName: userItem.firstName,
