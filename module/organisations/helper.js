@@ -233,13 +233,30 @@ function _checkUserAdminAccess(token, userId, organisationId) {
             let response;
 
             let profileData = JSON.parse(profileInfo);
+
+            let roles;
+            if(profileData.result 
+                && profileData.result.response 
+                && profileData.result.response.roles){
+                     roles = profileData.result.response.roles;
+            }
+            
+            let userCustomeRole = await database.models.platformUserRolesExt.findOne({ userId: userId }, { roles: 1 });
+
+            if (userCustomeRole && userCustomeRole.roles && userCustomeRole.roles.length > 0) {
+                userCustomeRole.roles.map(customRole => {
+                    if (!roles.includes(customRole.code)) {
+                        roles.push(customRole.code)
+                    }
+                })
+            }
+            
             if (profileData.responseCode == constants.common.RESPONSE_OK) {
 
-                if (profileData.result && profileData.result.response
-                    && profileData.result.response.roles) {
+                if (profileData.result && profileData.result.response) {
 
                     profileData['allowed'] = false;
-                    await Promise.all(profileData.result.response.roles.map(async function (role) {
+                    await Promise.all(roles.map(async function (role) {
                         if (role == constants.common.ORG_ADMIN_ROLE ||
                             role == constants.common.PLATFROM_ADMIN_ROLE) {
                             profileData['allowed'] = true;
