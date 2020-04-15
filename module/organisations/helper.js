@@ -167,12 +167,14 @@ module.exports = class platFormUserProfileHelper {
                                     }
                                 }
                             }));
-                           
+                            
+                            let gender =  userItem.gender == "M" ? "Male" :  userItem.gender == "F" ? "Female":"";
+
                             let resultObj = {
                                 firstName: userItem.firstName,
                                 lastName: userItem.lastName,
                                 id: userItem.id,
-                                gender: userItem.gender,
+                                gender: gender,
                                 role: rolesOfUser
                             }
                             userInfo.push(resultObj);
