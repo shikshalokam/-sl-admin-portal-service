@@ -159,11 +159,14 @@ module.exports = class platFormUserProfileHelper {
                             await Promise.all(userItem.organisations.map(async orgInfo => {
                                 if (orgInfo.organisationId == organisationId) {
 
-                                    let orgRoles = (orgInfo.roles).toString();
+                                    let orgRoles = orgInfo.roles.map(roleItem=>{
+                                        return allRoles[roleItem]
+                                    })
+                                     orgRoles = (orgRoles).toString();
                                     if (rolesOfUser == "") {
-                                        rolesOfUser = allRoles[orgRoles];
+                                        rolesOfUser = orgRoles;
                                     } else {
-                                        rolesOfUser = rolesOfUser + "," + allRoles[orgRoles]
+                                        rolesOfUser = rolesOfUser + "," + orgRoles
                                     }
                                 }
                             }));
