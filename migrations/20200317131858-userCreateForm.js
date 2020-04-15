@@ -69,12 +69,12 @@ module.exports = {
 
           if (fields == "gender") {
               inputObj.options=[
-                {
-                  "label": "Male",
-                  "value": "M"
-                }, {
+                 {
                   "label": "Female",
                   "value": "F"
+                },{
+                  "label": "Male",
+                  "value": "M"
                 }]
           }
           
