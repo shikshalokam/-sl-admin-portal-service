@@ -187,12 +187,8 @@ module.exports = class Organisations extends Abstract {
         let fileStream = new csvFileStream(fileName);
         let input = fileStream.initStream();
 
-
-
-
-
-        if (csvData && csvData.result && csvData.result.data) {
-          csvData.result.data.map(async userMap => {
+        if (csvData) {
+          csvData.map(async userMap => {
             input.push(userMap);
           })
         }else{

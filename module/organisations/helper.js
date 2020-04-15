@@ -203,8 +203,19 @@ module.exports = class platFormUserProfileHelper {
             try {
 
                 let csvData = await this.users(token, userId, requestBody.organisationId, requestBody.limit, requestBody.page, requestBody.searchText, requestBody.usersList);
-
-                resolve(csvData);
+                let responseData = [];
+                if(csvData.result && csvData.result.data){
+                    await Promise.all(csvData.result.data.map(fields=>
+                        {
+                            if(fields.id){
+                                delete fields.id;
+                            }
+                            let userInfo  = Object.keys(fields).reduce((c, k) => (c[gen.utils.camelCaseToCapitalizeCase(k)] = fields[k], c), {})
+                            responseData.push(userInfo);
+                    }))
+                }
+                
+                resolve(responseData);
 
             }
             catch (error) {
