@@ -129,6 +129,7 @@ module.exports = class Organisations extends Abstract {
   users(req) {
     return new Promise(async (resolve, reject) => {
       try {
+
         let organisationList = await organisationsHelper.users(
           req.userDetails.userToken,
           req.userDetails.userId,
@@ -136,7 +137,8 @@ module.exports = class Organisations extends Abstract {
           req.pageSize,
           req.pageNo,
           req.searchText,
-          req.status ? req.status: "" );
+          req.query.status ? req.query.status : ""
+           );
         return resolve(organisationList);
 
       } catch (error) {

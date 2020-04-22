@@ -97,7 +97,7 @@ module.exports = class platFormUserProfileHelper {
     * @returns {json} Response consists of organisations.
    */
 
-    static users(token, userId, organisationId, pageSize, pageNo, searchText, requestedUsers = []) {
+    static users(token, userId, organisationId, pageSize, pageNo, searchText,status = "",requestedUsers = []) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -126,6 +126,9 @@ module.exports = class platFormUserProfileHelper {
                     }
                     if (requestedUsers.length > 0) {
                         bodyOfRequest.request['filters']["id"] = requestedUsers;
+                    }
+                    if(status){
+                        bodyOfRequest.request['filters']['status'] = status;
                     }
 
                     let usersList =
