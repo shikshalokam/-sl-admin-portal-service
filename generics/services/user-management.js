@@ -145,8 +145,55 @@ var updatePlatFormUser = function ( requestBody,token ) {
 }
 
 
+/**
+  * block user
+  * @function
+  * @name blockUser
+  * @returns {Promise} returns a promise.
+*/
+
+var blockUser = function ( userId,token ) {
+
+    const platformUserBlockUrl = 
+    urlPrefix + constants.endpoints.BLOCK_USER;
+    
+    return new Promise(async (resolve, reject) => {
+        try {
+
+
+            let options = {
+                "headers":{
+                "content-type": "application/json",
+                "authorization" :  process.env.AUTHORIZATION,
+                "x-authenticated-user-token" : token,
+                },
+                json : { userId : userId }
+            };
+
+             request.post(platformUserBlockUrl,options,callback);
+            
+            function callback(err,data){
+                if( err ) {
+                    return reject({
+                        message : constants.apiResponses.SUNBIRD_SERVICE_DOWN
+                    });
+                } else {
+                    let dialCodeData = data.body;
+                    return resolve(dialCodeData);
+                }
+            }
+
+        } catch (error) {
+            return reject(error);
+        }
+    })
+
+}
+
+
 module.exports = {
     platformUserProfile : platformUserProfile,
     createPlatFormUser:createPlatFormUser,
-    updatePlatFormUser:updatePlatFormUser
+    updatePlatFormUser:updatePlatFormUser,
+    blockUser:blockUser
 };

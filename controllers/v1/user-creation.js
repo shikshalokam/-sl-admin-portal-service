@@ -258,4 +258,89 @@ module.exports = class userCreation {
   });
 }
 
+
+   /**
+   * @api {get} /admin-service/api/v1/user-creation/block 
+   * to block the user 
+   * @apiVersion 1.0.0
+   * @apiGroup User Creation
+   * @apiHeader {String} X-authenticated-user-token Authenticity token
+   * @apiSampleRequest /admin-service/api/v1/user-creation/block
+   * @apiUse successBody
+   * @apiUse errorBodyuser
+   * @apiParamExample {json} Response:
+  */
+
+  /**
+   * block block    
+   * @method
+   * @name create
+   * @param  {req}  - requested data.
+   * @returns {json} Response consists updated user details
+  */
+
+ block(req) {
+  return new Promise(async (resolve, reject) => {
+
+    try {
+
+      let blockUserData = 
+      await userCreationHelper.block(req.params._id,
+        req.userDetails.userToken
+      );
+     
+      return resolve(blockUserData);
+
+    } catch(error) {
+      
+      return reject({
+        status: 
+        error.status || 
+        httpStatusCode["internal_server_error"].status,
+
+        message: 
+        error.message || 
+        httpStatusCode["internal_server_error"].message
+      });
+    }
+  });
+}
+
+ /**
+   * details  
+   * @method
+   * @name create
+   * @param  {req}  - requested data.
+   * @returns {json} Response consists updated user details
+  */
+
+ details(req) {
+  return new Promise(async (resolve, reject) => {
+
+    try {
+
+      let blockUserData = 
+      await userCreationHelper.details(
+        (req.params._id && req.params._id != "") ? req.params._id : req.userDetails.userId,
+        req.userDetails.userToken
+      );
+     
+      return resolve(blockUserData);
+
+    } catch(error) {
+      
+      return reject({
+        status: 
+        error.status || 
+        httpStatusCode["internal_server_error"].status,
+
+        message: 
+        error.message || 
+        httpStatusCode["internal_server_error"].message
+      });
+    }
+  });
+}
+
+
 };

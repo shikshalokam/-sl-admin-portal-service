@@ -9,8 +9,8 @@ module.exports = {
 
       let allFields = [];
 
-      let inputFields = ["organisation", "firstName", "lastName", "email", "phoneNumber",
-        "userName", "password","confirmPassword","gender","roles", "state", ];
+      let inputFields = ["organisation", "state","firstName", "lastName", "email", "phoneNumber",
+        "userName","gender","password","confirmpassword","roles" ];
 
       let inputField = {
         "field": "",
@@ -40,14 +40,12 @@ module.exports = {
         let message = "";
         let validator = "";
 
-        if (fields == "password" || fields == "confirmPassword") {
-          inputObj.input = fields;
-          if(fields == "confirmPassword"){
-            inputObj.input = "text";
-          }
+        if (fields == "password" || fields == "confirmpassword") {
+          inputObj.input = "password";
+       
           
-          validator = "^(?=.*\d).{4,8}$";
-          message = "Minimum four charaters required";
+          validator = "^([a-zA-Z0-9@*#]{8,15})$";
+          message = "Minimum eight charaters required";
         } else if (fields == "email") {
           validator = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
           message = "Please provide a valid Email";

@@ -135,7 +135,8 @@ module.exports = class Organisations extends Abstract {
           req.params._id,
           req.pageSize,
           req.pageNo,
-          req.searchText);
+          req.searchText,
+          req.status ? req.status: "" );
         return resolve(organisationList);
 
       } catch (error) {

@@ -276,22 +276,63 @@ module.exports = class UserCreationHelper {
    * @returns {json} Response consists of updated user details.
    */
 
-  static update( requestedBodyData, userToken ) {
+  static update( updateInfo, userToken ) {
     return new Promise(async (resolve, reject) => {
         try {
             
+            let updateData = {
+                userId:updateInfo.userId,
+                firstName:updateInfo.firstName,
+                lastName:updateInfo.lastName
+            }
+
+            if(updateInfo.dob){
+                updateData['dob'] = updateInfo.dob;
+            }
+
             let updateUser =
             await userManagementService.updatePlatFormUser(
-                requestedBodyData,
+                updateData,
                 userToken
             );
+
+            console.log("updateUser",updateUser);
                 
             return resolve(updateUser);    
         } catch (error) {
             return reject(error);
         }
     })
-}
+ }
+
+    /**
+   * block.
+   * @method
+   * @name  block
+   * @param  {userId}  - userId
+   * @param  {userToken}  - user token
+   * @returns {json} Response consists of updated user details.
+   */
+
+  static block( userId, userToken ) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            
+            
+            let blockUserInfo =
+            await userManagementService.blockUser(
+                userId,
+                userToken
+            );
+
+            // console.log("updateUser",updateUser);
+                
+            return resolve(blockUserInfo);    
+        } catch (error) {
+            return reject(error);
+        }
+    })
+ }
 
 
 };

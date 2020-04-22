@@ -151,10 +151,29 @@ module.exports = class platFormUserProfileHelper {
                             });
                         }
 
+                        let platformRoles = 
+                        await database.models.platformRolesExt.find({},{ 
+                            code:1,
+                            title:1 
+                        }).lean();
 
+                        if(platformRoles){
+                            platformRoles.map(function(customRoles){
+                                allRoles[customRoles.code] = customRoles.title;
+                            });
+                        }
+
+                     
                         let userInfo = [];
                         await Promise.all(usersList.result.response.content.map(async function (userItem) {
 
+                            // if(userItem.id){
+                            //     let platformRoles = 
+                            //     await database.models.platformRolesExt.find({},{ 
+                            //         code:1,
+                            //         title:1 
+                            //     }).lean();
+                            // }
                             let rolesOfUser = "";
                             await Promise.all(userItem.organisations.map(async orgInfo => {
                                 if (orgInfo.organisationId == organisationId) {
@@ -170,6 +189,7 @@ module.exports = class platFormUserProfileHelper {
                                     }
                                 }
                             }));
+
                             
                             let gender =  userItem.gender == "M" ? "Male" :  userItem.gender == "F" ? "Female":"";
 
@@ -178,7 +198,8 @@ module.exports = class platFormUserProfileHelper {
                                 lastName: userItem.lastName,
                                 id: userItem.id,
                                 gender: gender,
-                                role: rolesOfUser
+                                role: rolesOfUser,
+                                "active/inactive":userItem.status
                             }
                             userInfo.push(resultObj);
                         }));
@@ -349,6 +370,7 @@ function _userColumn() {
         'lastName',
         'gender',
         'role',
+        'active/inactive',
         'action'
     ];
 
