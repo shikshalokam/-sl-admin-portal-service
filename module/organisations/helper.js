@@ -202,7 +202,7 @@ module.exports = class platFormUserProfileHelper {
                                 id: userItem.id,
                                 gender: gender,
                                 role: rolesOfUser,
-                                "active/inactive":userItem.status
+                                status:userItem.status
                             }
                             userInfo.push(resultObj);
                         }));
@@ -373,7 +373,7 @@ function _userColumn() {
         'lastName',
         'gender',
         'role',
-        'active/inactive',
+        'status',
         'action'
     ];
 
