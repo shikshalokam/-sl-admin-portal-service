@@ -8,7 +8,7 @@
 let sunBirdService =
     require(ROOT_PATH + "/generics/services/sunbird");
 
-module.exports = class platFormUserProfileHelper {
+module.exports = class OrganisationsHelper {
 
     /**
    * Get platform organisations list.
@@ -28,7 +28,7 @@ module.exports = class platFormUserProfileHelper {
                     let organisationsList = [];
 
                     let roles = profileData.result.response.roles;
-                    let userCustomeRole = await database.models.platformUserRolesExt.findOne({ userId: userId }, { roles: 1 });
+                    let userCustomeRole = await database.models.userExtension.findOne({ userId: userId }, { roles: 1 });
 
                     if (userCustomeRole && userCustomeRole.roles && userCustomeRole.roles.length > 0) {
                         userCustomeRole.roles.map(customRole => {
@@ -299,7 +299,7 @@ function _checkUserAdminAccess(token, userId, organisationId) {
                      roles = profileData.result.response.roles;
             }
             
-            let userCustomeRole = await database.models.platformUserRolesExt.findOne({ userId: userId }, { roles: 1 });
+            let userCustomeRole = await database.models.userExtension.findOne({ userId: userId }, { roles: 1 });
 
             if (userCustomeRole && userCustomeRole.roles && userCustomeRole.roles.length > 0) {
                 userCustomeRole.roles.map(customRole => {

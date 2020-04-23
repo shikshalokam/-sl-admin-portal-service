@@ -1,18 +1,18 @@
 /**
- * name : user-creation.js
+ * name : userExtension.js
  * author : Rakesh Kumar
  * created-date : 18-March-2020
  * Description : User creation and related information.
  */
 
-const userCreationHelper = require(MODULES_BASE_PATH + "/user-creation/helper.js");
+const userExtensionHelper = require(MODULES_BASE_PATH + "/user-extension/helper.js");
 
 /**
-    * userCreation
+    * userExtension
     * @class
 */
 
-module.exports = class userCreation {
+module.exports = class userExtension extends Abstract  {
   
    /**
      * @apiDefine errorBody
@@ -26,10 +26,13 @@ module.exports = class userCreation {
      * @apiSuccess {String} result Data
      */
 
-  constructor() {}
+  
+  constructor() {
+    super(schemas["userExtension"]);
+  }
 
   static get name() {
-    return "user-creation";
+    return "user";
   }
 
   /**
@@ -43,12 +46,12 @@ module.exports = class userCreation {
 */
 
    /**
-     * @api {get} /admin-service/api/v1/user-creation/getForm/:userId 
+     * @api {get} /admin-service/api/v1/userExtension/getForm/:userId 
      * User Creation Form.
      * @apiVersion 1.0.0
      * @apiGroup User Creation
      * @apiHeader {String} X-authenticated-user-token Authenticity token
-     * @apiSampleRequest /admin-service/api/v1/user-creation/getForm/8f6d6fd2-c069-41f1-b94d-ad2befcc964b
+     * @apiSampleRequest /admin-service/api/v1/userExtension/getForm/8f6d6fd2-c069-41f1-b94d-ad2befcc964b
      * @apiUse successBody
      * @apiUse errorBody
      * @apiParamExample {json} Response:
@@ -129,7 +132,7 @@ module.exports = class userCreation {
       try {
 
         let getUserForm = 
-        await userCreationHelper.getForm(
+        await userExtensionHelper.getForm(
           req.params._id ? req.params._id : req.userDetails.userId,
           req.userDetails.userToken,
           
@@ -153,12 +156,12 @@ module.exports = class userCreation {
   }
   
   /**
-   * @api {get} /admin-service/api/v1/user-creation/create 
+   * @api {get} /admin-service/api/v1/userExtension/create 
    * to create user 
    * @apiVersion 1.0.0
    * @apiGroup User Creation
    * @apiHeader {String} X-authenticated-user-token Authenticity token
-   * @apiSampleRequest /admin-service/api/v1/user-creation/create
+   * @apiSampleRequest /admin-service/api/v1/userExtension/create
    * @apiUse successBody
    * @apiUse errorBodyuser
    * @apiParamExample {json} Response:
@@ -186,7 +189,7 @@ module.exports = class userCreation {
       try {
 
         let getUserForm = 
-        await userCreationHelper.create(
+        await userExtensionHelper.create(
           req.body,
           req.userDetails.userToken
         );
@@ -211,12 +214,12 @@ module.exports = class userCreation {
 
 
    /**
-   * @api {get} /admin-service/api/v1/user-creation/update 
+   * @api {get} /admin-service/api/v1/userExtension/update 
    * to update user details
    * @apiVersion 1.0.0
    * @apiGroup User Creation
    * @apiHeader {String} X-authenticated-user-token Authenticity token
-   * @apiSampleRequest /admin-service/api/v1/user-creation/update
+   * @apiSampleRequest /admin-service/api/v1/userExtension/update
    * @apiUse successBody
    * @apiUse errorBodyuser
    * @apiParamExample {json} Response:
@@ -236,7 +239,7 @@ module.exports = class userCreation {
     try {
 
       let getUserForm = 
-      await userCreationHelper.update(
+      await userExtensionHelper.update(
         req.body,
         req.userDetails.userToken
       );
@@ -260,12 +263,12 @@ module.exports = class userCreation {
 
 
    /**
-   * @api {get} /admin-service/api/v1/user-creation/block 
+   * @api {get} /admin-service/api/v1/userExtension/block 
    * to block the user 
    * @apiVersion 1.0.0
    * @apiGroup User Creation
    * @apiHeader {String} X-authenticated-user-token Authenticity token
-   * @apiSampleRequest /admin-service/api/v1/user-creation/block
+   * @apiSampleRequest /admin-service/api/v1/userExtension/block
    * @apiUse successBody
    * @apiUse errorBodyuser
    * @apiParamExample {json} Response:
@@ -285,7 +288,7 @@ module.exports = class userCreation {
     try {
 
       let blockUserData = 
-      await userCreationHelper.block(req.params._id,
+      await userExtensionHelper.block(req.params._id,
         req.userDetails.userToken
       );
      
@@ -320,7 +323,7 @@ module.exports = class userCreation {
     try {
 
       let userDetails = 
-      await userCreationHelper.details(
+      await userExtensionHelper.details(
         (req.params._id && req.params._id != "") ? req.params._id : req.userDetails.userId,
         req.userDetails.userToken,req.userDetails.userId
       );

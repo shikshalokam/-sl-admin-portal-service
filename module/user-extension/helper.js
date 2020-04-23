@@ -95,24 +95,24 @@ module.exports = class UserCreationHelper {
                 let userProfileInfo = JSON.parse(profileInfo);
 
 
-                let profileRoles;
-                if (userProfileInfo &&
-                    userProfileInfo.result &&
-                    userProfileInfo.result.response &&
-                    userProfileInfo.result.response.roles
-                ) {
-                    profileRoles = userProfileInfo.result.response.roles;
-                }
+                // let profileRoles;
+                // if (userProfileInfo &&
+                //     userProfileInfo.result &&
+                //     userProfileInfo.result.response &&
+                //     userProfileInfo.result.response.roles
+                // ) {
+                //     profileRoles = userProfileInfo.result.response.roles;
+                // }
 
-                let userCustomeRole = await database.models.platformUserRolesExt.findOne({ userId: userId }, { roles: 1 });
+                // let userCustomeRole = await database.models.platformUserRolesExt.findOne({ userId: userId }, { roles: 1 });
 
-                if (userCustomeRole && userCustomeRole.roles && userCustomeRole.roles.length > 0) {
-                    userCustomeRole.roles.map(customRole => {
-                        if (!profileRoles.includes(customRole.code)) {
-                            profileRoles.push(customRole.code)
-                        }
-                    })
-                }
+                // if (userCustomeRole && userCustomeRole.roles && userCustomeRole.roles.length > 0) {
+                //     userCustomeRole.roles.map(customRole => {
+                //         if (!profileRoles.includes(customRole.code)) {
+                //             profileRoles.push(customRole.code)
+                //         }
+                //     })
+                // }
 
                  organisations = await  _getOrganisationlist(userProfileInfo,userId);
                 let platformRoles =
@@ -476,7 +476,7 @@ function _getOrganisationlist(userProfileInfo, userId) {
                 profileRoles = userProfileInfo.result.response.roles;
             }
 
-            let userCustomeRole = await database.models.platformUserRolesExt.findOne({ userId: userId }, { roles: 1 });
+            let userCustomeRole = await database.models.userExtension.findOne({ userId: userId }, { roles: 1 });
 
             if (userCustomeRole && userCustomeRole.roles && userCustomeRole.roles.length > 0) {
                 userCustomeRole.roles.map(customRole => {
