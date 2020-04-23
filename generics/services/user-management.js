@@ -191,9 +191,58 @@ var blockUser = function ( userId,token ) {
 }
 
 
+/**
+  * to get user details from user-management service
+  * @function
+  * @name userDetails
+  * @returns {Promise} returns a promise.
+*/
+
+var userDetails = function ( userId,token ) {
+
+    const userDetailsAPIUrl = 
+    urlPrefix + constants.endpoints.USER_DETAILS;
+
+
+    
+    return new Promise(async (resolve, reject) => {
+        try {
+
+
+            let options = {
+                "headers":{
+                "content-type": "application/json",
+                "authorization" :  process.env.AUTHORIZATION,
+                "x-authenticated-user-token" : token,
+                },
+                json : { userId : userId }
+            };
+
+             request.post(userDetailsAPIUrl,options,callback);
+            
+            function callback(err,data){
+                if( err ) {
+                    return reject({
+                        message : constants.apiResponses.SUNBIRD_SERVICE_DOWN
+                    });
+                } else {
+
+                    return resolve(data.body);
+                }
+            }
+
+        } catch (error) {
+            return reject(error);
+        }
+    })
+
+}
+
+
 module.exports = {
     platformUserProfile : platformUserProfile,
     createPlatFormUser:createPlatFormUser,
     updatePlatFormUser:updatePlatFormUser,
-    blockUser:blockUser
+    blockUser:blockUser,
+    userDetails:userDetails
 };

@@ -319,13 +319,13 @@ module.exports = class userCreation {
 
     try {
 
-      let blockUserData = 
+      let userDetails = 
       await userCreationHelper.details(
         (req.params._id && req.params._id != "") ? req.params._id : req.userDetails.userId,
-        req.userDetails.userToken
+        req.userDetails.userToken,req.userDetails.userId
       );
      
-      return resolve(blockUserData);
+      return resolve(userDetails);
 
     } catch(error) {
       

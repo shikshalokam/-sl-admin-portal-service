@@ -12,5 +12,6 @@ module.exports = {
     SUNBIRD_ORGANISATION_LIST : "/api/org/v1/type/list",
     SUNBIRD_USER_READ: "/api/user/v1/read",
     SUNBIRD_SEARCH_USER:"/api/user/v1/search",
-    BLOCK_USER:"/userExtension/block"
+    BLOCK_USER:"/userExtension/block",
+    USER_DETAILS:"/userExtension/userDetails"
 }
