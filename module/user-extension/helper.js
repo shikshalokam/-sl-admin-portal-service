@@ -114,9 +114,9 @@ module.exports = class UserCreationHelper {
                 //     })
                 // }
 
-                 organisations = await  _getOrganisationlist(userProfileInfo,userId);
+                organisations = await _getOrganisationlist(userProfileInfo, userId);
 
-                
+
                 let platformRoles =
                     await database.models.platformRolesExt.find({ isHidden: false }, {
                         code: 1,
@@ -267,7 +267,7 @@ module.exports = class UserCreationHelper {
    * @returns {json} Response consists of updated user details.
    */
 
-    static statusUpdate(userId, userToken,status) {
+    static statusUpdate(userId, userToken, status) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -279,7 +279,7 @@ module.exports = class UserCreationHelper {
                         status
                     );
 
-              
+
                 return resolve(statusUpdateUserInfo);
             } catch (error) {
                 return reject(error);
@@ -312,43 +312,8 @@ module.exports = class UserCreationHelper {
                     let userDetails = {};
                     if (profileData.result) {
 
-                        let orgInfo = [];
-                        let organisationsList = await _getOrganisationlist(profileData, orgAdminUserId);
-                        profileData.result.response.organisations.map(data => {
-                            var results = organisationsList.filter(function (orgData) { return orgData.value === data.organisationId });
-                            console.log("results",results);
-                            orgInfo.push({
-                                label:results[0].label,
-                                value: data.organisationId,
-                                roles: data.roles
-                            })
-                        });
-
-                        let gender = profileData.result.response.gender == "M" ? "Male" : profileData.result.response.gender == "F" ?  "Female" : "";
-
-                        let reponseObj = profileData.result.response;
-
-                        userDetails = {
-                            firstName: reponseObj.firstName,
-                            gender: gender,
-                            userName:reponseObj.userName,
-                            lastName: reponseObj.lastName,
-                            email: reponseObj.email,
-                            phoneNumber: reponseObj.phone,
-                            status: reponseObj.status,
-                            dob: reponseObj.dob,
-                            lastLoginTime:reponseObj.lastLoginTime,
-                            createdDate:reponseObj.createdDate,
-                            organisations: orgInfo,
-                            roles: [],
-                            organisationsList: []
-                        }
 
 
-
-       
-
-                      
                         let platformRoles =
                             await database.models.platformRolesExt.find({ isHidden: false }, {
                                 code: 1,
@@ -387,28 +352,87 @@ module.exports = class UserCreationHelper {
                             }));
                         }
 
-
                         if (roles) {
                             roles = roles.sort(gen.utils.sortArrayOfObjects("label"));
                         }
 
-                        userDetails.roles = roles;
-                        userDetails.organisationsList = organisationsList;
-                        resolve({ result: userDetails });
+                        let orgInfo = [];
+                        let organisationsList = await _getOrganisationlist(profileData, orgAdminUserId);
 
-                    } else {
+                        if (profileData.result.response &&
+                             profileData.result.response.organisations && 
+                             profileData.result.response.organisations.length > 0){
+                            profileData.result.response.organisations.map(data => {
+                                var results = organisationsList.filter(function (orgData) {
+                                    return orgData.value === data.organisationId
+                                });
 
-                        reject({ message: profileData });
+                                let allRoles = [];
+                                if (data && data.roles && data.roles.length > 0) {
+                                    data.roles.map(function (sunbirdUserRole) {
+
+                                        if (sunbirdUserRole && sunbirdUserRole!= constants.common.PUBLIC_ROLE) {
+
+                                            let roleInfo = roles.filter(function (roleDetails) {
+                                                return roleDetails.value === sunbirdUserRole
+                                            });
+                                            allRoles.push(roleInfo[0]);
+                                        }
+                                    })
+                                }
+
+                                orgInfo.push({
+                                    label: results[0].label,
+                                    value: data.organisationId,
+                                    roles: allRoles
+                                })
+                            });
+                       }
+
+                    let gender = profileData.result.response.gender == "M" ? "Male" : profileData.result.response.gender == "F" ? "Female" : "";
+
+                    let reponseObj = profileData.result.response;
+
+                    userDetails = {
+                        firstName: reponseObj.firstName,
+                        gender: gender,
+                        userName: reponseObj.userName,
+                        lastName: reponseObj.lastName,
+                        email: reponseObj.email,
+                        phoneNumber: reponseObj.phone,
+                        status: reponseObj.status,
+                        dob: reponseObj.dob,
+                        lastLoginTime: reponseObj.lastLoginTime,
+                        createdDate: reponseObj.createdDate,
+                        organisations: orgInfo,
+                        roles: [],
+                        organisationsList: []
                     }
+
+
+
+
+
+
+
+
+                    userDetails.roles = roles;
+                    userDetails.organisationsList = organisationsList;
+                    resolve({ result: userDetails });
+
                 } else {
+
                     reject({ message: profileData });
                 }
-            } catch (error) {
-                console.log("error", error);
-                return reject(error);
+            } else {
+                reject({ message: profileData });
             }
-        })
-    }
+        } catch (error) {
+            console.log("error", error);
+            return reject(error);
+        }
+    })
+}
 
 };
 

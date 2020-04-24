@@ -279,8 +279,7 @@ module.exports = class OrganisationsHelper {
         try {
             let response = await sunBirdService.addUser(orgnisationInfo, token);
 
-            console.log("response",response);
-            if (response && response.responseCode == constants.common.RESPONSE_OK) {
+              if (response && response.responseCode == constants.common.RESPONSE_OK) {
                 resolve({ result: response.result, message: constants.apiResponses.USER_ADDED_TO_ORG });
             } else {
                 reject({ message: response.body });
