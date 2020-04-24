@@ -169,14 +169,7 @@ module.exports = class OrganisationsHelper {
                      
                         let userInfo = [];
                         await Promise.all(usersList.result.response.content.map(async function (userItem) {
-
-                            // if(userItem.id){
-                            //     let platformRoles = 
-                            //     await database.models.platformRolesExt.find({},{ 
-                            //         code:1,
-                            //         title:1 
-                            //     }).lean();
-                            // }
+                           
                             let rolesOfUser = "";
                             await Promise.all(userItem.organisations.map(async orgInfo => {
                                 if (orgInfo.organisationId == organisationId) {
@@ -249,7 +242,7 @@ module.exports = class OrganisationsHelper {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let csvData = await this.users(token, userId, requestBody.organisationId, requestBody.limit, requestBody.page, requestBody.searchText, requestBody.usersList);
+                let csvData = await this.users(token, userId, requestBody.organisationId, requestBody.limit, requestBody.page, requestBody.searchText,requestBody.status,requestBody.usersList);
                 let responseData = [];
                 if(csvData.result && csvData.result.data){
                     await Promise.all(csvData.result.data.map(fields=>
