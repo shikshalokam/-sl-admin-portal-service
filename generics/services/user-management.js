@@ -146,16 +146,16 @@ var updatePlatFormUser = function ( requestBody,token ) {
 
 
 /**
-  * block user
+  * to update status of the user
   * @function
-  * @name blockUser
+  * @name statusUpdate
   * @returns {Promise} returns a promise.
 */
 
-var blockUser = function ( userId,token ) {
+var statusUpdate = function ( userId,token,status ) {
 
-    const platformUserBlockUrl = 
-    urlPrefix + constants.endpoints.BLOCK_USER;
+    const platformUserStatusUpdateUrl = 
+    urlPrefix + constants.endpoints.STATUS_UPDATE;
     
     return new Promise(async (resolve, reject) => {
         try {
@@ -167,10 +167,10 @@ var blockUser = function ( userId,token ) {
                 "authorization" :  process.env.AUTHORIZATION,
                 "x-authenticated-user-token" : token,
                 },
-                json : { userId : userId }
+                json : { userId : userId,status:status }
             };
 
-             request.post(platformUserBlockUrl,options,callback);
+             request.post(platformUserStatusUpdateUrl,options,callback);
             
             function callback(err,data){
                 if( err ) {
@@ -243,6 +243,6 @@ module.exports = {
     platformUserProfile : platformUserProfile,
     createPlatFormUser:createPlatFormUser,
     updatePlatFormUser:updatePlatFormUser,
-    blockUser:blockUser,
+    statusUpdate:statusUpdate,
     userDetails:userDetails
 };

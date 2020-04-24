@@ -263,36 +263,38 @@ module.exports = class userExtension extends Abstract  {
 
 
    /**
-   * @api {get} /admin-service/api/v1/userExtension/block 
-   * to block the user 
+   * @api {get} /admin-service/api/v1/userExtension/statusUpdate 
+   * to Update status of the user 
    * @apiVersion 1.0.0
    * @apiGroup User Creation
    * @apiHeader {String} X-authenticated-user-token Authenticity token
-   * @apiSampleRequest /admin-service/api/v1/userExtension/block
+   * @apiSampleRequest /admin-service/api/v1/userExtension/statusUpdate
    * @apiUse successBody
    * @apiUse errorBodyuser
    * @apiParamExample {json} Response:
   */
 
   /**
-   * block block    
+   * Status Update to the user  
    * @method
-   * @name create
+   * @name statusUpdate
    * @param  {req}  - requested data.
    * @returns {json} Response consists updated user details
   */
 
- block(req) {
+ statusUpdate(req) {
   return new Promise(async (resolve, reject) => {
 
     try {
 
-      let blockUserData = 
-      await userExtensionHelper.block(req.params._id,
-        req.userDetails.userToken
+ 
+      let updateUserData = 
+      await userExtensionHelper.statusUpdate(req.params._id,
+        req.userDetails.userToken,
+        req.query.status
       );
      
-      return resolve(blockUserData);
+      return resolve(updateUserData);
 
     } catch(error) {
       

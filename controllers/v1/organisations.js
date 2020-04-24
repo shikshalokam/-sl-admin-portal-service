@@ -217,6 +217,138 @@ module.exports = class Organisations extends Abstract {
   }
 
 
+   /**
+  * @api {get} /admin-service/api/v1/organisations/addUser 
+  * To add User to the organisation.
+  * @apiVersion 1.0.0
+  * @apiGroup Organisations
+  * @apiHeader {String} X-authenticated-user-token Authenticity token
+  * @apiSampleRequest /admin-service/api/v1/organisations/addUser
+  * {
+  *   "userId":"",
+  *   "organisationId":"",
+  *   "roles":["ASSESSOR"]
+  * }
+  * 
+  * 
+  * 
+  * @apiUse successBody
+  * @apiUse errorBody
+  * @apiParamExample {json} Response:
+  * 
+  * {
+  *  "status": 200,
+  *  "message": ""message": "User added to organisation Successfully"
+  *      "result": {
+  *          "response": "SUCCESS"
+  *      }
+  *  }
+  * }
+  * 
+  * 
+*/
+
+  /**
+  * to add user to organisation
+  * @method
+  * @name addUser
+  * @param  {req}  - requested data.
+  * @returns {json} Response consists of platform organisation list
+  */
+
+ addUser(req) {
+  return new Promise(async (resolve, reject) => {
+    try {
+
+      let orgDetails = {
+        organisationId:req.body.organisationId,
+        userId:req.body.userId,
+        roles:req.body.roles
+      }
+
+     let response = await organisationsHelper.addUser(orgDetails,req.userDetails.userToken);
+      return resolve(response);
+
+    } catch (error) {
+      return reject({
+        status:
+          error.status ||
+          httpStatusCode["internal_server_error"].status,
+        message:
+          error.message ||
+          httpStatusCode["internal_server_error"].message
+      });
+    }
+  });
+}
+
+
+   /**
+  * @api {get} /admin-service/api/v1/organisations/assignRoles 
+  * To assign Roles to the organisation for the user
+  * @apiVersion 1.0.0
+  * @apiGroup Organisations
+  * @apiHeader {String} X-authenticated-user-token Authenticity token
+  * @apiSampleRequest /admin-service/api/v1/organisations/assignRoles
+  * {
+  *   "userId":"",
+  *   "organisationId":"",
+  *   "roles":["ASSESSOR"]
+  * }
+  * 
+  * 
+  * 
+  * @apiUse successBody
+  * @apiUse errorBody
+  * @apiParamExample {json} Response:
+  * 
+  * {
+  *  "status": 200,
+  *  "message": ""message": "roles updated to organisation Successfully"
+  *      "result": {
+  *          "response": "SUCCESS"
+  *      }
+  *  }
+  * }
+  * 
+  * 
+*/
+
+  /**
+  * to add roles to organisation
+  * @method
+  * @name addUser
+  * @param  {req}  - requested data.
+  * @returns {json} Response consists of platform organisation list
+  */
+
+ assignRoles(req) {
+  return new Promise(async (resolve, reject) => {
+    try {
+
+      let orgDetails = {
+        organisationId:req.body.organisationId,
+        userId:req.body.userId,
+        roles:req.body.roles
+      }
+
+     let response = await organisationsHelper.assignRoles(orgDetails,req.userDetails.userToken);
+      return resolve(response);
+
+    } catch (error) {
+      return reject({
+        status:
+          error.status ||
+          httpStatusCode["internal_server_error"].status,
+        message:
+          error.message ||
+          httpStatusCode["internal_server_error"].message
+      });
+    }
+  });
+}
+
+
 
 
 };

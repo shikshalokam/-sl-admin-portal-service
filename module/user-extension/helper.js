@@ -115,6 +115,8 @@ module.exports = class UserCreationHelper {
                 // }
 
                  organisations = await  _getOrganisationlist(userProfileInfo,userId);
+
+                
                 let platformRoles =
                     await database.models.platformRolesExt.find({ isHidden: false }, {
                         code: 1,
@@ -257,28 +259,28 @@ module.exports = class UserCreationHelper {
     }
 
     /**
-   * block.
+   * statusUpdate.
    * @method
-   * @name  block
+   * @name  statusUpdate
    * @param  {userId}  - userId
    * @param  {userToken}  - user token
    * @returns {json} Response consists of updated user details.
    */
 
-    static block(userId, userToken) {
+    static statusUpdate(userId, userToken,status) {
         return new Promise(async (resolve, reject) => {
             try {
 
 
-                let blockUserInfo =
-                    await userManagementService.blockUser(
+                let statusUpdateUserInfo =
+                    await userManagementService.statusUpdate(
                         userId,
-                        userToken
+                        userToken,
+                        status
                     );
 
-                // console.log("updateUser",updateUser);
-
-                return resolve(blockUserInfo);
+              
+                return resolve(statusUpdateUserInfo);
             } catch (error) {
                 return reject(error);
             }
@@ -303,35 +305,40 @@ module.exports = class UserCreationHelper {
                     await sunBirdService.getUserProfileInfo(userToken, userId);
 
 
-
                 profileData = JSON.parse(profileData);
                 if (profileData.responseCode == "OK") {
 
 
                     let userDetails = {};
-
                     if (profileData.result) {
 
-
-                        //  let roles = [];
-
                         let orgInfo = [];
-
+                        let organisationsList = await _getOrganisationlist(profileData, orgAdminUserId);
                         profileData.result.response.organisations.map(data => {
-                            // roles.push(...data.roles);
+                            var results = organisationsList.filter(function (orgData) { return orgData.value === data.organisationId });
+                            console.log("results",results);
                             orgInfo.push({
-                                orgnaisationId: data.organisationId,
+                                label:results[0].label,
+                                value: data.organisationId,
                                 roles: data.roles
                             })
                         });
+
+                        let gender = profileData.result.response.gender == "M" ? "Male" : profileData.result.response.gender == "F" ?  "Female" : "";
+
+                        let reponseObj = profileData.result.response;
+
                         userDetails = {
-                            firstName: profileData.result.response.firstName,
-                            gender: profileData.result.response.gender,
-                            lastName: profileData.result.response.lastName,
-                            email: profileData.result.response.email,
-                            phoneNumber: profileData.result.response.phone,
-                            status: profileData.result.response.status,
-                            dob: profileData.result.response.dob,
+                            firstName: reponseObj.firstName,
+                            gender: gender,
+                            userName:reponseObj.userName,
+                            lastName: reponseObj.lastName,
+                            email: reponseObj.email,
+                            phoneNumber: reponseObj.phone,
+                            status: reponseObj.status,
+                            dob: reponseObj.dob,
+                            lastLoginTime:reponseObj.lastLoginTime,
+                            createdDate:reponseObj.createdDate,
                             organisations: orgInfo,
                             roles: [],
                             organisationsList: []
@@ -339,16 +346,9 @@ module.exports = class UserCreationHelper {
 
 
 
+       
 
-
-
-
-
-
-                        let organisationsList = await _getOrganisationlist(profileData, orgAdminUserId);
-
-                        console.log("organisationsList", organisationsList);
-
+                      
                         let platformRoles =
                             await database.models.platformRolesExt.find({ isHidden: false }, {
                                 code: 1,
@@ -390,7 +390,6 @@ module.exports = class UserCreationHelper {
 
                         if (roles) {
                             roles = roles.sort(gen.utils.sortArrayOfObjects("label"));
-                            console.log("roles", roles);
                         }
 
                         userDetails.roles = roles;
@@ -410,9 +409,6 @@ module.exports = class UserCreationHelper {
             }
         })
     }
-
-
-
 
 };
 

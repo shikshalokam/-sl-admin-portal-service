@@ -271,6 +271,64 @@ module.exports = class OrganisationsHelper {
         });
     }
 
+
+
+   /*
+   * addUser.
+   * @method
+   * @name  addUser
+   * @param  {orgnisationInfo,token}  - organisation object and token
+   * @returns {json} Response consists of success or failure of the api.
+   */
+  static addUser(orgnisationInfo, token) {
+
+    return new Promise(async (resolve, reject) => {
+        try {
+            let response = await sunBirdService.addUser(orgnisationInfo, token);
+
+            console.log("response",response);
+            if (response && response.responseCode == constants.common.RESPONSE_OK) {
+                resolve({ result: response.result, message: constants.apiResponses.USER_ADDED_TO_ORG });
+            } else {
+                reject({ message: response.body });
+            }
+
+        } catch (error) {
+            return reject(error)
+        }
+
+    });
+}
+
+
+
+  /*
+   * assignRoles.
+   * @method
+   * @name  addUser
+   * @param  {orgnisationInfo,token}  - organisation object and token
+   * @returns {json} Response consists of success or failure of the api.
+   */
+  static assignRoles(orgnisationInfo, token) {
+
+    return new Promise(async (resolve, reject) => {
+        try {
+            let response = await sunBirdService.assignRoles(orgnisationInfo, token);
+
+            if (response && response.responseCode == constants.common.RESPONSE_OK) {
+                resolve({ result: response.result, message: constants.apiResponses.ASSIGNED_ROLE_SUCCESSFULLY });
+            } else {
+                reject({ message: response.body });
+            }
+
+        } catch (error) {
+            return reject(error)
+        }
+
+    });
+}
+
+
 };
 
 
