@@ -250,6 +250,10 @@ module.exports = class OrganisationsHelper {
                             if(fields.id){
                                 delete fields.id;
                             }
+
+                            if(fields.status){
+                                fields.status  = fields.status == 0 ? "Inactive" : "Active";  
+                            }
                             let userInfo  = Object.keys(fields).reduce((c, k) => (c[gen.utils.camelCaseToCapitalizeCase(k)] = fields[k], c), {})
                             responseData.push(userInfo);
                     }))
