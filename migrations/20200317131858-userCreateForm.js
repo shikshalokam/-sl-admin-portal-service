@@ -10,7 +10,7 @@ module.exports = {
       let allFields = [];
 
       let inputFields = ["organisation", "state","firstName", "lastName", "email", "phoneNumber",
-        "userName","gender","password","confirmpassword","roles" ];
+        "userName","gender","password","confirmpassword","roles","dateOfBirth" ];
 
       let inputField = {
         "field": "",
@@ -57,6 +57,11 @@ module.exports = {
         }else if(fields == "userName"){
           validator = "^[a-z0-9_-]{3,15}$";
           message = "Please provide a valid User Name";
+        }else if (fields == "dateOfBirth") {
+          validator = "([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))";
+          message = "Please provide a valid Date of Birth";
+          inputObj.input = "date";
+
         }else if (
           fields === "state" ||
           fields === "organisation" ||
@@ -86,7 +91,10 @@ module.exports = {
           message = "Please Provide Valid " + inputObj.label;
         }
         inputObj.validation[0].message = inputObj.label + " required";
-        if( fields === "state" || fields === "organisation" || fields === "gender"){
+        if(fields === "dateOfBirth"){
+          delete inputObj.validation[0];
+        } 
+        if( fields === "state" || fields === "organisation" || fields === "gender" ){
           delete inputObj.validation[1];
         }else{
           inputObj.validation[1].message = message;
