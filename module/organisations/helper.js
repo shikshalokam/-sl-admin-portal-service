@@ -251,9 +251,13 @@ module.exports = class OrganisationsHelper {
                                 delete fields.id;
                             }
 
-                            if(fields.status){
-                                fields.status  = fields.status == 0 ? "Inactive" : "Active";  
-                            }
+                                 let status = "";
+                                if(fields.status ==1){
+                                    status ="Active"
+                                }else{
+                                    status ="Inactive";
+                                }
+                                fields.status =status;
                             let userInfo  = Object.keys(fields).reduce((c, k) => (c[gen.utils.camelCaseToCapitalizeCase(k)] = fields[k], c), {})
                             responseData.push(userInfo);
                     }))
