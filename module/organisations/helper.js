@@ -391,7 +391,19 @@ module.exports = class OrganisationsHelper {
                             }
 
                             if(organisationInfo.length > 0){
-                                resolve({ result: organisationInfo, message: constants.apiResponses.ORG_INFO_FETCHED })
+
+                                let orgColumns = _organisationColumn();
+
+                                let sortedOrganisations = organisationInfo.sort(gen.utils.sortArrayOfObjects('organisationName'));
+
+                                resolve({ 
+                                    result:{
+                                        count:organisationList.result.response.count,
+                                        columns:orgColumns,
+                                        data: sortedOrganisations
+                                    },
+                                    message: constants.apiResponses.ORG_INFO_FETCHED 
+                                });
                             }else{
                                 resolve({ result: organisationInfo,message: constants.apiResponses.NO_ORG_FOUND })
                             }
