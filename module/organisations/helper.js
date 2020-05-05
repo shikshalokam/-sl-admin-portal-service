@@ -352,13 +352,23 @@ module.exports = class OrganisationsHelper {
                             }
                         })
                     }
+
+                    let offset = inputData.pageSize * (inputData.pageNo - 1);
                     if (roles.includes(constants.common.PLATFROM_ADMIN_ROLE)) {
                         let request = {
                             "filters": {
                             },
                             "limit": inputData.pageSize,
-                            "offset": inputData.pageNo
+                            "offset": offset
                         }
+
+                        if (inputData.searchText) {
+                            request['query'] = inputData.searchText;
+                        }
+                        if (inputData.status) {
+                            request['filters']['status'] = inputData.status;
+                        }
+                        //  console.log("inputData.pageNo",request);
 
                         let organisationInfo = [];
                         let organisationList = await sunBirdService.searchOrganisation(request, inputData.userToken);
@@ -380,7 +390,12 @@ module.exports = class OrganisationsHelper {
                                 }));
                             }
 
-                            resolve({ result: organisationInfo, message: constants.apiResponses.ORG_INFO_FETCHED })
+                            if(organisationInfo.length > 0){
+                                resolve({ result: organisationInfo, message: constants.apiResponses.ORG_INFO_FETCHED })
+                            }else{
+                                resolve({ result: organisationInfo,message: constants.apiResponses.NO_ORG_FOUND })
+                            }
+                            
                         } else {
                             resolve({ result: organisationList, message: constants.apiResponses.NO_ORG_FOUND })
                         }
