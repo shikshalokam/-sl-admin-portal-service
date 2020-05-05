@@ -210,10 +210,33 @@ function callToSunbird(token, requestBody, url) {
     });
 }
 
+
+/**
+  * to search the organisation 
+  * @function
+  * @name searchOrganisation
+  * @param requestBody - requestBody .
+  * @param token - Logged in user token.
+  * @returns {JSON} - All users data.
+*/
+
+var searchOrganisation = function (requestBody, token) {
+    return new Promise(async (resolve, reject) => {
+
+        const searchOrgUrl =
+            process.env.sunbird_url + constants.endpoints.SUNBIRD_SEARCH_ORG;
+        let response = await callToSunbird(token, requestBody, searchOrgUrl);
+        return resolve(response);
+
+
+    })
+}
+
 module.exports = {
     organisationList: organisationList,
     getUserProfileInfo: getUserProfileInfo,
     users: users,
     addUser: addUser,
-    assignRoles: assignRoles
+    assignRoles: assignRoles,
+    searchOrganisation:searchOrganisation
 };

@@ -28,10 +28,10 @@ module.exports = class Organisations extends Abstract {
 * @apiError {String} status 4XX,5XX
 * @apiError {String} message Error
 */ /**
-      * @apiDefine successBody
-      * @apiSuccess {String} status 200
-      * @apiSuccess {String} result Data
-      */
+        * @apiDefine successBody
+        * @apiSuccess {String} status 200
+        * @apiSuccess {String} result Data
+        */
 
   /**
     * @api {get} /admin-service/api/v1/organisations/list 
@@ -138,7 +138,7 @@ module.exports = class Organisations extends Abstract {
           req.pageNo,
           req.searchText,
           req.query.status ? req.query.status : ""
-           );
+        );
         return resolve(organisationList);
 
       } catch (error) {
@@ -194,7 +194,7 @@ module.exports = class Organisations extends Abstract {
           csvData.map(async userMap => {
             input.push(userMap);
           })
-        }else{
+        } else {
           return resolve(csvData);
         }
 
@@ -217,35 +217,35 @@ module.exports = class Organisations extends Abstract {
   }
 
 
-   /**
-  * @api {get} /admin-service/api/v1/organisations/addUser 
-  * To add User to the organisation.
-  * @apiVersion 1.0.0
-  * @apiGroup Organisations
-  * @apiHeader {String} X-authenticated-user-token Authenticity token
-  * @apiSampleRequest /admin-service/api/v1/organisations/addUser
-  * {
-  *   "userId":"",
-  *   "organisationId":"",
-  *   "roles":["ASSESSOR"]
-  * }
-  * 
-  * 
-  * 
-  * @apiUse successBody
-  * @apiUse errorBody
-  * @apiParamExample {json} Response:
-  * 
-  * {
-  *  "status": 200,
-  *  "message": ""message": "User added to organisation Successfully"
-  *      "result": {
-  *          "response": "SUCCESS"
-  *      }
-  *  }
-  * }
-  * 
-  * 
+  /**
+ * @api {get} /admin-service/api/v1/organisations/addUser 
+ * To add User to the organisation.
+ * @apiVersion 1.0.0
+ * @apiGroup Organisations
+ * @apiHeader {String} X-authenticated-user-token Authenticity token
+ * @apiSampleRequest /admin-service/api/v1/organisations/addUser
+ * {
+ *   "userId":"",
+ *   "organisationId":"",
+ *   "roles":["ASSESSOR"]
+ * }
+ * 
+ * 
+ * 
+ * @apiUse successBody
+ * @apiUse errorBody
+ * @apiParamExample {json} Response:
+ * 
+ * {
+ *  "status": 200,
+ *  "message": ""message": "User added to organisation Successfully"
+ *      "result": {
+ *          "response": "SUCCESS"
+ *      }
+ *  }
+ * }
+ * 
+ * 
 */
 
   /**
@@ -253,65 +253,65 @@ module.exports = class Organisations extends Abstract {
   * @method
   * @name addUser
   * @param  {req}  - requested data.
-  * @returns {json} Response consists of platform organisation list
+  * @returns {json} Response consists of success or failure of the request
   */
 
- addUser(req) {
-  return new Promise(async (resolve, reject) => {
-    try {
+  addUser(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
 
-      let orgDetails = {
-        organisationId:req.body.organisationId,
-        userId:req.body.userId,
-        roles:req.body.roles
+        let orgDetails = {
+          organisationId: req.body.organisationId,
+          userId: req.body.userId,
+          roles: req.body.roles
+        }
+
+        let response = await organisationsHelper.addUser(orgDetails, req.userDetails.userToken);
+        return resolve(response);
+
+      } catch (error) {
+        return reject({
+          status:
+            error.status ||
+            httpStatusCode["internal_server_error"].status,
+          message:
+            error.message ||
+            httpStatusCode["internal_server_error"].message
+        });
       }
-
-     let response = await organisationsHelper.addUser(orgDetails,req.userDetails.userToken);
-      return resolve(response);
-
-    } catch (error) {
-      return reject({
-        status:
-          error.status ||
-          httpStatusCode["internal_server_error"].status,
-        message:
-          error.message ||
-          httpStatusCode["internal_server_error"].message
-      });
-    }
-  });
-}
+    });
+  }
 
 
-   /**
-  * @api {get} /admin-service/api/v1/organisations/assignRoles 
-  * To assign Roles to the organisation for the user
-  * @apiVersion 1.0.0
-  * @apiGroup Organisations
-  * @apiHeader {String} X-authenticated-user-token Authenticity token
-  * @apiSampleRequest /admin-service/api/v1/organisations/assignRoles
-  * {
-  *   "userId":"",
-  *   "organisationId":"",
-  *   "roles":["ASSESSOR"]
-  * }
-  * 
-  * 
-  * 
-  * @apiUse successBody
-  * @apiUse errorBody
-  * @apiParamExample {json} Response:
-  * 
-  * {
-  *  "status": 200,
-  *  "message": ""message": "roles updated to organisation Successfully"
-  *      "result": {
-  *          "response": "SUCCESS"
-  *      }
-  *  }
-  * }
-  * 
-  * 
+  /**
+ * @api {get} /admin-service/api/v1/organisations/assignRoles 
+ * To assign Roles to the organisation for the user
+ * @apiVersion 1.0.0
+ * @apiGroup Organisations
+ * @apiHeader {String} X-authenticated-user-token Authenticity token
+ * @apiSampleRequest /admin-service/api/v1/organisations/assignRoles
+ * {
+ *   "userId":"",
+ *   "organisationId":"",
+ *   "roles":["ASSESSOR"]
+ * }
+ * 
+ * 
+ * 
+ * @apiUse successBody
+ * @apiUse errorBody
+ * @apiParamExample {json} Response:
+ * 
+ * {
+ *  "status": 200,
+ *  "message": ""message": "roles updated to organisation Successfully"
+ *      "result": {
+ *          "response": "SUCCESS"
+ *      }
+ *  }
+ * }
+ * 
+ * 
 */
 
   /**
@@ -319,34 +319,107 @@ module.exports = class Organisations extends Abstract {
   * @method
   * @name addUser
   * @param  {req}  - requested data.
+  * @returns {json} Response consists of success or failure of the request
+  * 
+  */
+
+  assignRoles(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
+
+        let orgDetails = {
+          organisationId: req.body.organisationId,
+          userId: req.body.userId,
+          roles: req.body.roles
+        }
+
+        let response = await organisationsHelper.assignRoles(orgDetails, req.userDetails.userToken);
+        return resolve(response);
+
+      } catch (error) {
+        return reject({
+          status:
+            error.status ||
+            httpStatusCode["internal_server_error"].status,
+          message:
+            error.message ||
+            httpStatusCode["internal_server_error"].message
+        });
+      }
+    });
+  }
+
+
+  /**
+   * @api {get} /admin-service/api/v1/organisations/detailList 
+   * To get the organisation list for the user 
+   * @apiVersion 1.0.0
+   * @apiGroup Organisations
+   * @apiHeader {String} X-authenticated-user-token Authenticity token
+   * @apiSampleRequest /admin-service/api/v1/organisations/detailList?pageSize=20&pageNo=1
+   * @apiUse successBody
+   * @apiUse errorBody
+   * @apiParamExample {json} Response:
+   * 
+   * {
+   *  "status": 200,
+   *  "message": ""message": "Organisation List fetched Successfully"
+   *      "result": {
+   *          "columns":[{
+   *             "type": "column",
+   *             "visible": true,
+   *             "label": "organisation Name",
+   *             "key": "organisationName"
+   *         }],
+   *         data:[{
+   *             organisationName:”Mantra4Change”,
+   *             description:”ShikshaLokam Development”,
+   *             status:”Active/Inactive”,
+   *             noOfMembers::”10”,
+   *         }]
+   *      }
+   *  }
+   * }
+   * 
+   * 
+ */
+
+  /**
+  * to get organisation list
+  * @method
+  * @name detailList
+  * @param  {req}  - requested data.
   * @returns {json} Response consists of platform organisation list
   */
 
- assignRoles(req) {
-  return new Promise(async (resolve, reject) => {
-    try {
+ detailList(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
 
-      let orgDetails = {
-        organisationId:req.body.organisationId,
-        userId:req.body.userId,
-        roles:req.body.roles
+       let query = { 
+        userToken:req.userDetails.userToken,
+        userId:req.userDetails.userId,
+        pageSize:req.pageSize,
+        pageNo:req.pageNo,
+        searchText:req.searchText,
+        status:req.query.status ? req.query.status : "" 
       }
+    
+        let response = await organisationsHelper.detailList(query);
+        return resolve(response);
 
-     let response = await organisationsHelper.assignRoles(orgDetails,req.userDetails.userToken);
-      return resolve(response);
-
-    } catch (error) {
-      return reject({
-        status:
-          error.status ||
-          httpStatusCode["internal_server_error"].status,
-        message:
-          error.message ||
-          httpStatusCode["internal_server_error"].message
-      });
-    }
-  });
-}
+      } catch (error) {
+        return reject({
+          status:
+            error.status ||
+            httpStatusCode["internal_server_error"].status,
+          message:
+            error.message ||
+            httpStatusCode["internal_server_error"].message
+        });
+      }
+    });
+  }
 
 
 
