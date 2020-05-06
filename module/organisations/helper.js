@@ -8,6 +8,8 @@
 let sunBirdService =
     require(ROOT_PATH + "/generics/services/sunbird");
 
+let formsHelper = require(MODULES_BASE_PATH + "/forms/helper");
+
 module.exports = class OrganisationsHelper {
 
     /**
@@ -327,7 +329,7 @@ module.exports = class OrganisationsHelper {
         });
     }
 
-    /*
+    /**
      * get organisation list.
      * @method
      * @name  detailList
@@ -377,44 +379,47 @@ module.exports = class OrganisationsHelper {
                                 organisationList.result.response && organisationList.result.response.content) {
                                 await Promise.all(organisationList.result.response.content.map(async function (orgInfo) {
 
-                                           let orgDetails = {
-                                                organisationName: orgInfo.orgName,
-                                                description: orgInfo.description,
-                                                _id: orgInfo.id,
-                                                noOfMembers:orgInfo.noOfMembers,
-                                                externalId:orgInfo.externalId,
-                                                status: orgInfo.status == 0 ? "Inactive": "Active" 
+                                    let orgDetails = {
+                                        organisationName: orgInfo.orgName,
+                                        description: orgInfo.description,
+                                        email: orgInfo.email,
+                                        _id: orgInfo.id,
+                                        noOfMembers: orgInfo.noOfMembers,
+                                        externalId: orgInfo.externalId,
+                                        status: orgInfo.status == 0 ? "Inactive" : "Active",
+                                        provider: orgInfo.provider,
+                                        // channel:orgInfo.channel
 
-                                            }
-                                            organisationInfo.push(orgDetails);
+                                    }
+                                    organisationInfo.push(orgDetails);
                                 }));
                             }
 
-                            if(organisationInfo.length > 0){
+                            if (organisationInfo.length > 0) {
 
                                 let orgColumns = _organisationColumn();
 
                                 let sortedOrganisations = organisationInfo.sort(gen.utils.sortArrayOfObjects('organisationName'));
 
-                                resolve({ 
-                                    result:{
-                                        count:organisationList.result.response.count,
-                                        columns:orgColumns,
+                                resolve({
+                                    result: {
+                                        count: organisationList.result.response.count,
+                                        columns: orgColumns,
                                         data: sortedOrganisations
                                     },
-                                    message: constants.apiResponses.ORG_INFO_FETCHED 
+                                    message: constants.apiResponses.ORG_INFO_FETCHED
                                 });
-                            }else{
-                                resolve({ result: organisationInfo,message: constants.apiResponses.NO_ORG_FOUND })
+                            } else {
+                                resolve({ result: organisationInfo, message: constants.apiResponses.NO_ORG_FOUND })
                             }
-                            
+
                         } else {
                             resolve({ result: organisationList, message: constants.apiResponses.NO_ORG_FOUND })
                         }
-                    }else{
-                        reject({  
-                             status: httpStatusCode["bad_request"].status,
-                             message: constants.apiResponses.INVALID_ACCESS 
+                    } else {
+                        reject({
+                            status: httpStatusCode["bad_request"].status,
+                            message: constants.apiResponses.INVALID_ACCESS
                         })
                     }
                 } else {
@@ -428,6 +433,166 @@ module.exports = class OrganisationsHelper {
             }
         });
     }
+
+
+
+    /** 
+    * to create organisation.
+    * @method
+    * @name  create
+    * @param  {inputData}  - hold query object
+    * @returns {json} Response consists of success or failure of the api.
+    */
+    static create(inputData, token) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                let requestBody = {
+                    // "channel":inputData.organisationName,
+                    "description": inputData.description,
+                    "externalId": inputData.externalId,
+                    // "isRootOrg": true,
+                    "provider": inputData.provider,
+                    "orgName": inputData.name,
+                    // "orgType": "string",
+                    // "orgTypeId": "string",
+                    // "rootOrgId": "string",
+                    "email": inputData.email,
+                    // "license": "string",
+                    // "isSSOEnabled": true,
+                }
+                let createOrg = await sunBirdService.createOrganisation(requestBody, token);
+                if (createOrg && createOrg.responseCode == constants.common.RESPONSE_OK) {
+                    resolve({ result: createOrg.result, message: constants.apiResponses.ORG_CREATED });
+                } else {
+                    reject({ message: createOrg });
+                }
+
+            } catch (error) {
+                return reject(error)
+            }
+        });
+    }
+
+
+
+    /**
+   * Get get organisation creation form.
+   * @method
+   * @name  getForm
+   * @returns {json} Response consists of organisation creation form.
+   */
+
+    static getForm() {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                let formData =
+                    await formsHelper.list({
+                        name: "organisationCreateForm"
+                    }, {
+                        value: 1
+                    });
+
+                if (!formData[0]) {
+
+                    return resolve({
+                        status: httpStatusCode["bad_request"].status,
+                        message:
+                            constants.apiResponses.ORG_FORM_NOT_FOUND
+                    });
+
+                } else {
+
+                    resolve({ result: formData[0].value, message: constants.apiResponses.ORG_FORM_FETCHED })
+                }
+
+            } catch (error) {
+                return reject(error)
+            }
+        });
+    }
+
+    /**
+    * To update the organisational details
+    * @method
+    * @name  update
+    * @returns {json} Response consists of organisation creation form.
+    */
+
+    static update(inputData, token) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                let requestBody = {
+                    orgName: inputData.name ? inputData.name : "",
+                    email: inputData.email ? inputData.email : "",
+                    description: inputData.description ? inputData.description : "",
+                    organisationId: inputData.organisationId,
+                }
+
+                if (inputData.externalId) {
+                    requestBody['externalId'] = inputData.externalId;
+                }
+                if (inputData.provider) {
+                    requestBody['provider'] = inputData.provider;
+                }
+
+                let updateOrg = await sunBirdService.updateOrganisationDetails(requestBody, token);
+                if (updateOrg && updateOrg.responseCode == constants.common.RESPONSE_OK) {
+                    resolve({ result: updateOrg.result, message: constants.apiResponses.ORG_CREATED });
+                } else {
+                    reject({ message: updateOrg });
+                }
+
+            } catch (error) {
+                return reject(error)
+            }
+        });
+    }
+
+
+    /**
+    * To get the organisational details
+    * @method
+    * @name  details
+    * @returns {json} Response consists of organisation creation form.
+    */
+
+    static details(organisationId, token) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                let orgDetails = await sunBirdService.getOrganisationDetails({ organisationId: organisationId}, token);
+                if (orgDetails && orgDetails.responseCode == constants.common.RESPONSE_OK) {
+
+                    // if(orgDetails.result.response)
+
+                    let response = orgDetails.result.response;
+                    let responseObj={
+                        organisationId:response.organisationId,
+                        status:response.status == 1 ? "Active" : "Inactive" ,
+                        provider:response.provider,
+                        name:response.orgName,
+                        externalId:response.externalId,
+                        noOfMembers:response.noOfMembers,
+                        description:response.description,
+                        channel:response.channel,
+                        updatedDate:response.updatedDate,
+                        createdDate:response.createdDate
+                    }
+                    resolve({ result: responseObj, message: constants.apiResponses.ORG_DETAILS_FOUND });
+                } else {
+                    reject({ message: orgDetails });
+                }
+
+            } catch (error) {
+                return reject(error)
+            }
+        });
+    }
+
+
 };
 
 
@@ -642,8 +807,10 @@ function _organisationColumn() {
         'select',
         'organisationName',
         'description',
-        'noOfMembers',
+        'email',
+        // 'noOfMembers',
         'externalId',
+        'provider',
         'status',
         'action'
     ];

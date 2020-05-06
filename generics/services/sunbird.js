@@ -181,7 +181,7 @@ var assignRoles = function (requestBody, token) {
   * @returns {JSON} - user profile information.
 */
 
-function callToSunbird(token, requestBody, url) {
+function callToSunbird(token, requestBody, url,type ="") {
 
     return new Promise(async (resolve, reject) => {
         let options = {
@@ -195,7 +195,12 @@ function callToSunbird(token, requestBody, url) {
 
         };
 
-        request.post(url, options, callback);
+        if(type=="PATCH"){
+            request.patch(url, options, callback);    
+        }else{
+            request.post(url, options, callback);
+        }
+        
         function callback(err, data) {
 
             if (err) {
@@ -232,11 +237,58 @@ var searchOrganisation = function (requestBody, token) {
     })
 }
 
+/**
+  * For creating organisation
+  * @function
+  * @name createOrganisation
+  * @param requestBody - requestBody .
+  * @param token - Logged in user token.
+  * @returns {JSON} - All users data.
+*/
+
+var createOrganisation = function (requestBody, token) {
+    return new Promise(async (resolve, reject) => {
+
+        const searchOrgUrl =
+            process.env.sunbird_url + constants.endpoints.SUNBIRD_CREATE_ORG;
+        let response = await callToSunbird(token, requestBody, searchOrgUrl);
+        return resolve(response);
+
+
+    })
+}
+
+var updateOrganisationDetails  = function (requestBody, token) {
+    return new Promise(async (resolve, reject) => {
+
+        const updateOrgDetails =
+            process.env.sunbird_url + constants.endpoints.SUNBIRD_UPDATE_ORG;
+        let response = await callToSunbird(token, requestBody, updateOrgDetails ,"PATCH");
+        return resolve(response);
+
+
+    })
+}
+var getOrganisationDetails = function (requestBody, token) {
+    return new Promise(async (resolve, reject) => {
+
+        const OrgDetails =
+            process.env.sunbird_url + constants.endpoints.SUNBIRD_READ_ORG;
+        let response = await callToSunbird(token, requestBody, OrgDetails);
+        return resolve(response);
+
+
+    })
+}
+
 module.exports = {
     organisationList: organisationList,
     getUserProfileInfo: getUserProfileInfo,
     users: users,
     addUser: addUser,
     assignRoles: assignRoles,
-    searchOrganisation:searchOrganisation
+    searchOrganisation:searchOrganisation,
+    createOrganisation:createOrganisation,
+    updateOrganisationDetails:updateOrganisationDetails,
+    getOrganisationDetails:getOrganisationDetails
 };

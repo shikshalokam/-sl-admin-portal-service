@@ -17,7 +17,11 @@ module.exports = {
     ORG_INFO_FETCHED : "Organisation list fetched Successfully",
     USER_ADDED_TO_ORG : "User added to organisation Successfully",
     ASSIGNED_ROLE_SUCCESSFULLY : "User roles added to organisation  Successfully",
-
+    ORG_CREATED: "Organisation Created Successfully",
+    ORG_FORM_FETCHED: "Organisation Create Form Fetched Successfully",
+    ORG_FORM_NOT_FOUND: "Organisation Create Form Not Found",
+    ORG_DETAILS_FOUND: "Organisation Details Found",
+   
     // USER
     USER_INFO_NOT_FOUND : "User Info Not Found",
     USER_LIST_NOT_FOUND :"User List Not Found",

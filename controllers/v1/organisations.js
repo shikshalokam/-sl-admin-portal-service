@@ -423,5 +423,243 @@ module.exports = class Organisations extends Abstract {
 
 
 
+  /**
+   * @api {get} /admin-service/api/v1/organisations/create 
+   * To create the organisation
+   * @apiVersion 1.0.0
+   * @apiGroup Organisations
+   * @apiHeader {String} X-authenticated-user-token Authenticity token
+   * @apiSampleRequest /admin-service/api/v1/organisations/create
+   * @apiUse successBody
+   * @apiUse errorBody
+   * @apiParamExample {json} Response:
+   * 
+   * {
+   *  "status": 200,
+   *  "message": ""message": "Organisation List fetched Successfully"
+   *      "result": {
+   *          "columns":[{
+   *             "type": "column",
+   *             "visible": true,
+   *             "label": "organisation Name",
+   *             "key": "organisationName"
+   *         }],
+   *         data:[{
+   *             organisationName:”Mantra4Change”,
+   *             description:”ShikshaLokam Development”,
+   *             status:”Active/Inactive”,
+   *             noOfMembers::”10”,
+   *         }]
+   *      }
+   *  }
+   * }
+   * 
+   * 
+ */
+
+  /**
+  * to get create create
+  * @method
+  * @name create
+  * @param  {req}  - requested data.
+  * @returns {json} Response consists of platform organisation list
+  */
+
+ create(req) {
+  return new Promise(async (resolve, reject) => {
+    try {
+  
+      let response = await organisationsHelper.create(req.body, req.userDetails.userToken);
+      return resolve(response);
+
+    } catch (error) {
+      return reject({
+        status:
+          error.status ||
+          httpStatusCode["internal_server_error"].status,
+        message:
+          error.message ||
+          httpStatusCode["internal_server_error"].message
+      });
+    }
+  });
+}
+
+
+
+/**
+   * @api {get} /admin-service/api/v1/organisations/getForm 
+   * To get create form organisation
+   * @apiVersion 1.0.0
+   * @apiGroup Organisations
+   * @apiHeader {String} X-authenticated-user-token Authenticity token
+   * @apiSampleRequest /admin-service/api/v1/organisations/getForm
+   * @apiUse successBody
+   * @apiUse errorBody
+   * @apiParamExample {json} Response:
+   * 
+   * {
+   *  "status": 200,
+   *  "message": ""message": "Organisation List fetched Successfully"
+   *      "result": [{
+   *         "field": "name",
+   *         "value": "",
+   *         "visible": true,
+   *         "editable": true,
+   *         "label": "Name",
+   *         "input": "text",
+   *         "validation": [
+   *             {
+   *                 "name": "required",
+   *                 "validator": "required",
+   *                 "message": "Name required"
+   *             },
+   *             {
+   *                 "name": "pattern",
+   *                 "validator": "([a-zA-Z]{3,30}s*)+",
+   *                 "message": "Please Provide Valid Name"
+   *             }
+   *         ]
+   *     }]
+   * }
+   * 
+   * 
+ */
+ /**
+  * to get create organisation form
+  * @method
+  * @name getForm
+  * @param  {req}  - requested data.
+  * @returns {json} Response consists of organisation create form
+  */
+
+ getForm(req) {
+  return new Promise(async (resolve, reject) => {
+    try {
+  
+      let response = await organisationsHelper.getForm();
+      return resolve(response);
+
+    } catch (error) {
+      return reject({
+        status:
+          error.status ||
+          httpStatusCode["internal_server_error"].status,
+        message:
+          error.message ||
+          httpStatusCode["internal_server_error"].message
+      });
+    }
+  });
+}
+
+/**
+   * @api {get} /admin-service/api/v1/organisations/update 
+   * To update organisation details
+   * @apiVersion 1.0.0
+   * @apiGroup Organisations
+   * @apiHeader {String} X-authenticated-user-token Authenticity token
+   * @apiSampleRequest /admin-service/api/v1/organisations/update
+   * {
+   *  name:"",
+   *  email:"",
+   *  description:"",
+   *  externalId:"",
+   *  organisationId:""
+   * }
+   * @apiUse successBody
+   * @apiUse errorBody
+   * @apiParamExample {json} Response:
+   * {
+   *  "message": "Organisation Created Successfully",
+   *  "status": 200,
+   *  "result": {
+   *     "organisationId": "013014480583598080574",
+   *   "response": "SUCCESS"
+   *   }
+   * }
+   * 
+ */
+ /**
+  * to update organisation data
+  * @method
+  * @name getForm
+  * @param  {req}  - requested data.
+  * @returns {json} Response consists of organisation create form
+  */
+
+ update(req) {
+  return new Promise(async (resolve, reject) => {
+    try {
+  
+      let response = await organisationsHelper.update(req.body,req.userDetails.userToken);
+      return resolve(response);
+
+    } catch (error) {
+      return reject({
+        status:
+          error.status ||
+          httpStatusCode["internal_server_error"].status,
+        message:
+          error.message ||
+          httpStatusCode["internal_server_error"].message
+      });
+    }
+  });
+}
+
+
+/**
+   * @api {get} /admin-service/api/v1/organisations/details 
+   * To get organisation details
+   * @apiVersion 1.0.0
+   * @apiGroup Organisations
+   * @apiHeader {String} X-authenticated-user-token Authenticity token
+   * @apiSampleRequest /admin-service/api/v1/organisations/details/:organisationId
+   * @apiUse successBody
+   * @apiUse errorBody
+   * @apiParamExample {json} Response:
+   * {
+   *  "message": "Organisation Details Fetched Successfully",
+   *  "status": 200,
+   *  "result": {
+   *     "organisationId": "013014480583598080574",
+   *     "name": "",
+   *     "email":"",
+   *     "provider":"",
+   *     "externalId":""
+   *   }
+   * }
+   * 
+ */
+ /**
+  * to get organisation details
+  * @method
+  * @name details
+  * @param  {req}  - requested data.
+  * @returns {json} Response consists of organisation details
+  */
+
+ details(req) {
+  return new Promise(async (resolve, reject) => {
+    try {
+  
+      let response = await organisationsHelper.details(req.params._id,req.userDetails.userToken);
+      return resolve(response);
+
+    } catch (error) {
+      return reject({
+        status:
+          error.status ||
+          httpStatusCode["internal_server_error"].status,
+        message:
+          error.message ||
+          httpStatusCode["internal_server_error"].message
+      });
+    }
+  });
+}
+
+
 
 };
