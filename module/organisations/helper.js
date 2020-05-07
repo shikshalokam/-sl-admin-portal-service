@@ -395,9 +395,8 @@ module.exports = class OrganisationsHelper {
                                 }));
                             }
 
+                            let orgColumns = _organisationColumn();
                             if (organisationInfo.length > 0) {
-
-                                let orgColumns = _organisationColumn();
 
                                 let sortedOrganisations = organisationInfo.sort(gen.utils.sortArrayOfObjects('organisationName'));
 
@@ -410,7 +409,11 @@ module.exports = class OrganisationsHelper {
                                     message: constants.apiResponses.ORG_INFO_FETCHED
                                 });
                             } else {
-                                resolve({ result: organisationInfo, message: constants.apiResponses.NO_ORG_FOUND })
+                                resolve({ result:  {
+                                    count: 0,
+                                    columns: orgColumns,
+                                    data: []
+                                }, message: constants.apiResponses.NO_ORG_FOUND })
                             }
 
                         } else {

@@ -24,7 +24,8 @@ module.exports = {
     SUNBIRD_SEARCH_ORG:"/api/org/v1/search",
     SUNBIRD_CREATE_ORG:"/api/org/v1/create",
     SUNBIRD_UPDATE_ORG:"/api/org/v1/update",
-    SUNBIRD_READ_ORG:"/api/org/v1/read"
+    SUNBIRD_READ_ORG:"/api/org/v1/read",
+    SUNBIRD_ORG_STATUS_UPDATE:"/api/org/v1/status/update"
     
     
 }
