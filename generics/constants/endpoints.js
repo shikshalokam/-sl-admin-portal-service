@@ -25,7 +25,8 @@ module.exports = {
     SUNBIRD_CREATE_ORG:"/api/org/v1/create",
     SUNBIRD_UPDATE_ORG:"/api/org/v1/update",
     SUNBIRD_READ_ORG:"/api/org/v1/read",
-    SUNBIRD_ORG_STATUS_UPDATE:"/api/org/v1/status/update"
+    SUNBIRD_ORG_STATUS_UPDATE:"/api/org/v1/status/update",
+    SUNBIRD_REMOVE_USER_FROM_ORG:"/api/org/v1/member/remove"
     
     
 }

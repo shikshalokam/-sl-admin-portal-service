@@ -114,7 +114,7 @@ module.exports = class UserCreationHelper {
                 //     })
                 // }
 
-                organisations = await _getOrganisationlist(userProfileInfo, userId);
+                organisations = await _getOrganisationlist(userProfileInfo, userId,token);
 
 
                 let platformRoles =
@@ -357,8 +357,9 @@ module.exports = class UserCreationHelper {
                         }
 
                         let orgInfo = [];
-                        let organisationsList = await _getOrganisationlist(profileData, orgAdminUserId);
+                        let organisationsList = await _getOrganisationlist(profileData, orgAdminUserId,userToken);
 
+                        console.log("organisationsList",organisationsList);
                         if (profileData.result.response &&
                              profileData.result.response.organisations && 
                              profileData.result.response.organisations.length > 0){
@@ -366,6 +367,8 @@ module.exports = class UserCreationHelper {
                                 var results = organisationsList.filter(function (orgData) {
                                     return orgData.value === data.organisationId
                                 });
+
+
 
                                 let allRoles = [];
                                 if (data && data.roles && data.roles.length > 0) {
@@ -481,7 +484,7 @@ function _checkStateWithSubEntities(groups, entityTypeId) {
   * @returns {boolean}
   * */
 
-function _getOrganisationlist(userProfileInfo, userId) {
+function _getOrganisationlist(userProfileInfo, userId,token) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -508,18 +511,40 @@ function _getOrganisationlist(userProfileInfo, userId) {
 
             if (profileRoles.includes(constants.common.PLATFROM_ADMIN_ROLE)) {
 
-                let organisationsDoc = await cassandraDatabase.models.organisation.findAsync({},
-                    { raw: true, select: ["orgname", "id"] });
-                if (organisationsDoc) {
-                    await Promise.all(organisationsDoc.map(function (orgInfo) {
+                // let organisationsDoc = await cassandraDatabase.models.organisation.findAsync({},
+                //     { raw: true, select: ["orgname", "id"] });
 
-                        let orgDetails = {
-                            label: orgInfo.orgname,
-                            value: orgInfo.id
-                        }
-                        organisations.push(orgDetails);
-                    }));
+                // let organisationsDoc = await sunBirdService. 
+                
+                let request = {
+                    "filters": {
+                    }
                 }
+                let organisationList = await sunBirdService.searchOrganisation(request, token);
+                if (organisationList.responseCode == constants.common.RESPONSE_OK) {
+                    if (organisationList.result && organisationList.result.response &&
+                        organisationList.result.response && organisationList.result.response.content) {
+                        await Promise.all(organisationList.result.response.content.map(async function (orgInfo) {
+
+                            let orgDetails = {
+                                label: orgInfo.orgName,
+                                value: orgInfo.id
+                            }
+                            organisations.push(orgDetails);
+
+                        }))
+                    }
+                }
+                // if (organisationsDoc) {
+                //     await Promise.all(organisationsDoc.map(function (orgInfo) {
+
+                //         let orgDetails = {
+                //             label: orgInfo.orgname,
+                //             value: orgInfo.id
+                //         }
+                //         organisations.push(orgDetails);
+                //     }));
+                // }
 
             }
             else if (
@@ -533,21 +558,46 @@ function _getOrganisationlist(userProfileInfo, userId) {
                     userProfileInfo.result.response.organisations.map(
                         async function (organisation) {
 
-                            let organisationDetails =
-                                await cassandraDatabase.models.organisation.findOneAsync(
-                                    {
-                                        id: organisation.organisationId
-                                    }, {
-                                    raw: true
-                                });
+                            // let organisationDetails =
+                            //     await cassandraDatabase.models.organisation.findOneAsync(
+                            //         {
+                            //             id: organisation.organisationId
+                            //         }, {
+                            //         raw: true
+                            //     });
 
-                            if (organisationDetails) {
+                                let request = {
+                                    "filters": {
+                                        id:organisation.organisationId
+                                    }
+                                }
+                                let organisationList = await sunBirdService.searchOrganisation(request, token);
+                                if (organisationList.responseCode == constants.common.RESPONSE_OK) {
+                                    if (organisationList.result && organisationList.result.response &&
+                                        organisationList.result.response && organisationList.result.response.content) {
+                                        await Promise.all(organisationList.result.response.content.map(async function (orgInfo) {
+                
+                                            // let orgDetails = {
+                                            //     label: orgInfo.orgname,
+                                            //     value: orgInfo.id
+                                            // }
+                                            organisations.push({
+                                                label: orgInfo.orgName,
+                                                value: orgInfo.id
+                                            });
+                
+                                        }))
+                                    }
+                                }
 
-                                organisations.push({
-                                    "label": organisationDetails.orgname,
-                                    "value": organisation.organisationId
-                                });
-                            }
+
+                            // if (organisationDetails) {
+
+                            //     organisations.push({
+                            //         "label": organisationDetails.orgname,
+                            //         "value": organisation.organisationId
+                            //     });
+                            // }
 
                         }));
             }

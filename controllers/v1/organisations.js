@@ -660,6 +660,109 @@ module.exports = class Organisations extends Abstract {
   });
 }
 
+/**
+   * @api {get} /admin-service/api/v1/organisations/updateStatus 
+   * To update organisation status
+   * @apiVersion 1.0.0
+   * @apiGroup Organisations
+   * @apiHeader {String} X-authenticated-user-token Authenticity token
+   * @apiSampleRequest /admin-service/api/v1/organisations/updateStatus
+   * {
+   *   "organisationId": "013014480583598080574",
+   *   "status":"0"
+   * }
+   * @apiUse successBody
+   * @apiUse errorBody
+   * @apiParamExample {json} Response:
+   * {
+   *  "message": "Organisation Status Update Successfully",
+   *  "status": 200,
+   *  "result": {
+   *     "organisationId": "",
+   *   }
+   * }
+   * 
+ */
+ /**
+  * to update organisation status
+  * @method
+  * @name updateStatus
+  * @param  {req}  - requested data.
+  * @returns {json} Response consists updated organisation status
+  **/
+
+ updateStatus(req) {
+  return new Promise(async (resolve, reject) => {
+    try {
+  
+      let response = await organisationsHelper.updateStatus(req.body,req.userDetails.userToken);
+      return resolve(response);
+
+    } catch (error) {
+      return reject({
+        status:
+          error.status ||
+          httpStatusCode["internal_server_error"].status,
+        message:
+          error.message ||
+          httpStatusCode["internal_server_error"].message
+      });
+    }
+  });
+}
+
+
+/**
+   * @api {get} /admin-service/api/v1/organisations/removeUser  
+   * To remove User from organisation
+   * @apiVersion 1.0.0
+   * @apiGroup Organisations
+   * @apiHeader {String} X-authenticated-user-token Authenticity token
+   * @apiSampleRequest /admin-service/api/v1/organisations/removeUser
+   * {
+   *   "organisationId": "",
+   *   "userId":""
+   * }
+   * @apiUse successBody
+   * @apiUse errorBody
+   * @apiParamExample {json} Response:
+   * {
+   *  "message": "user removed from Organisation Successfully",
+   *  "status": 200,
+   *  "result": {
+   *     "organisationId": "",
+   *   }
+   * }
+   * 
+ */
+ /**
+  * to update organisation status
+  * @method
+  * @name updateStatus
+  * @param  {req}  - requested data.
+  * @returns {json} Response consists updated organisation status
+  **/
+
+ removeUser(req) {
+  return new Promise(async (resolve, reject) => {
+    try {
+  
+      let response = await organisationsHelper.removeUser(req.body,req.userDetails.userToken);
+      return resolve(response);
+
+    } catch (error) {
+      return reject({
+        status:
+          error.status ||
+          httpStatusCode["internal_server_error"].status,
+        message:
+          error.message ||
+          httpStatusCode["internal_server_error"].message
+      });
+    }
+  });
+}
+
 
 
 };

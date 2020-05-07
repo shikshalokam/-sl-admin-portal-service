@@ -10,7 +10,7 @@ module.exports = {
 
     let allFields = [];
 
-    let inputFields = ["name","description","email", "externalId","provider"];
+    let inputFields = ["name","description","email", "externalId","address"];
 
     let inputField = {
       "field": "",
@@ -54,9 +54,9 @@ module.exports = {
 
         validator = "^[a-z0-9_-]{3,15}$";
         message = "Please provide a valid external id";
-      }else if (fields == "provider") {
-        validator = "^[a-z0-9_-]{3,15}$";
-        message = "Please provide a valid provider";
+      }else if (fields == "address") {
+        validator = "^[a-z0-9_-]{3,80}$";
+        message = "Please provide a valid address";
       }else {
         validator = inputObj.validation[1].validator; 
         message = "Please Provide Valid " + inputObj.label;

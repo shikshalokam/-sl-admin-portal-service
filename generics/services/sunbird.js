@@ -281,6 +281,32 @@ var getOrganisationDetails = function (requestBody, token) {
     })
 }
 
+var updateOrgStatus = function (requestBody, token) {
+    return new Promise(async (resolve, reject) => {
+
+
+        const OrgDetails =
+            process.env.sunbird_url + constants.endpoints.SUNBIRD_ORG_STATUS_UPDATE;
+        let response = await callToSunbird(token, requestBody, OrgDetails,"PATCH");
+        return resolve(response);
+
+
+    })
+}
+
+var removeUser = function (requestBody, token) {
+    return new Promise(async (resolve, reject) => {
+
+
+        const userRemoveApi =
+            process.env.sunbird_url + constants.endpoints.SUNBIRD_REMOVE_USER_FROM_ORG;
+        let response = await callToSunbird(token, requestBody, userRemoveApi);
+        return resolve(response);
+
+
+    })
+}
+
 module.exports = {
     organisationList: organisationList,
     getUserProfileInfo: getUserProfileInfo,
@@ -290,5 +316,7 @@ module.exports = {
     searchOrganisation:searchOrganisation,
     createOrganisation:createOrganisation,
     updateOrganisationDetails:updateOrganisationDetails,
-    getOrganisationDetails:getOrganisationDetails
+    getOrganisationDetails:getOrganisationDetails,
+    updateOrgStatus:updateOrgStatus,
+    removeUser:removeUser
 };

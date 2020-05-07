@@ -21,6 +21,10 @@ module.exports = {
     ORG_FORM_FETCHED: "Organisation Create Form Fetched Successfully",
     ORG_FORM_NOT_FOUND: "Organisation Create Form Not Found",
     ORG_DETAILS_FOUND: "Organisation Details Found",
+    ORG_ACTIVATED: "Organisation Activated Successfully",
+    ORG_DEACTIVATED: "Organisation Deactivated Successfully",
+    USER_REMOVED: "User Removed From Organisation Succefully",
+
    
     // USER
     USER_INFO_NOT_FOUND : "User Info Not Found",
