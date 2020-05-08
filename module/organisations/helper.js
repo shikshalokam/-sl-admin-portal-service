@@ -566,7 +566,7 @@ module.exports = class OrganisationsHelper {
 
                 let updateOrg = await sunBirdService.updateOrganisationDetails(requestBody, token);
                 if (updateOrg && updateOrg.responseCode == constants.common.RESPONSE_OK) {
-                    resolve({ result: updateOrg.result, message: constants.apiResponses.ORG_CREATED });
+                    resolve({ result: updateOrg.result, message: constants.apiResponses.ORG_UPDATED });
                 } else {
                     reject({ message: updateOrg });
                 }

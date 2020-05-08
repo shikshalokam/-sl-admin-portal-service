@@ -23,10 +23,11 @@ module.exports = {
     ORG_DETAILS_FOUND: "Organisation Details Found",
     ORG_ACTIVATED: "Organisation Activated Successfully",
     ORG_DEACTIVATED: "Organisation Deactivated Successfully",
-    USER_REMOVED: "User Removed From Organisation Succefully",
+    ORG_UPDATED: "Organisation Details Updated Successfully",
 
    
     // USER
+    USER_REMOVED: "User Removed From Organisation Succefully",
     USER_INFO_NOT_FOUND : "User Info Not Found",
     USER_LIST_NOT_FOUND :"User List Not Found",
     USERS_LIST_FETCHED : "Users List Fetched Successfully",

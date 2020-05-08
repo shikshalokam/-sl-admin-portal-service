@@ -91,11 +91,10 @@ module.exports = {
           message = "Please Provide Valid " + inputObj.label;
         }
         inputObj.validation[0].message = inputObj.label + " required";
-        if(fields === "dateOfBirth"){
-          delete inputObj.validation[0];
-        } 
-        if( fields === "state" || fields === "gender" ){
+        
+        if( fields === "state" || fields === "gender" || fields=="dateOfBirth" ){
           delete inputObj.validation;
+          inputObj.validation = [];
          
         }else if( fields === "organisation"){
            delete inputObj.validation[1];
