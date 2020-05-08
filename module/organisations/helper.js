@@ -409,6 +409,7 @@ module.exports = class OrganisationsHelper {
                                         status: orgInfo.status == 0 ? "Inactive" : "Active",
                                         provider: orgInfo.provider,
                                         // channel:orgInfo.channel
+                                        address:orgInfo.address.addressLine1
 
                                     }
                                     organisationInfo.push(orgDetails);
@@ -479,7 +480,9 @@ module.exports = class OrganisationsHelper {
                     // "isRootOrg": true,
                     "provider": process.env.SUNBIRD_PROVIDER,
                     "orgName": inputData.name,
-                    "address": inputData.address,
+                    "address":{
+                        addressLine1:inputData.address,
+                    },
                     // "orgType": "string",
                     // "orgTypeId": "string",
                     // "rootOrgId": "string",
@@ -555,15 +558,16 @@ module.exports = class OrganisationsHelper {
                     email: inputData.email ? inputData.email : "",
                     description: inputData.description ? inputData.description : "",
                     organisationId: inputData.organisationId,
+                    address:{
+                        addressLine1:inputData.address
+                    }
                 }
 
                 if (inputData.externalId) {
                     requestBody['externalId'] = inputData.externalId;
+                    requestBody['provider'] = process.env.SUNBIRD_PROVIDER;
                 }
-                if (inputData.provider) {
-                    requestBody['provider'] = inputData.provider;
-                }
-
+                
                 let updateOrg = await sunBirdService.updateOrganisationDetails(requestBody, token);
                 if (updateOrg && updateOrg.responseCode == constants.common.RESPONSE_OK) {
                     resolve({ result: updateOrg.result, message: constants.apiResponses.ORG_UPDATED });
@@ -606,7 +610,8 @@ module.exports = class OrganisationsHelper {
                         description: response.description,
                         channel: response.channel,
                         updatedDate: response.updatedDate,
-                        createdDate: response.createdDate
+                        createdDate: response.createdDate,
+                        address:response.address.addressLine1
                     }
                     resolve({ result: responseObj, message: constants.apiResponses.ORG_DETAILS_FOUND });
                 } else {

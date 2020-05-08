@@ -91,13 +91,18 @@ module.exports = {
           message = "Please Provide Valid " + inputObj.label;
         }
         inputObj.validation[0].message = inputObj.label + " required";
-        
+
         if( fields === "state" || fields === "gender" || fields=="dateOfBirth" ){
           delete inputObj.validation;
           inputObj.validation = [];
          
         }else if( fields === "organisation"){
-           delete inputObj.validation[1];
+
+          let requiredField = inputObj.validation[0]
+          inputObj.validation = [];
+          inputObj.validation.push(requiredField);
+
+        
         }else{
           inputObj.validation[1].message = message;
           inputObj.validation[1].validator = validator;
