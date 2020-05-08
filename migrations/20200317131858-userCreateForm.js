@@ -94,8 +94,11 @@ module.exports = {
         if(fields === "dateOfBirth"){
           delete inputObj.validation[0];
         } 
-        if( fields === "state" || fields === "organisation" || fields === "gender" ){
-          delete inputObj.validation[1];
+        if( fields === "state" || fields === "gender" ){
+          delete inputObj.validation;
+         
+        }else if( fields === "organisation"){
+           delete inputObj.validation[1];
         }else{
           inputObj.validation[1].message = message;
           inputObj.validation[1].validator = validator;

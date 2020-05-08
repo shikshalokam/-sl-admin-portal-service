@@ -400,7 +400,7 @@ module.exports = class OrganisationsHelper {
                                 await Promise.all(organisationList.result.response.content.map(async function (orgInfo) {
 
                                     let orgDetails = {
-                                        organisationName: orgInfo.orgName,
+                                        name: orgInfo.orgName,
                                         description: orgInfo.description,
                                         email: orgInfo.email,
                                         _id: orgInfo.id,

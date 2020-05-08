@@ -57,6 +57,7 @@ module.exports = {
       }else if (fields == "address") {
         validator = "^[a-z0-9_-]{3,80}$";
         message = "Please provide a valid address";
+        inputObj.input = "textarea";
       }else {
         validator = inputObj.validation[1].validator; 
         message = "Please Provide Valid " + inputObj.label;
