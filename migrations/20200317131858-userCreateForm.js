@@ -64,7 +64,6 @@ module.exports = {
 
         }else if (
           fields === "state" ||
-          fields === "organisation" ||
           fields === "roles" ||
           fields === "gender"
         ) {
@@ -97,12 +96,11 @@ module.exports = {
           inputObj.validation = [];
          
         }else if( fields === "organisation"){
-
+          inputObj.input = "select";
           let requiredField = inputObj.validation[0]
           inputObj.validation = [];
           inputObj.validation.push(requiredField);
 
-        
         }else{
           inputObj.validation[1].message = message;
           inputObj.validation[1].validator = validator;

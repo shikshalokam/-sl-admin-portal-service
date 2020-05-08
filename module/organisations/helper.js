@@ -399,6 +399,10 @@ module.exports = class OrganisationsHelper {
                                 organisationList.result.response && organisationList.result.response.content) {
                                 await Promise.all(organisationList.result.response.content.map(async function (orgInfo) {
 
+                                    let address = "";
+                                    if(orgInfo.address && orgInfo.address.addressLine1){
+                                        address = orgInfo.address.addressLine1
+                                    }
                                     let orgDetails = {
                                         name: orgInfo.orgName,
                                         description: orgInfo.description,
@@ -409,7 +413,7 @@ module.exports = class OrganisationsHelper {
                                         status: orgInfo.status == 0 ? "Inactive" : "Active",
                                         provider: orgInfo.provider,
                                         // channel:orgInfo.channel
-                                        address:orgInfo.address.addressLine1
+                                        address:address
 
                                     }
                                     organisationInfo.push(orgDetails);
@@ -598,7 +602,15 @@ module.exports = class OrganisationsHelper {
 
                     // if(orgDetails.result.response)
 
+                    
+
                     let response = orgDetails.result.response;
+
+                    let address = "";
+                    if(response.address && response.address.addressLine1){
+                        address = response.address.addressLine1
+                    }
+
                     let responseObj = {
                         organisationId: response.organisationId,
                         status: response.status == 1 ? "Active" : "Inactive",
@@ -611,7 +623,7 @@ module.exports = class OrganisationsHelper {
                         channel: response.channel,
                         updatedDate: response.updatedDate,
                         createdDate: response.createdDate,
-                        address:response.address.addressLine1
+                        address:address
                     }
                     resolve({ result: responseObj, message: constants.apiResponses.ORG_DETAILS_FOUND });
                 } else {

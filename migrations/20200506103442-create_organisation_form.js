@@ -25,7 +25,7 @@ module.exports = {
         "message": ""
       }, {
         "name": "pattern",
-        "validator": "([a-zA-Z]{3,30}\s*)+",
+        "validator": "^[a-zA-Z0-9_-]{3,30}$",
         "message": ""
       }]
     };
@@ -52,7 +52,7 @@ module.exports = {
         inputObj.input = "textarea";
       }else if (fields == "externalId") {
 
-        validator = "^[a-z0-9_-]{3,15}$";
+        validator = "^[a-zA-Z0-9_-]{3,15}$";
         message = "Please provide a valid external id";
       }else if (fields == "address") {
         validator = "^[a-z0-9_-]{3,80}$";
