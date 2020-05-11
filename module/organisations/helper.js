@@ -66,11 +66,11 @@ module.exports = class OrganisationsHelper {
                             if (organisationList.result && organisationList.result.response &&
                                 organisationList.result.response && organisationList.result.response.content) {
                                 await Promise.all(organisationList.result.response.content.map(async function (orgInfo) {
-                                        organisationsList.push({
+                                    organisationsList.push({
                                         label: orgInfo.orgName,
                                         value: orgInfo.id
                                     });
-        
+
                                 }))
                             }
                         }
@@ -80,7 +80,7 @@ module.exports = class OrganisationsHelper {
                         await Promise.all(orgList.map(async function (orgInfo) {
                             if (roles.includes(constants.common.ORG_ADMIN_ROLE) ||
                                 orgInfo.roles.includes(constants.common.ORG_ADMIN_ROLE)) {
-                                let result = await _getOrganisationDetailsById(orgInfo.organisationId,token);
+                                let result = await _getOrganisationDetailsById(orgInfo.organisationId, token);
                                 let orgDetails = { value: orgInfo.organisationId, label: result.orgName };
 
                                 organisationsList.push(orgDetails);
@@ -157,31 +157,37 @@ module.exports = class OrganisationsHelper {
                     let usersList =
                         await sunBirdService.users(token, bodyOfRequest);
 
+
+                    let platformRoles =
+                        await database.models.platformRolesExt.find({}, {
+                            code: 1,
+                            title: 1
+                        }).lean();
+                    let sunBirdRoles =
+                        await cassandraDatabase.models.role.findAsync(
+                            {
+                                status: 1
+                            }, {
+                            select: ["id", "name"], raw: true, allow_filtering: true
+                        });
                     if (usersList.responseCode == constants.common.RESPONSE_OK) {
 
 
-                        let sunBirdRoles =
-                            await cassandraDatabase.models.role.findAsync(
-                                {
-                                    status: 1
-                                }, {
-                                select: ["id", "name"], raw: true, allow_filtering: true
-                            });
+
 
                         let allRoles = {
 
                         };
                         if (sunBirdRoles) {
                             sunBirdRoles.map(function (sunBirdrole) {
-                                allRoles[sunBirdrole.id] = sunBirdrole.name;
+                                if(sunBirdrole.id != constants.common.PUBLIC_ROLE){
+                                    allRoles[sunBirdrole.id] = sunBirdrole.name;
+                                }
+                                
                             });
                         }
 
-                        let platformRoles =
-                            await database.models.platformRolesExt.find({}, {
-                                code: 1,
-                                title: 1
-                            }).lean();
+
 
                         if (platformRoles) {
                             platformRoles.map(function (customRoles) {
@@ -189,23 +195,51 @@ module.exports = class OrganisationsHelper {
                             });
                         }
 
+                       
+
+
+                    //    console.log("allRoles",allRoles);
 
                         let userInfo = [];
                         await Promise.all(usersList.result.response.content.map(async function (userItem) {
 
+
                             let rolesOfUser = "";
+                            let customRoles = await database.models.userExtension.findOne({
+                                userId: userItem.id
+                            }, {
+                                roles: 1
+                            })
+                            if(customRoles){
+
+                            customRoles.roles.map(roleData => {
+
+                             
+                            if((roleData.code).toUpperCase() != constants.common.PUBLIC_ROLE){
+                                if (rolesOfUser == "") {
+                                    rolesOfUser = allRoles[roleData.code];
+                                } else {
+                                    rolesOfUser = rolesOfUser + "," + rolesOfUser[roleData.code]
+                                }
+                            }
+                            })
+                        }
+
                             await Promise.all(userItem.organisations.map(async orgInfo => {
                                 if (orgInfo.organisationId == organisationId) {
 
-                                    let orgRoles = orgInfo.roles.map(roleItem => {
-                                        return allRoles[roleItem]
-                                    })
-                                    orgRoles = (orgRoles).toString();
-                                    if (rolesOfUser == "") {
-                                        rolesOfUser = orgRoles;
-                                    } else {
-                                        rolesOfUser = rolesOfUser + "," + orgRoles
-                                    }
+
+                                        let orgRoles = orgInfo.roles.map(roleItem => {
+                                            return allRoles[roleItem]
+                                        })
+                                        orgRoles = (orgRoles).toString();
+                                        if (rolesOfUser == "") {
+                                            rolesOfUser = orgRoles;
+                                        } else {
+                                            rolesOfUser = rolesOfUser + "," + orgRoles
+                                        }
+                                    
+                                    
                                 }
                             }));
 
@@ -304,13 +338,105 @@ module.exports = class OrganisationsHelper {
     * @param  {orgnisationInfo,token}  - organisation object and token
     * @returns {json} Response consists of success or failure of the api.
     */
-    static addUser(orgnisationInfo, token) {
+    static addUser(orgnaisationInfo, token) {
 
         return new Promise(async (resolve, reject) => {
             try {
-                let response = await sunBirdService.addUser(orgnisationInfo, token);
+
+
+                let plaformRoles = [];
+                let allRoles = [];
+                let rolesId =[];
+
+
+                let rolesDocuments = await database.models.platformRolesExt.find({}, {
+                    _id: 1, code: 1, title: 1
+                }).lean();
+
+
+                plaformRoles.push("PUBLIC");
+                await Promise.all(orgnaisationInfo.roles.map(async function (roleInfo) {
+
+                    let found = false;
+                    await Promise.all(rolesDocuments.map(roleDoc => {
+                        if (roleDoc.code === roleInfo) {
+                            found = true;
+                            let roleObj = {
+                                roleId: roleDoc._id,
+                                code: roleDoc.code,
+                                name: roleDoc.title
+                            }
+                            rolesId.push(roleObj);
+                            allRoles.push({ roleId: roleDoc._id, code: roleDoc.code });
+                        }
+                    }));
+
+                    if (!found) {
+                        if (roleInfo.value) {
+                            plaformRoles.push(roleInfo.value);
+                        }
+                    }
+                }));
+
+
+                console.log("orgnaisationInfo",orgnaisationInfo);
+
+                if(plaformRoles.length ==0){
+                    plaformRoles.push("PUBLIC");
+                }
+                let orgCreateRequest = {
+                    organisationId:orgnaisationInfo.organisation.value,
+                    roles:plaformRoles,
+                    userId:orgnaisationInfo.userId
+                }
+
+                
+                let response = await sunBirdService.addUser(orgCreateRequest, token);
+
+
+
 
                 if (response && response.responseCode == constants.common.RESPONSE_OK) {
+
+                    // if(orgnisationInfo)
+                    // let orgObj = {
+                    //     label:orgnisationInfo
+                    
+                    // }
+
+                    // organisationInfo.roles
+
+
+                  console.log("response",response.result);
+
+                // if(response.result)
+
+                if(response.result.response=="SUCCESS"){
+                  let organisationsRoles =[];
+                  organisationsRoles.push({ organisationId: orgnaisationInfo.organisation.value, roles: rolesId });
+
+                 let userInfo = await database.models.userExtension.findOne({ userId:orgnaisationInfo.userId },{roles:1});
+
+                 let newRoles = [];
+                 allRoles.map( function(roleInfo){
+                     let found =false;
+                     await Promise.all(userInfo.roles.map(existingRoles=>{
+                         if(existingRoles.code == roleInfo.code){
+                             found = true;
+                         }
+                     }));
+                     if(found==true){
+                         newRoles.push(roleInfo);
+                     }
+                 });
+
+                   let updateUser = await database.models.userExtension.findOneAndUpdate({ userId:orgnaisationInfo.userId },
+                        { $push: { organisations: orgnaisationInfo.organisation,organisationRoles:organisationsRoles, roles:newRoles } });
+
+                   }
+                    // database.models.userExtension.findOneAndUpdate({ userId:orgnisationInfo.userId },
+                    //         { $push: { roles: orgnisationInfo.name } });
+
                     resolve({ result: response.result, message: constants.apiResponses.USER_ADDED_TO_ORG });
                 } else {
                     reject({ message: response.body });
@@ -401,7 +527,7 @@ module.exports = class OrganisationsHelper {
                                 await Promise.all(organisationList.result.response.content.map(async function (orgInfo) {
 
                                     let address = "";
-                                    if(orgInfo.address && orgInfo.address.addressLine1){
+                                    if (orgInfo.address && orgInfo.address.addressLine1) {
                                         address = orgInfo.address.addressLine1
                                     }
                                     let orgDetails = {
@@ -414,7 +540,7 @@ module.exports = class OrganisationsHelper {
                                         status: orgInfo.status == 0 ? "Inactive" : "Active",
                                         provider: orgInfo.provider,
                                         // channel:orgInfo.channel
-                                        address:address
+                                        address: address
 
                                     }
                                     organisationInfo.push(orgDetails);
@@ -485,8 +611,8 @@ module.exports = class OrganisationsHelper {
                     // "isRootOrg": true,
                     "provider": process.env.SUNBIRD_PROVIDER,
                     "orgName": inputData.name,
-                    "address":{
-                        addressLine1:inputData.address,
+                    "address": {
+                        addressLine1: inputData.address,
                     },
                     // "orgType": "string",
                     // "orgTypeId": "string",
@@ -563,8 +689,8 @@ module.exports = class OrganisationsHelper {
                     email: inputData.email ? inputData.email : "",
                     description: inputData.description ? inputData.description : "",
                     organisationId: inputData.organisationId,
-                    address:{
-                        addressLine1:inputData.address
+                    address: {
+                        addressLine1: inputData.address
                     }
                 }
 
@@ -572,7 +698,7 @@ module.exports = class OrganisationsHelper {
                     requestBody['externalId'] = inputData.externalId;
                     requestBody['provider'] = process.env.SUNBIRD_PROVIDER;
                 }
-                
+
                 let updateOrg = await sunBirdService.updateOrganisationDetails(requestBody, token);
                 if (updateOrg && updateOrg.responseCode == constants.common.RESPONSE_OK) {
                     resolve({ result: updateOrg.result, message: constants.apiResponses.ORG_UPDATED });
@@ -603,12 +729,12 @@ module.exports = class OrganisationsHelper {
 
                     // if(orgDetails.result.response)
 
-                    
+
 
                     let response = orgDetails.result.response;
 
                     let address = "";
-                    if(response.address && response.address.addressLine1){
+                    if (response.address && response.address.addressLine1) {
                         address = response.address.addressLine1
                     }
 
@@ -617,14 +743,14 @@ module.exports = class OrganisationsHelper {
                         status: response.status == 1 ? "Active" : "Inactive",
                         provider: response.provider,
                         name: response.orgName,
-                        email:response.email,   
+                        email: response.email,
                         externalId: response.externalId,
                         noOfMembers: response.noOfMembers,
                         description: response.description,
                         channel: response.channel,
                         updatedDate: response.updatedDate,
                         createdDate: response.createdDate,
-                        address:address
+                        address: address
                     }
                     resolve({ result: responseObj, message: constants.apiResponses.ORG_DETAILS_FOUND });
                 } else {
@@ -653,8 +779,8 @@ module.exports = class OrganisationsHelper {
                 if (updateOrg && updateOrg.responseCode == constants.common.RESPONSE_OK) {
 
                     let msg = constants.apiResponses.ORG_ACTIVATED;
-                    if(inputData.status==0){
-                        msg = constants.apiResponses.ORG_DEACTIVATED; 
+                    if (inputData.status == 0) {
+                        msg = constants.apiResponses.ORG_DEACTIVATED;
                     }
                     resolve({ result: updateOrg.result, message: msg });
                 } else {
@@ -674,23 +800,38 @@ module.exports = class OrganisationsHelper {
     * @returns {json} Response consists of organisation creation form.
     */
 
-   static removeUser(inputData, token) {
-    return new Promise(async (resolve, reject) => {
-        try {
+    static removeUser(inputData, token) {
+        return new Promise(async (resolve, reject) => {
+            try {
 
-            let removeUser = await sunBirdService.removeUser(inputData, token);
-            if (removeUser && removeUser.responseCode == constants.common.RESPONSE_OK) {
+                let removeUser = await sunBirdService.removeUser(inputData, token);
+                if (removeUser && removeUser.responseCode == constants.common.RESPONSE_OK) {
 
-                resolve({ result: removeUser.result, message: constants.apiResponses.USER_REMOVED });
-            } else {
-                reject({ message: removeUser });
+                    if(removeUser.result.response=="SUCCESS"){
+                        let updateUser = await database.models.userExtension.findOneAndUpdate(
+                            { userId:inputData.userId }
+                            ,{
+                                $pull:  { 
+                                    organisations:{ value:inputData.organisationId  },
+                                    organisationsRoles:{
+                                        organisationid:inputData.organisationId
+                                    }
+                                }
+
+                            });
+                           
+
+                    }
+                    resolve({ result: removeUser.result, message: constants.apiResponses.USER_REMOVED });
+                } else {
+                    reject({ message: removeUser });
+                }
+
+            } catch (error) {
+                return reject(error)
             }
-
-        } catch (error) {
-            return reject(error)
-        }
-    });
-}
+        });
+    }
 
 
 
@@ -861,7 +1002,7 @@ function _actions() {
    * @returns {json}
 */
 
-function _getOrganisationDetailsById(orgId,token) {
+function _getOrganisationDetailsById(orgId, token) {
 
     return new Promise(async (resolve, reject) => {
 
@@ -870,25 +1011,25 @@ function _getOrganisationDetailsById(orgId,token) {
         //         return resolve(result);
         //     });
 
-            let request = {
-                "filters": {
-                    id:orgId
-                }
+        let request = {
+            "filters": {
+                id: orgId
             }
+        }
 
-            // let organisationsList = [];
-            let organisationList = await sunBirdService.searchOrganisation(request, token);
-            if (organisationList.responseCode == constants.common.RESPONSE_OK) {
-                if (organisationList.result && organisationList.result.response &&
-                    organisationList.result.response && organisationList.result.response.content) {
-                    // await Promise.all(organisationList.result.response.content.map(async function (orgInfo) {
-                    //         organisationsList.push(org);
+        // let organisationsList = [];
+        let organisationList = await sunBirdService.searchOrganisation(request, token);
+        if (organisationList.responseCode == constants.common.RESPONSE_OK) {
+            if (organisationList.result && organisationList.result.response &&
+                organisationList.result.response && organisationList.result.response.content) {
+                // await Promise.all(organisationList.result.response.content.map(async function (orgInfo) {
+                //         organisationsList.push(org);
 
-                    // }))
+                // }))
 
-                    resolve(organisationList.result.response.content[0]);
-                }
+                resolve(organisationList.result.response.content[0]);
             }
+        }
 
     });
 
@@ -959,7 +1100,7 @@ function _organisationColumn() {
             // obj['type'] = "checkbox";
             obj["key"] = "id";
             obj["visible"] = false;
-           
+
         }
 
         result.push(obj);

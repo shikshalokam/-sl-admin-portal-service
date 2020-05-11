@@ -261,9 +261,10 @@ module.exports = class Organisations extends Abstract {
       try {
 
         let orgDetails = {
-          organisationId: req.body.organisationId,
+          // organisationId: req.body.organisationId,
           userId: req.body.userId,
-          roles: req.body.roles
+          roles: req.body.roles,
+          organisation:req.body.organisation
         }
 
         let response = await organisationsHelper.addUser(orgDetails, req.userDetails.userToken);

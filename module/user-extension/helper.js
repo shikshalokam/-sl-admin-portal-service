@@ -118,7 +118,7 @@ module.exports = class UserCreationHelper {
 
 
                 let platformRoles =
-                    await database.models.platformRolesExt.find({ isHidden: false }, {
+                    await database.models.platformRolesExt.find({ isDeleted:false }, {
                         code: 1,
                         title: 1
                     }).lean();
@@ -148,13 +148,15 @@ module.exports = class UserCreationHelper {
                 if (platformRoles.length > 0) {
 
                     await Promise.all(platformRoles.map(platformRole => {
-                        roles.push({
-                            label: platformRole.title,
-                            value: platformRole.code
-                        })
+                        if(!platformRoles.isHidden || platformRoles.isHidden!=false){
+                            roles.push({
+                                label: platformRole.title,
+                                value: platformRole.code
+                            })
+                        }
+                       
                     }));
                 }
-
 
                 if (roles) {
                     roles = roles.sort(gen.utils.sortArrayOfObjects("label"));
