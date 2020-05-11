@@ -120,7 +120,8 @@ module.exports = class UserCreationHelper {
                 let platformRoles =
                     await database.models.platformRolesExt.find({ isDeleted:false }, {
                         code: 1,
-                        title: 1
+                        title: 1,
+                        isHidden:1
                     }).lean();
 
                 let roles = [];
@@ -148,7 +149,7 @@ module.exports = class UserCreationHelper {
                 if (platformRoles.length > 0) {
 
                     await Promise.all(platformRoles.map(platformRole => {
-                        if(!platformRoles.isHidden || platformRoles.isHidden!=false){
+                        if(!platformRole.isHidden || platformRole.isHidden!=true){
                             roles.push({
                                 label: platformRole.title,
                                 value: platformRole.code
@@ -317,9 +318,10 @@ module.exports = class UserCreationHelper {
 
 
                         let platformRoles =
-                            await database.models.platformRolesExt.find({ isHidden: false }, {
+                            await database.models.platformRolesExt.find({ isDeleted:false }, {
                                 code: 1,
-                                title: 1
+                                title: 1,
+                                isHidden:1
                             }).lean();
 
                         let roles = [];
@@ -347,10 +349,13 @@ module.exports = class UserCreationHelper {
                         if (platformRoles.length > 0) {
 
                             await Promise.all(platformRoles.map(platformRole => {
+
+                                if(!platformRole.isHidden || platformRole.isHidden!=true){
                                 roles.push({
                                     label: platformRole.title,
                                     value: platformRole.code
                                 })
+                            }
                             }));
                         }
 
