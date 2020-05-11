@@ -96,10 +96,21 @@ module.exports = {
           inputObj.validation = [];
          
         }else if( fields === "organisation"){
-          inputObj.input = "select";
+         
+            inputObj.input = "select";
           let requiredField = inputObj.validation[0]
           inputObj.validation = [];
           inputObj.validation.push(requiredField);
+
+        }else if(fields === "phoneNumber" ||  fields === "email"){
+
+          let requiredField = inputObj.validation[1];
+          inputObj.validation = [];
+          inputObj.validation.push(requiredField);
+          inputObj.validation[0].message = message;
+          inputObj.validation[0].validator = validator;
+
+      
 
         }else{
           inputObj.validation[1].message = message;
