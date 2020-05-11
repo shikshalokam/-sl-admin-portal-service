@@ -956,8 +956,9 @@ function _organisationColumn() {
             obj["type"] = "action";
             obj["actions"] = _actions();
         } else if (field === "select") {
-            obj['type'] = "checkbox";
+            // obj['type'] = "checkbox";
             obj["key"] = "id";
+            obj["visible"] = false;
            
         }
 
