@@ -211,6 +211,7 @@ module.exports = class OrganisationsHelper {
 
 
                             let gender = userItem.gender == "M" ? "Male" : userItem.gender == "F" ? "Female" : "";
+                            let status = userItem.status == 1 ? "Active" : "Inactive";
 
                             let resultObj = {
                                 firstName: userItem.firstName,
@@ -218,7 +219,7 @@ module.exports = class OrganisationsHelper {
                                 id: userItem.id,
                                 gender: gender,
                                 role: rolesOfUser,
-                                status: userItem.status
+                                status: status
                             }
                             userInfo.push(resultObj);
                         }));
@@ -273,13 +274,13 @@ module.exports = class OrganisationsHelper {
                             delete fields.id;
                         }
 
-                        let status = "";
-                        if (fields.status == 1) {
-                            status = "Active"
-                        } else {
-                            status = "Inactive";
-                        }
-                        fields.status = status;
+                        // let status = "";
+                        // if (fields.status == 1) {
+                        //     status = "Active"
+                        // } else {
+                        //     status = "Inactive";
+                        // }
+                        // fields.status = status;
                         let userInfo = Object.keys(fields).reduce((c, k) => (c[gen.utils.camelCaseToCapitalizeCase(k)] = fields[k], c), {})
                         responseData.push(userInfo);
                     }))
@@ -820,7 +821,7 @@ function _userColumn() {
         } else if (field === "select") {
             obj['type'] = "checkbox";
             obj["key"] = "id";
-            obj["visible"] = false;
+            // obj["visible"] = true;
         }
 
         result.push(obj);
@@ -957,7 +958,7 @@ function _organisationColumn() {
         } else if (field === "select") {
             obj['type'] = "checkbox";
             obj["key"] = "id";
-            obj["visible"] = false;
+           
         }
 
         result.push(obj);
