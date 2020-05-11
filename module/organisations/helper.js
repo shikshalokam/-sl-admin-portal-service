@@ -357,6 +357,7 @@ module.exports = class OrganisationsHelper {
                 plaformRoles.push("PUBLIC");
                 await Promise.all(orgnaisationInfo.roles.map(async function (roleInfo) {
 
+                    console.log("roleInfo.value",roleInfo);
                     let found = false;
                     await Promise.all(rolesDocuments.map(roleDoc => {
                         if (roleDoc.code === roleInfo) {
@@ -372,8 +373,8 @@ module.exports = class OrganisationsHelper {
                     }));
 
                     if (!found) {
-                        if (roleInfo.value) {
-                            plaformRoles.push(roleInfo.value);
+                        if (roleInfo) {
+                            plaformRoles.push(roleInfo);
                         }
                     }
                 }));
@@ -389,6 +390,8 @@ module.exports = class OrganisationsHelper {
                     roles:plaformRoles,
                     userId:orgnaisationInfo.userId
                 }
+
+                console.log("plaformRoles",orgCreateRequest);
 
                 
                 let response = await sunBirdService.addUser(orgCreateRequest, token);
@@ -425,10 +428,12 @@ module.exports = class OrganisationsHelper {
                              found = true;
                          }
                      }));
-                     if(found==true){
+                     if(found==false){
                          newRoles.push(roleInfo);
                      }
                  });
+
+                 console.log("newRoles",newRoles);
 
                    let updateUser = await database.models.userExtension.findOneAndUpdate({ userId:orgnaisationInfo.userId },
                         { $push: { organisations: orgnaisationInfo.organisation,organisationRoles:organisationsRoles, roles:newRoles } });
@@ -813,8 +818,8 @@ module.exports = class OrganisationsHelper {
                             ,{
                                 $pull:  { 
                                     organisations:{ value:inputData.organisationId  },
-                                    organisationsRoles:{
-                                        organisationid:inputData.organisationId
+                                    organisationRoles:{
+                                        organisationId:inputData.organisationId
                                     }
                                 }
 
