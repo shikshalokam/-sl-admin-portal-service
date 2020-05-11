@@ -418,7 +418,7 @@ module.exports = class OrganisationsHelper {
                  let userInfo = await database.models.userExtension.findOne({ userId:orgnaisationInfo.userId },{roles:1});
 
                  let newRoles = [];
-                 allRoles.map( function(roleInfo){
+                 allRoles.map(async function(roleInfo){
                      let found =false;
                      await Promise.all(userInfo.roles.map(existingRoles=>{
                          if(existingRoles.code == roleInfo.code){
