@@ -946,7 +946,7 @@ function _userColumn() {
         obj["label"] = gen.utils.camelCaseToCapitalizeCase(field);
         obj["key"] = field
 
-        if (field === "action") {
+        if (field === "actions") {
             obj["type"] = "action";
             obj["actions"] = _actions();
         } else if (field === "select") {
@@ -1083,7 +1083,7 @@ function _organisationColumn() {
         obj["label"] = gen.utils.camelCaseToCapitalizeCase(field);
         obj["key"] = field
 
-        if (field === "action") {
+        if (field === "actions") {
             obj["type"] = "action";
             obj["actions"] = _actions();
         } else if (field === "select") {
