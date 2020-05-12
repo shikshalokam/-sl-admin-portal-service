@@ -218,9 +218,17 @@ module.exports = class OrganisationsHelper {
 
                             await Promise.all(userItem.organisations.map(async orgInfo => {
                                 if (orgInfo.organisationId == organisationId) {
-                                    let orgRoles = orgInfo.roles.map(roleItem => {
-                                        return allRoles[roleItem]
-                                    })
+                                    
+                                    
+                                    let orgRoles =[];
+                                    orgInfo.roles.map(roleItem => {
+                                        if(roleItem!="PUBLIC"){
+                                               if(allRoles[roleItem]){
+                                                orgRoles.push(allRoles[roleItem]);
+                                               }
+                                        }
+                                    });
+                                    
                                     orgRoles = (orgRoles).toString();
                                     if (orgRoles) {
                                         if (rolesOfUser == "") {
