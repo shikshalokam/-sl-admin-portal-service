@@ -10,7 +10,7 @@ module.exports = {
       let allFields = [];
 
       let inputFields = ["organisation", "state","firstName", "lastName", "email", "phoneNumber",
-        "userName","gender","password","confirmpassword","roles","dateOfBirth" ];
+        "userName","gender","password","confirmPassword","roles","dateOfBirth" ];
 
       let inputField = {
         "field": "",
@@ -23,11 +23,8 @@ module.exports = {
           "name": "required",
           "validator": "required",
           "message": ""
-        }, {
-          "name": "pattern",
-          "validator": "([a-zA-Z]{3,30}\s*)+",
-          "message": ""
-        }]
+        }
+      ]
       };
 
       await Promise.all(inputFields.map(async function (fields) {
@@ -37,88 +34,58 @@ module.exports = {
         inputObj.label = field.charAt(0).toUpperCase() + field.slice(1);
         inputObj.field = fields;
 
-        let message = "";
-        let validator = "";
 
-        if (fields == "password" || fields == "confirmpassword") {
-          inputObj.input = "password";
-       
-          
-          validator = "^([a-zA-Z0-9@*#]{8,15})$";
-          message = "Minimum eight charaters required";
-        } else if (fields == "email") {
-          validator = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
-          message = "Please provide a valid Email";
-
-        } else if (fields == "phoneNumber") {
-          validator = "(0/91)?[7-9][0-9]{9}";
-          message = "Please provide a valid Phone Number";
-
-        }else if(fields == "userName"){
-          validator = "^[a-z0-9_-]{3,15}$";
-          message = "Please provide a valid User Name";
-        }else if (fields == "dateOfBirth") {
-          validator = "([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))";
-          message = "Please provide a valid Date of Birth";
-          inputObj.input = "date";
-
-        }else if (
-          fields === "state" ||
-          fields === "roles" ||
-          fields === "gender"
-        ) {
-          inputObj.options = [];
-
-          if (fields == "gender") {
-              inputObj.options=[
-                 {
-                  "label": "Female",
-                  "value": "F"
-                },{
-                  "label": "Male",
-                  "value": "M"
-                }]
-          }
-          
-          if (fields == "roles") {
-            inputObj.input = "multiselect";
-          } else {
-            inputObj.input = "select";
-          }
-        } else {
-          validator = inputObj.validation[1].validator;
-          message = "Please Provide Valid " + inputObj.label;
-        }
         inputObj.validation[0].message = inputObj.label + " required";
 
-        if( fields === "state" || fields === "gender" || fields=="dateOfBirth" ){
-          delete inputObj.validation;
+        if (fields == "password" || fields == "confirmPassword") {
+          inputObj.input = "password";
+         
+          inputObj.validation.push({
+            "name": "pattern",
+            "validator": "^([a-zA-Z0-9@*#]{8,15})$",
+            "message": "Minimum eight charaters required"
+          });
+
+          
+        } else if (fields == "email") {
+          inputObj.validation.push({
+            "name": "pattern",
+            "validator": "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$",
+            "message": "Please provide a valid Email"
+          });
+
+        } else if (fields == "phoneNumber") {
+          inputObj.validation.push({
+            "name": "pattern",
+            "validator": "(0/91)?[7-9][0-9]{9}",
+            "message": "Please provide a valid Phone Number"
+          });
+        }else if (fields == "gender") {
+           inputObj.options=[
+             {
+              "label": "Female",
+              "value": "F"
+            },{
+              "label": "Male",
+              "value": "M"
+            }]
+            inputObj.validation = [];
+       }else if (fields == "dateOfBirth") {
+          inputObj.input = "date";
           inputObj.validation = [];
-         
-        }else if( fields === "organisation"){
-         
+
+        }else if (fields === "state"){
+          inputObj.input = "select";
+          inputObj.validation = [];
+
+        }else if(fields === "roles") {
+              inputObj.options = [];
+              inputObj.input = "multiselect";
+
+          }else if( fields === "organisation"){
             inputObj.input = "select";
-          let requiredField = inputObj.validation[0]
-          inputObj.validation = [];
-          inputObj.validation.push(requiredField);
-
-        }else if(fields === "phoneNumber" ||  fields === "email"){
-
-          let requiredField = inputObj.validation[1];
-          inputObj.validation = [];
-          inputObj.validation.push(requiredField);
-          inputObj.validation[0].message = message;
-          inputObj.validation[0].validator = validator;
-
-      
-
-        }else{
-          inputObj.validation[1].message = message;
-          inputObj.validation[1].validator = validator;
         }
-
         allFields.push(inputObj);
-
       }));
 
       let createForm = {

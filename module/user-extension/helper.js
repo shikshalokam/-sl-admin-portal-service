@@ -366,6 +366,12 @@ module.exports = class UserCreationHelper {
                         let orgInfo = [];
                         let organisationsList = await _getOrganisationlist(profileData, orgAdminUserId,userToken);
 
+                        // userId
+
+                       let userDoc =  await database.models.userExtension.findOne({ userId:userId },{ organisationRoles:1 });
+
+                      
+
                         if (profileData.result.response &&
                              profileData.result.response.organisations && 
                              profileData.result.response.organisations.length > 0){
@@ -386,6 +392,24 @@ module.exports = class UserCreationHelper {
                                             allRoles.push(roleInfo[0]);
                                         }
                                     })
+                                }
+
+                                if (userDoc) {
+                                    if (userDoc.organisationRoles) {
+                                        let orgRolesOfUser = [];
+                                        userDoc.organisationRoles.map(userRoles=>{
+                                             if(data.organisationId ==userRoles.organisationId){
+                                                orgRolesOfUser.push(...userRoles.roles);
+                                             }
+                                        })
+            
+                                        orgRolesOfUser.map(element=>{
+                                            let roleInfo = roles.filter(function (roleDetails) {
+                                                return roleDetails.value === element.code
+                                            });
+                                            allRoles.push(roleInfo[0]);
+                                        });
+                                    }
                                 }
 
                                 orgInfo.push({

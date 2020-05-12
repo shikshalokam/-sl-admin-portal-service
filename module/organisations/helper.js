@@ -196,23 +196,26 @@ module.exports = class OrganisationsHelper {
                                 roles: 1, organisationRoles: 1
                             })
                             if (customRoles) {
-                                if (customRoles.organisationRoles && customRoles.organisationRoles.roles) {
-                                    let cRoles = customRoles.organisationRoles.roles;
-                                    cRoles.map(roleData => {
-                                        if ((roleData.code).toUpperCase() != constants.common.PUBLIC_ROLE) {
+                                if (customRoles.organisationRoles) {
+                                    let orgRolesOfUser = [];
+                                     customRoles.organisationRoles.map(userRoles=>{
+                                         if(organisationId ==userRoles.organisationId){
+                                            orgRolesOfUser.push(...userRoles.roles);
+                                         }
+                                    })
+
+                                    let disctinctRoles =[];
+                                    orgRolesOfUser.map(element=>{
+                                        if(!disctinctRoles.includes(element.code)){
+                                            disctinctRoles.push(element.code);
                                             if (rolesOfUser == "") {
-                                                if(allRoles[roleData.code]){
-                                                    rolesOfUser = allRoles[roleData.code];
-                                                }
-                                                // rolesOfUser = allRoles[roleData.code];
+                                                rolesOfUser = allRoles[element.code];
                                             } else {
-                                                if (allRoles[roleData.code]) {
-                                                    rolesOfUser = rolesOfUser + "," + allRoles[roleData.code]
-                                                }
+                                                rolesOfUser = rolesOfUser + "," + allRoles[element.code]
                                             }
+
                                         }
                                     });
-                                
                                 }
                             }
 
@@ -1072,7 +1075,7 @@ function _organisationColumn() {
         'select',
         'name',
         'description',
-        'email',
+        // 'email',
         // 'noOfMembers',
         'externalId',
         'address',

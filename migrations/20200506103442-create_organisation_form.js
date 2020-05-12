@@ -10,7 +10,7 @@ module.exports = {
 
     let allFields = [];
 
-    let inputFields = ["name","description","email", "externalId","address"];
+    let inputFields = ["name","description","email", "externalId"];
 
     let inputField = {
       "field": "",
@@ -22,10 +22,6 @@ module.exports = {
       "validation": [{
         "name": "required",
         "validator": "required",
-        "message": ""
-      }, {
-        "name": "pattern",
-        "validator": "[^a-zA-Z0-9\s\:]*",
         "message": ""
       }]
     };
@@ -39,7 +35,6 @@ module.exports = {
 
       let message = "";
       let validator = "";
-
       
 
       if (fields == "email") {
@@ -50,30 +45,28 @@ module.exports = {
         // validator = "^[a-z0-9_-]{3,15}$";
         // message = "Please provide a valid User Name";
         inputObj.input = "textarea";
-      }else if (fields == "externalId") {
-
-        validator = "[^a-zA-Z0-9\s\:]*";
-        message = "Please provide a valid external id";
-      }else if (fields == "address") {
-        validator = "^[a-z0-9_-]{3,80}$";
-        message = "Please provide a valid address";
-        inputObj.input = "textarea";
-      }else {
-        validator = inputObj.validation[1].validator; 
-        message = "Please Provide Valid " + inputObj.label;
       }
+      // else if (fields == "externalId") {
+
+      //   validator = "[^a-zA-Z0-9\s\:]*";
+      //   message = "Please provide a valid external id";
+      // }else if (fields == "address") {
+      //   validator = "^[a-z0-9_-]{3,80}$";
+      //   message = "Please provide a valid address";
+      //   inputObj.input = "textarea";
+      // }else {
+      //   validator = inputObj.validation[1].validator; 
+      //   message = "Please Provide Valid " + inputObj.label;
+      // }
       
       inputObj.validation[0].message = inputObj.label + " required";
-      if( fields === "description" || fields === "email"  ){
+      if(fields === "email"  ){
         // delete inputObj.validation[0];
         inputObj.validation = [{
           "name": "pattern",
           "validator": validator,
           "message": message
         }];
-      }else{
-        inputObj.validation[1].message = message;
-        inputObj.validation[1].validator = validator;
       }
 
       allFields.push(inputObj);

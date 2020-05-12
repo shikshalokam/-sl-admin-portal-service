@@ -27,7 +27,7 @@ module.exports = {
 
    
     // USER
-    USER_REMOVED: "User Removed From Organisation Succefully",
+    USER_REMOVED: "User Removed From Organisation Successfully",
     USER_INFO_NOT_FOUND : "User Info Not Found",
     USER_LIST_NOT_FOUND :"User List Not Found",
     USERS_LIST_FETCHED : "Users List Fetched Successfully",
