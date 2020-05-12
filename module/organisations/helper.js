@@ -196,7 +196,7 @@ module.exports = class OrganisationsHelper {
                                 roles: 1, organisationRoles: 1
                             })
                             if (customRoles) {
-                                if (customRoles.organisationRoles) {
+                                if (customRoles.organisationRoles && customRoles.organisationRoles.roles) {
                                     let cRoles = customRoles.organisationRoles.roles;
                                     cRoles.map(roleData => {
                                         if ((roleData.code).toUpperCase() != constants.common.PUBLIC_ROLE) {
@@ -209,6 +209,7 @@ module.exports = class OrganisationsHelper {
                                             }
                                         }
                                     });
+                                
                                 }
                             }
 
