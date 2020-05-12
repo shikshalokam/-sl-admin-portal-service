@@ -334,6 +334,7 @@ module.exports = class Organisations extends Abstract {
           roles: req.body.roles
         }
 
+        
         let response = await organisationsHelper.assignRoles(orgDetails, req.userDetails.userToken);
         return resolve(response);
 

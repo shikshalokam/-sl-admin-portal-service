@@ -157,7 +157,6 @@ module.exports = class OrganisationsHelper {
                     let usersList =
                         await sunBirdService.users(token, bodyOfRequest);
 
-
                     let platformRoles =
                         await database.models.platformRolesExt.find({}, {
                             code: 1,
@@ -172,77 +171,62 @@ module.exports = class OrganisationsHelper {
                         });
                     if (usersList.responseCode == constants.common.RESPONSE_OK) {
 
-
-
-
-                        let allRoles = {
-
-                        };
+                        let allRoles = {};
                         if (sunBirdRoles) {
                             sunBirdRoles.map(function (sunBirdrole) {
-                                if(sunBirdrole.id != constants.common.PUBLIC_ROLE){
+                                if (sunBirdrole.id != constants.common.PUBLIC_ROLE) {
                                     allRoles[sunBirdrole.id] = sunBirdrole.name;
                                 }
-                                
+
                             });
                         }
-
-
 
                         if (platformRoles) {
                             platformRoles.map(function (customRoles) {
                                 allRoles[customRoles.code] = customRoles.title;
                             });
                         }
-
-                       
-
-
-                    //    console.log("allRoles",allRoles);
-
                         let userInfo = [];
                         await Promise.all(usersList.result.response.content.map(async function (userItem) {
-
 
                             let rolesOfUser = "";
                             let customRoles = await database.models.userExtension.findOne({
                                 userId: userItem.id
                             }, {
-                                roles: 1
+                                roles: 1, organisationRoles: 1
                             })
-                            if(customRoles){
-
-                            customRoles.roles.map(roleData => {
-
-                             
-                            if((roleData.code).toUpperCase() != constants.common.PUBLIC_ROLE){
-                                if (rolesOfUser == "") {
-                                    rolesOfUser = allRoles[roleData.code];
-                                } else {
-                                    rolesOfUser = rolesOfUser + "," + rolesOfUser[roleData.code]
+                            if (customRoles) {
+                                if (customRoles.organisationRoles) {
+                                    let cRoles = customRoles.organisationRoles.roles;
+                                    cRoles.map(roleData => {
+                                        if ((roleData.code).toUpperCase() != constants.common.PUBLIC_ROLE) {
+                                            if (rolesOfUser == "") {
+                                                rolesOfUser = allRoles[roleData.code];
+                                            } else {
+                                                if (rolesOfUser[roleData.code]) {
+                                                    rolesOfUser = rolesOfUser + "," + rolesOfUser[roleData.code]
+                                                }
+                                            }
+                                        }
+                                    });
                                 }
                             }
-                            })
-                        }
 
                             await Promise.all(userItem.organisations.map(async orgInfo => {
                                 if (orgInfo.organisationId == organisationId) {
-
-
-                                        let orgRoles = orgInfo.roles.map(roleItem => {
-                                            return allRoles[roleItem]
-                                        })
-                                        orgRoles = (orgRoles).toString();
+                                    let orgRoles = orgInfo.roles.map(roleItem => {
+                                        return allRoles[roleItem]
+                                    })
+                                    orgRoles = (orgRoles).toString();
+                                    if (orgRoles) {
                                         if (rolesOfUser == "") {
                                             rolesOfUser = orgRoles;
                                         } else {
                                             rolesOfUser = rolesOfUser + "," + orgRoles
                                         }
-                                    
-                                    
+                                    }
                                 }
                             }));
-
 
                             let gender = userItem.gender == "M" ? "Male" : userItem.gender == "F" ? "Female" : "";
                             let status = userItem.status == 1 ? "Active" : "Inactive";
@@ -259,7 +243,6 @@ module.exports = class OrganisationsHelper {
                         }));
 
                         let columns = _userColumn();
-
                         response = {
                             "result": {
                                 count: usersList.result.response.count,
@@ -345,8 +328,7 @@ module.exports = class OrganisationsHelper {
 
 
                 let plaformRoles = [];
-                let allRoles = [];
-                let rolesId =[];
+                let rolesId = [];
 
 
                 let rolesDocuments = await database.models.platformRolesExt.find({}, {
@@ -357,7 +339,6 @@ module.exports = class OrganisationsHelper {
                 plaformRoles.push("PUBLIC");
                 await Promise.all(orgnaisationInfo.roles.map(async function (roleInfo) {
 
-                    console.log("roleInfo.value",roleInfo);
                     let found = false;
                     await Promise.all(rolesDocuments.map(roleDoc => {
                         if (roleDoc.code === roleInfo) {
@@ -368,7 +349,6 @@ module.exports = class OrganisationsHelper {
                                 name: roleDoc.title
                             }
                             rolesId.push(roleObj);
-                            allRoles.push({ roleId: roleDoc._id, code: roleDoc.code });
                         }
                     }));
 
@@ -380,67 +360,25 @@ module.exports = class OrganisationsHelper {
                 }));
 
 
-                console.log("orgnaisationInfo",orgnaisationInfo);
-
-                if(plaformRoles.length ==0){
+                if (plaformRoles.length == 0) {
                     plaformRoles.push("PUBLIC");
                 }
                 let orgCreateRequest = {
-                    organisationId:orgnaisationInfo.organisation.value,
-                    roles:plaformRoles,
-                    userId:orgnaisationInfo.userId
+                    organisationId: orgnaisationInfo.organisation.value,
+                    roles: plaformRoles,
+                    userId: orgnaisationInfo.userId
                 }
 
-                console.log("plaformRoles",orgCreateRequest);
-
-                
                 let response = await sunBirdService.addUser(orgCreateRequest, token);
 
-
-
-
                 if (response && response.responseCode == constants.common.RESPONSE_OK) {
+                    if (response.result.response == "SUCCESS") {
+                        let organisationsRoles = [];
+                        organisationsRoles.push({ organisationId: orgnaisationInfo.organisation.value, roles: rolesId });
 
-                    // if(orgnisationInfo)
-                    // let orgObj = {
-                    //     label:orgnisationInfo
-                    
-                    // }
-
-                    // organisationInfo.roles
-
-
-                  console.log("response",response.result);
-
-                // if(response.result)
-
-                if(response.result.response=="SUCCESS"){
-                  let organisationsRoles =[];
-                  organisationsRoles.push({ organisationId: orgnaisationInfo.organisation.value, roles: rolesId });
-
-                 let userInfo = await database.models.userExtension.findOne({ userId:orgnaisationInfo.userId },{roles:1});
-
-                 let newRoles = [];
-                 allRoles.map(async function(roleInfo){
-                     let found =false;
-                     await Promise.all(userInfo.roles.map(existingRoles=>{
-                         if(existingRoles.code == roleInfo.code){
-                             found = true;
-                         }
-                     }));
-                     if(found==false){
-                         newRoles.push(roleInfo);
-                     }
-                 });
-
-                 console.log("newRoles",newRoles);
-
-                   let updateUser = await database.models.userExtension.findOneAndUpdate({ userId:orgnaisationInfo.userId },
-                        { $push: { organisations: orgnaisationInfo.organisation,organisationRoles:organisationsRoles, roles:newRoles } });
-
-                   }
-                    // database.models.userExtension.findOneAndUpdate({ userId:orgnisationInfo.userId },
-                    //         { $push: { roles: orgnisationInfo.name } });
+                        let updateUser = await database.models.userExtension.findOneAndUpdate({ userId: orgnaisationInfo.userId },
+                            { $push: { organisations: orgnaisationInfo.organisation, organisationRoles: organisationsRoles } });
+                    }
 
                     resolve({ result: response.result, message: constants.apiResponses.USER_ADDED_TO_ORG });
                 } else {
@@ -467,9 +405,52 @@ module.exports = class OrganisationsHelper {
 
         return new Promise(async (resolve, reject) => {
             try {
-                let response = await sunBirdService.assignRoles(orgnisationInfo, token);
 
+
+                let plaformRoles = [];
+                let rolesId = [];
+
+                let rolesDocuments = await database.models.platformRolesExt.find({}, {
+                    _id: 1, code: 1, title: 1
+                }).lean();
+
+                await Promise.all(orgnisationInfo.roles.map(async function (roleInfo) {
+
+                    let found = false;
+                    await Promise.all(rolesDocuments.map(roleDoc => {
+                        if (roleDoc.code === roleInfo) {
+                            found = true;
+                            let roleObj = {
+                                roleId: roleDoc._id,
+                                code: roleDoc.code,
+                                name: roleDoc.title
+                            }
+                            rolesId.push(roleObj);
+                        }
+                    }));
+
+                    if (!found) {
+                        if (roleInfo) {
+                            plaformRoles.push(roleInfo);
+                        }
+                    }
+                }));
+
+                if (plaformRoles.length == 0) {
+                    plaformRoles.push("PUBLIC");
+                }
+                orgnisationInfo.roles = plaformRoles;
+
+                let response = await sunBirdService.assignRoles(orgnisationInfo, token);
                 if (response && response.responseCode == constants.common.RESPONSE_OK) {
+                    if (response.result.response == "SUCCESS") {
+                        console.log(orgnisationInfo.organisationId, "rolesId", rolesId)
+                        let userDetails = await database.models.userExtension.updateOne({
+                            userId: orgnisationInfo.userId, "organisationRoles.organisationId": orgnisationInfo.organisationId
+                        }, {
+                            $set: { "organisationRoles.$.roles": rolesId }
+                        });
+                    }
                     resolve({ result: response.result, message: constants.apiResponses.ASSIGNED_ROLE_SUCCESSFULLY });
                 } else {
                     reject({ message: response.body });
@@ -545,7 +526,8 @@ module.exports = class OrganisationsHelper {
                                         status: orgInfo.status == 0 ? "Inactive" : "Active",
                                         provider: orgInfo.provider,
                                         // channel:orgInfo.channel
-                                        address: address
+                                        address: address,
+                                        // dateOfBirth:
 
                                     }
                                     organisationInfo.push(orgDetails);
@@ -756,6 +738,8 @@ module.exports = class OrganisationsHelper {
                         updatedDate: response.updatedDate,
                         createdDate: response.createdDate,
                         address: address
+
+
                     }
                     resolve({ result: responseObj, message: constants.apiResponses.ORG_DETAILS_FOUND });
                 } else {
@@ -812,19 +796,19 @@ module.exports = class OrganisationsHelper {
                 let removeUser = await sunBirdService.removeUser(inputData, token);
                 if (removeUser && removeUser.responseCode == constants.common.RESPONSE_OK) {
 
-                    if(removeUser.result.response=="SUCCESS"){
+                    if (removeUser.result.response == "SUCCESS") {
                         let updateUser = await database.models.userExtension.findOneAndUpdate(
-                            { userId:inputData.userId }
-                            ,{
-                                $pull:  { 
-                                    organisations:{ value:inputData.organisationId  },
-                                    organisationRoles:{
-                                        organisationId:inputData.organisationId
+                            { userId: inputData.userId }
+                            , {
+                                $pull: {
+                                    organisations: { value: inputData.organisationId },
+                                    organisationRoles: {
+                                        organisationId: inputData.organisationId
                                     }
                                 }
 
                             });
-                           
+
 
                     }
                     resolve({ result: removeUser.result, message: constants.apiResponses.USER_REMOVED });
@@ -944,7 +928,7 @@ function _userColumn() {
         'gender',
         'role',
         'status',
-        'action'
+        'actions'
     ];
 
     let defaultColumn = {
@@ -1081,7 +1065,7 @@ function _organisationColumn() {
         'externalId',
         'address',
         'status',
-        'action'
+        'actions'
     ];
 
     let defaultColumn = {

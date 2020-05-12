@@ -249,6 +249,7 @@ var searchOrganisation = function (requestBody, token) {
 var createOrganisation = function (requestBody, token) {
     return new Promise(async (resolve, reject) => {
 
+
         const searchOrgUrl =
             process.env.sunbird_url + constants.endpoints.SUNBIRD_CREATE_ORG;
         let response = await callToSunbird(token, requestBody, searchOrgUrl);

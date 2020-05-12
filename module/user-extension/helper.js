@@ -366,7 +366,6 @@ module.exports = class UserCreationHelper {
                         let orgInfo = [];
                         let organisationsList = await _getOrganisationlist(profileData, orgAdminUserId,userToken);
 
-                        console.log("organisationsList",organisationsList);
                         if (profileData.result.response &&
                              profileData.result.response.organisations && 
                              profileData.result.response.organisations.length > 0){
@@ -374,8 +373,6 @@ module.exports = class UserCreationHelper {
                                 var results = organisationsList.filter(function (orgData) {
                                     return orgData.value === data.organisationId
                                 });
-
-
 
                                 let allRoles = [];
                                 if (data && data.roles && data.roles.length > 0) {
@@ -418,12 +415,6 @@ module.exports = class UserCreationHelper {
                         roles: [],
                         organisationsList: []
                     }
-
-
-
-
-
-
 
 
                     userDetails.roles = roles;
