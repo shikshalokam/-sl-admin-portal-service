@@ -201,7 +201,10 @@ module.exports = class OrganisationsHelper {
                                     cRoles.map(roleData => {
                                         if ((roleData.code).toUpperCase() != constants.common.PUBLIC_ROLE) {
                                             if (rolesOfUser == "") {
-                                                rolesOfUser = allRoles[roleData.code];
+                                                if(rolesOfUser[roleData.code]){
+                                                    rolesOfUser = rolesOfUser[roleData.code];
+                                                }
+                                                // rolesOfUser = allRoles[roleData.code];
                                             } else {
                                                 if (rolesOfUser[roleData.code]) {
                                                     rolesOfUser = rolesOfUser + "," + rolesOfUser[roleData.code]
