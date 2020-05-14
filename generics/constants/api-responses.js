@@ -24,6 +24,7 @@ module.exports = {
     ORG_ACTIVATED: "Organisation Activated Successfully",
     ORG_DEACTIVATED: "Organisation Deactivated Successfully",
     ORG_UPDATED: "Organisation Details Updated Successfully",
+    FAILED_TO_ADD_USER_TO_ORG: "Failed to add user to organisation",
 
    
     // USER
@@ -32,6 +33,9 @@ module.exports = {
     USER_LIST_NOT_FOUND :"User List Not Found",
     USERS_LIST_FETCHED : "Users List Fetched Successfully",
     
-    INVALID_ACCESS : "Invalid Access"
+    INVALID_ACCESS : "Invalid Access",
+
+    //BULK UPLOAD
+    REQUEST_SUBMITTED:"Request Submitted Successfully"
 
 };

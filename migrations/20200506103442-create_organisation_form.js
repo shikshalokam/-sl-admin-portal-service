@@ -10,7 +10,7 @@ module.exports = {
 
     let allFields = [];
 
-    let inputFields = ["name","description","email", "externalId"];
+    let inputFields = ["name","description","email", "externalId","address"];
 
     let inputField = {
       "field": "",
@@ -41,10 +41,11 @@ module.exports = {
         validator = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
         message = "Please provide a valid Email";
 
-      } else if(fields == "description"){
+      } else if(fields == "description" || fields =="address"){
         // validator = "^[a-z0-9_-]{3,15}$";
         // message = "Please provide a valid User Name";
         inputObj.input = "textarea";
+        // inputObj.validation = [];
       }
       // else if (fields == "externalId") {
 

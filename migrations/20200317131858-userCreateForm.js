@@ -48,6 +48,7 @@ module.exports = {
 
           
         } else if (fields == "email") {
+          inputObj.validation = [];
           inputObj.validation.push({
             "name": "pattern",
             "validator": "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$",
@@ -55,6 +56,7 @@ module.exports = {
           });
 
         } else if (fields == "phoneNumber") {
+          inputObj.validation = [];
           inputObj.validation.push({
             "name": "pattern",
             "validator": "(0/91)?[7-9][0-9]{9}",
@@ -70,6 +72,7 @@ module.exports = {
               "value": "M"
             }]
             inputObj.validation = [];
+            inputObj.input = "select";
        }else if (fields == "dateOfBirth") {
           inputObj.input = "date";
           inputObj.validation = [];

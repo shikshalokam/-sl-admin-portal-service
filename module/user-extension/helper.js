@@ -13,6 +13,8 @@ let userManagementService =
 let sunBirdService =
     require(ROOT_PATH + "/generics/services/sunbird");
 
+const csv = require('csvtojson');
+
 module.exports = class UserCreationHelper {
 
     /**
@@ -114,14 +116,14 @@ module.exports = class UserCreationHelper {
                 //     })
                 // }
 
-                organisations = await _getOrganisationlist(userProfileInfo, userId,token);
+                organisations = await _getOrganisationlist(userProfileInfo, userId, token);
 
 
                 let platformRoles =
-                    await database.models.platformRolesExt.find({ isDeleted:false }, {
+                    await database.models.platformRolesExt.find({ isDeleted: false }, {
                         code: 1,
                         title: 1,
-                        isHidden:1
+                        isHidden: 1
                     }).lean();
 
                 let roles = [];
@@ -149,13 +151,13 @@ module.exports = class UserCreationHelper {
                 if (platformRoles.length > 0) {
 
                     await Promise.all(platformRoles.map(platformRole => {
-                        if(!platformRole.isHidden || platformRole.isHidden!=true){
+                        if (!platformRole.isHidden || platformRole.isHidden != true) {
                             roles.push({
                                 label: platformRole.title,
                                 value: platformRole.code
                             })
                         }
-                       
+
                     }));
                 }
 
@@ -318,10 +320,10 @@ module.exports = class UserCreationHelper {
 
 
                         let platformRoles =
-                            await database.models.platformRolesExt.find({ isDeleted:false }, {
+                            await database.models.platformRolesExt.find({ isDeleted: false }, {
                                 code: 1,
                                 title: 1,
-                                isHidden:1
+                                isHidden: 1
                             }).lean();
 
                         let roles = [];
@@ -350,12 +352,12 @@ module.exports = class UserCreationHelper {
 
                             await Promise.all(platformRoles.map(platformRole => {
 
-                                if(!platformRole.isHidden || platformRole.isHidden!=true){
-                                roles.push({
-                                    label: platformRole.title,
-                                    value: platformRole.code
-                                })
-                            }
+                                if (!platformRole.isHidden || platformRole.isHidden != true) {
+                                    roles.push({
+                                        label: platformRole.title,
+                                        value: platformRole.code
+                                    })
+                                }
                             }));
                         }
 
@@ -364,17 +366,17 @@ module.exports = class UserCreationHelper {
                         }
 
                         let orgInfo = [];
-                        let organisationsList = await _getOrganisationlist(profileData, orgAdminUserId,userToken);
+                        let organisationsList = await _getOrganisationlist(profileData, orgAdminUserId, userToken);
 
                         // userId
 
-                       let userDoc =  await database.models.userExtension.findOne({ userId:userId },{ organisationRoles:1 });
+                        let userDoc = await database.models.userExtension.findOne({ userId: userId }, { organisationRoles: 1 });
 
-                      
+
 
                         if (profileData.result.response &&
-                             profileData.result.response.organisations && 
-                             profileData.result.response.organisations.length > 0){
+                            profileData.result.response.organisations &&
+                            profileData.result.response.organisations.length > 0) {
                             profileData.result.response.organisations.map(data => {
                                 var results = organisationsList.filter(function (orgData) {
                                     return orgData.value === data.organisationId
@@ -384,7 +386,7 @@ module.exports = class UserCreationHelper {
                                 if (data && data.roles && data.roles.length > 0) {
                                     data.roles.map(function (sunbirdUserRole) {
 
-                                        if (sunbirdUserRole && sunbirdUserRole!= constants.common.PUBLIC_ROLE) {
+                                        if (sunbirdUserRole && sunbirdUserRole != constants.common.PUBLIC_ROLE) {
 
                                             let roleInfo = roles.filter(function (roleDetails) {
                                                 return roleDetails.value === sunbirdUserRole
@@ -397,13 +399,13 @@ module.exports = class UserCreationHelper {
                                 if (userDoc) {
                                     if (userDoc.organisationRoles) {
                                         let orgRolesOfUser = [];
-                                        userDoc.organisationRoles.map(userRoles=>{
-                                             if(data.organisationId ==userRoles.organisationId){
+                                        userDoc.organisationRoles.map(userRoles => {
+                                            if (data.organisationId == userRoles.organisationId) {
                                                 orgRolesOfUser.push(...userRoles.roles);
-                                             }
+                                            }
                                         })
-            
-                                        orgRolesOfUser.map(element=>{
+
+                                        orgRolesOfUser.map(element => {
                                             let roleInfo = roles.filter(function (roleDetails) {
                                                 return roleDetails.value === element.code
                                             });
@@ -418,47 +420,66 @@ module.exports = class UserCreationHelper {
                                     roles: allRoles
                                 })
                             });
-                       }
+                        }
 
-                    let gender = profileData.result.response.gender == "M" ? "Male" : profileData.result.response.gender == "F" ? "Female" : "";
+                        let gender = profileData.result.response.gender == "M" ? "Male" : profileData.result.response.gender == "F" ? "Female" : "";
 
-                    let reponseObj = profileData.result.response;
+                        let reponseObj = profileData.result.response;
 
-                    userDetails = {
-                        firstName: reponseObj.firstName,
-                        gender: gender,
-                        userName: reponseObj.userName,
-                        lastName: reponseObj.lastName,
-                        email: reponseObj.email,
-                        phoneNumber: reponseObj.phone,
-                        status: reponseObj.status,
-                        dob: reponseObj.dob,
-                        lastLoginTime: reponseObj.lastLoginTime,
-                        createdDate: reponseObj.createdDate,
-                        organisations: orgInfo,
-                        roles: [],
-                        organisationsList: []
+                        userDetails = {
+                            firstName: reponseObj.firstName,
+                            gender: gender,
+                            userName: reponseObj.userName,
+                            lastName: reponseObj.lastName,
+                            email: reponseObj.email,
+                            phoneNumber: reponseObj.phone,
+                            status: reponseObj.status,
+                            dob: reponseObj.dob,
+                            lastLoginTime: reponseObj.lastLoginTime,
+                            createdDate: reponseObj.createdDate,
+                            organisations: orgInfo,
+                            roles: [],
+                            organisationsList: []
+                        }
+
+
+                        userDetails.roles = roles;
+                        userDetails.organisationsList = organisationsList;
+                        resolve({ result: userDetails });
+
+                    } else {
+
+                        reject({ message: profileData });
                     }
-
-
-                    userDetails.roles = roles;
-                    userDetails.organisationsList = organisationsList;
-                    resolve({ result: userDetails });
-
                 } else {
-
                     reject({ message: profileData });
                 }
-            } else {
-                reject({ message: profileData });
+            } catch (error) {
+                console.log("error", error);
+                return reject(error);
             }
-        } catch (error) {
-            console.log("error", error);
-            return reject(error);
-        }
-    })
-}
+        })
+    }
 
+    /**
+    * to get bulkUserSampleCsvDwonload.
+    * @method
+    * @name  bulkUserSampleCsvDwonload
+    * @returns {json} Response consists sample csv data
+    */
+
+    static bulkUserSampleCsvDwonload() {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                const csvData = await csv().fromFile('sample-bulk-user.csv');
+                resolve(csvData);
+            } catch (error) {
+                console.log("error", error);
+                return reject(error);
+            }
+        })
+    }
 };
 
 /**
@@ -506,7 +527,7 @@ function _checkStateWithSubEntities(groups, entityTypeId) {
   * @returns {boolean}
   * */
 
-function _getOrganisationlist(userProfileInfo, userId,token) {
+function _getOrganisationlist(userProfileInfo, userId, token) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -537,7 +558,7 @@ function _getOrganisationlist(userProfileInfo, userId,token) {
                 //     { raw: true, select: ["orgname", "id"] });
 
                 // let organisationsDoc = await sunBirdService. 
-                
+
                 let request = {
                     "filters": {
                     }
@@ -588,29 +609,29 @@ function _getOrganisationlist(userProfileInfo, userId,token) {
                             //         raw: true
                             //     });
 
-                                let request = {
-                                    "filters": {
-                                        id:organisation.organisationId
-                                    }
+                            let request = {
+                                "filters": {
+                                    id: organisation.organisationId
                                 }
-                                let organisationList = await sunBirdService.searchOrganisation(request, token);
-                                if (organisationList.responseCode == constants.common.RESPONSE_OK) {
-                                    if (organisationList.result && organisationList.result.response &&
-                                        organisationList.result.response && organisationList.result.response.content) {
-                                        await Promise.all(organisationList.result.response.content.map(async function (orgInfo) {
-                
-                                            // let orgDetails = {
-                                            //     label: orgInfo.orgname,
-                                            //     value: orgInfo.id
-                                            // }
-                                            organisations.push({
-                                                label: orgInfo.orgName,
-                                                value: orgInfo.id
-                                            });
-                
-                                        }))
-                                    }
+                            }
+                            let organisationList = await sunBirdService.searchOrganisation(request, token);
+                            if (organisationList.responseCode == constants.common.RESPONSE_OK) {
+                                if (organisationList.result && organisationList.result.response &&
+                                    organisationList.result.response && organisationList.result.response.content) {
+                                    await Promise.all(organisationList.result.response.content.map(async function (orgInfo) {
+
+                                        // let orgDetails = {
+                                        //     label: orgInfo.orgname,
+                                        //     value: orgInfo.id
+                                        // }
+                                        organisations.push({
+                                            label: orgInfo.orgName,
+                                            value: orgInfo.id
+                                        });
+
+                                    }))
                                 }
+                            }
 
 
                             // if (organisationDetails) {

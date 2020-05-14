@@ -387,17 +387,22 @@ module.exports = class OrganisationsHelper {
                 let response = await sunBirdService.addUser(orgCreateRequest, token);
 
                 if (response && response.responseCode == constants.common.RESPONSE_OK) {
-                    if (response.result.response == "SUCCESS") {
+                    if (response.result.response == constants.common.SUCCESS_RESPONSE) {
                         let organisationsRoles = [];
                         organisationsRoles.push({ organisationId: orgnaisationInfo.organisation.value, roles: rolesId });
 
                         let updateUser = await database.models.userExtension.findOneAndUpdate({ userId: orgnaisationInfo.userId },
                             { $push: { organisations: orgnaisationInfo.organisation, organisationRoles: organisationsRoles } });
+
+                            resolve({ result: response.result, message: constants.apiResponses.USER_ADDED_TO_ORG });
+                    }else{
+
+                        reject({ result: response.result, status: httpStatusCode["bad_request"].status, 
+                        message:constants.apiResponses.FAILED_TO_ADD_USER_TO_ORG });
                     }
 
-                    resolve({ result: response.result, message: constants.apiResponses.USER_ADDED_TO_ORG });
                 } else {
-                    reject({ message: response.body });
+                    reject({ message: response,status: httpStatusCode["bad_request"].status });
                 }
 
             } catch (error) {
@@ -458,7 +463,7 @@ module.exports = class OrganisationsHelper {
 
                 let response = await sunBirdService.assignRoles(orgnisationInfo, token);
                 if (response && response.responseCode == constants.common.RESPONSE_OK) {
-                    if (response.result.response == "SUCCESS") {
+                    if (response.result.response == constants.common.SUCCESS_RESPONSE) {
                         console.log(orgnisationInfo.organisationId, "rolesId", rolesId)
                         let userDetails = await database.models.userExtension.updateOne({
                             userId: orgnisationInfo.userId, "organisationRoles.organisationId": orgnisationInfo.organisationId
@@ -468,7 +473,7 @@ module.exports = class OrganisationsHelper {
                     }
                     resolve({ result: response.result, message: constants.apiResponses.ASSIGNED_ROLE_SUCCESSFULLY });
                 } else {
-                    reject({ message: response.body });
+                    reject({ message: response });
                 }
 
             } catch (error) {
@@ -811,7 +816,7 @@ module.exports = class OrganisationsHelper {
                 let removeUser = await sunBirdService.removeUser(inputData, token);
                 if (removeUser && removeUser.responseCode == constants.common.RESPONSE_OK) {
 
-                    if (removeUser.result.response == "SUCCESS") {
+                    if (removeUser.result.response == constants.common.SUCCESS_RESPONSE) {
                         let updateUser = await database.models.userExtension.findOneAndUpdate(
                             { userId: inputData.userId }
                             , {
@@ -941,7 +946,7 @@ function _userColumn() {
         'firstName',
         'lastName',
         'gender',
-        'role',
+        'roles',
         'status',
         'actions'
     ];
