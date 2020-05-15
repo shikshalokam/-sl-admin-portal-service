@@ -309,6 +309,9 @@ module.exports = class UserCreationHelper {
                 let profileData =
                     await sunBirdService.getUserProfileInfo(userToken, userId);
                 profileData = JSON.parse(profileData);
+
+                let userCustomeRole = await database.models.userExtension.findOne({ userId: orgAdminUserId }, { roles: 1 });
+
                 if (profileData.responseCode == constants.common.RESPONSE_OK) {
 
                     let orgInfo = [];
@@ -323,6 +326,15 @@ module.exports = class UserCreationHelper {
                         message: constants.apiResponses.INVALID_ACCESS });
                     }
                     let orgFound =false;
+
+                    if(userCustomeRole && userCustomeRole.roles){
+                        userCustomeRole.roles.map(custRole=>{
+                          if(custRole.code==  constants.common.PLATFROM_ADMIN_ROLE){
+                            orgFound = true;
+                          }
+                        })
+                    }
+                    
                    let adminUserOrganisation = [];
                     if(apiAccessUserData.result.response &&
                         apiAccessUserData.result.response.organisations &&
