@@ -37,7 +37,15 @@ module.exports = {
 
         inputObj.validation[0].message = inputObj.label + " required";
 
-        if (fields == "password" || fields == "confirmPassword") {
+        
+        if (fields == "userName"){
+          inputObj.validation.push({
+            "name": "pattern",
+            "validator": "^[a-zA-Z0-9]+$",
+            "message": "Please provide a valid User Name"
+          });
+        }
+        else if (fields == "password" || fields == "confirmPassword") {
           inputObj.input = "password";
          
           inputObj.validation.push({

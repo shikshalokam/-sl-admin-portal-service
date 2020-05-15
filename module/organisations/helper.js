@@ -251,7 +251,7 @@ module.exports = class OrganisationsHelper {
                                 lastName: userItem.lastName,
                                 id: userItem.id,
                                 gender: gender,
-                                role: rolesOfUser,
+                                roles: rolesOfUser,
                                 status: status
                             }
                             userInfo.push(resultObj);
@@ -402,7 +402,7 @@ module.exports = class OrganisationsHelper {
                     }
 
                 } else {
-                    reject({ message: response,status: httpStatusCode["bad_request"].status });
+                    reject({ message: response.result.response,status: httpStatusCode["bad_request"].status });
                 }
 
             } catch (error) {

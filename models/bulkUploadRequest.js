@@ -6,16 +6,19 @@ module.exports = {
         type: String,
         required: true
       },
-      createdBy: {
+      remarks:{
+        type: String
+      },
+      userId:{
         type: String,
         required: true
       },
-      updatedBy: {
-        type: String
+      metaInformation:{
+        type:Object
       },
       status: {
         type: String,
-        default: "proccessing"
+        default: "pending"
       }
     }
   };

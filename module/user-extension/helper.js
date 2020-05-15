@@ -308,17 +308,53 @@ module.exports = class UserCreationHelper {
 
                 let profileData =
                     await sunBirdService.getUserProfileInfo(userToken, userId);
-
-
                 profileData = JSON.parse(profileData);
-                if (profileData.responseCode == "OK") {
+                if (profileData.responseCode == constants.common.RESPONSE_OK) {
 
+                    let orgInfo = [];
+                    let organisationsList = await _getOrganisationlist(profileData, orgAdminUserId, userToken);
 
+                    let apiAccessUserData =
+                    await sunBirdService.getUserProfileInfo(userToken, orgAdminUserId);
+
+                    apiAccessUserData = JSON.parse(apiAccessUserData);
+                    if(apiAccessUserData.responseCode != constants.common.RESPONSE_OK){
+                        reject({status: httpStatusCode["bad_request"].status,
+                        message: constants.apiResponses.INVALID_ACCESS });
+                    }
+                    let orgFound =false;
+                   let adminUserOrganisation = [];
+                    if(apiAccessUserData.result.response &&
+                        apiAccessUserData.result.response.organisations &&
+                        apiAccessUserData.result.response.organisations.length > 0) {
+                            apiAccessUserData.result.response.organisations.map(data => {
+                            adminUserOrganisation.push(data.organisationId);
+                            
+                        })
+
+                    }
+                    if(adminUserOrganisation && adminUserOrganisation.length > 0){
+                       
+                        if (profileData.result.response &&
+                            profileData.result.response.organisations &&
+                            profileData.result.response.organisations.length > 0) {
+                            profileData.result.response.organisations.map(data => {
+                                
+                                if(adminUserOrganisation.includes(data.organisationId)){
+                                    orgFound =true;
+                                }
+                            });
+                        }
+                    }
+    
+                  if(orgFound==false){
+                        reject({status: httpStatusCode["bad_request"].status,
+                        message: constants.apiResponses.INVALID_ACCESS });
+                
+                  }else{
+                     
                     let userDetails = {};
                     if (profileData.result) {
-
-
-
                         let platformRoles =
                             await database.models.platformRolesExt.find({ isDeleted: false }, {
                                 code: 1,
@@ -365,14 +401,7 @@ module.exports = class UserCreationHelper {
                             roles = roles.sort(gen.utils.sortArrayOfObjects("label"));
                         }
 
-                        let orgInfo = [];
-                        let organisationsList = await _getOrganisationlist(profileData, orgAdminUserId, userToken);
-
-                        // userId
-
                         let userDoc = await database.models.userExtension.findOne({ userId: userId }, { organisationRoles: 1 });
-
-
 
                         if (profileData.result.response &&
                             profileData.result.response.organisations &&
@@ -451,6 +480,10 @@ module.exports = class UserCreationHelper {
 
                         reject({ message: profileData });
                     }
+               
+               
+                }
+               
                 } else {
                     reject({ message: profileData });
                 }

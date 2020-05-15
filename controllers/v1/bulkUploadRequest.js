@@ -98,7 +98,9 @@ module.exports = class PlatformRolesExt extends Abstract {
       let list = await bulkUploadHelper.list(req.userDetails.userId,
         req.searchText,
         req.pageSize,
-        req.pageNo);
+        req.pageNo,
+        req.userDetails.userToken
+        );
       return resolve(list);
 
     } catch (error) {
@@ -139,7 +141,7 @@ module.exports = class PlatformRolesExt extends Abstract {
   return new Promise(async (resolve, reject) => {
     try {
 
-      let details = await bulkUploadHelper.details(req.params._id);
+      let details = await bulkUploadHelper.details(req.userDetails.userToken,req.userDetails.userId,req.params._id);
       return resolve(details);
 
     } catch (error) {
