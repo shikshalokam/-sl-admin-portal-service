@@ -612,7 +612,7 @@ module.exports = class OrganisationsHelper {
             try {
 
                 let requestBody = {
-                    // "channel":inputData.organisationName,
+                     "channel":process.env.SUNBIRD_CHANNEL,
                     "description": inputData.description,
                     "externalId": inputData.externalId,
                     // "isRootOrg": true,
