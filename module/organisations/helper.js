@@ -618,8 +618,9 @@ module.exports = class OrganisationsHelper {
                     // "isRootOrg": true,
                     "provider": process.env.SUNBIRD_PROVIDER,
                     "orgName": inputData.name,
-                    "address": {
+                    "address":{
                         addressLine1: inputData.address,
+                        city:inputData.address
                     },
                     // "orgType": "string",
                     // "orgTypeId": "string",
