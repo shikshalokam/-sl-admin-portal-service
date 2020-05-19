@@ -13,6 +13,9 @@ module.exports = {
         type: String,
         required: true
       },
+      file:{
+        type: Object
+      },
       metaInformation:{
         type:Object
       },

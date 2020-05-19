@@ -36,6 +36,9 @@ module.exports = {
     INVALID_ACCESS : "Invalid Access",
 
     //BULK UPLOAD
-    REQUEST_SUBMITTED:"Request Submitted Successfully"
+    REQUEST_SUBMITTED:"Request Submitted Successfully",
+
+    //Kendra APIS
+    KENDRA_SERVICE_DOWN:"Kendra serviece down"
 
 };

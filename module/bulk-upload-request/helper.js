@@ -7,8 +7,15 @@
 
 let sunBirdService =
     require(ROOT_PATH + "/generics/services/sunbird");
+let kendrService =
+    require(ROOT_PATH + "/generics/services/kendra-service")
 
 const csv = require('csvtojson');
+const request = require('request');
+
+
+
+const fs = require('fs');
 
 module.exports = class UserCreationHelper {
 
@@ -29,27 +36,82 @@ module.exports = class UserCreationHelper {
                 if (profileData && profileData['allowed']) {
                     let configData = await csv().fromString(req.files.userCreationFile.data.toString());
 
+                    let randomNuumber = Math.floor(Math.random() * (100000 - 1) + 1);
+                    var timestamp = Math.floor(new Date() / 1000);
+                    let fileName = timestamp + "_" + randomNuumber + ".csv";
+                    var dir = ROOT_PATH + process.env.BATCH_FOLDER_PATH;
+                    if (!fs.existsSync(dir)) {
+                        fs.mkdirSync(dir);
+                    }
 
-                    console.log("eq.headers",req);
-                    let type ="user-create";
-                    if(req.query.requestType){
+
+                    let files = [];
+                    files.push(userId+"/"+fileName);
+                    let fileInfo = { };
+
+                    let fileCompletePath = ROOT_PATH + process.env.BATCH_FOLDER_PATH + fileName;
+                    let data = fs.writeFileSync(fileCompletePath, req.files.userCreationFile.data);
+
+                    let requestBody = {
+                        fileNames: files,
+                    }
+                    let endPoint =  "";
+                    if(process.env.CLOUD_STORAGE== constants.common.AWS_SERVICE){
+                        requestBody['bucket'] = process.env.AWS_STORAGE_BUCKET;
+                        endPoint = constants.endpoints.AWS_PRESIGNED_URL;
+
+                    }else if(process.env.CLOUD_STORAGE== constants.common.GOOGLE_CLOUD_SERVICE){
+
+                        requestBody['bucket'] = process.env.GCP_STORAGE_BUCKET;
+                        endPoint =constants.endpoints.GCP_PRESIGNED_URL;
+    
+                    }else if(process.env.CLOUD_STORAGE== constants.common.AZURE_SERVICE){
+                       
+                         requestBody['bucket'] = process.env.AZURE_STORAGE_BUCKET;
+                        endPoint = constants.endpoints.AZURE_PRESIGNED_URL;
+                    }
+
+                    let response = await kendrService.getPreSignedUrl(req.userDetails.userToken, 
+                        requestBody,endPoint
+                        );
+                    if(response.result){
+                       
+                        let uploadResp  = await _uploadFileToGcp(fileCompletePath,response.result[0].url);
+                        fileInfo = {
+                            sourcePath:response.result[0].payload.sourcePath,
+                            cloudStorage:response.result[0].cloudStorage,
+                            bucket:requestBody['bucket']
+                        }
+                        
+                        fs.unlink(fileCompletePath);
+                        
+                    }else{
+                        return reject(response);
+                    }
+                
+                    let type = "user-create";
+                    if (req.query.requestType) {
                         type = req.query.requestType;
                     }
                     let doc = {
                         requestType: type,
                         userId: userId,
+                        file:fileInfo,
                         metaInformation: {
                             // headers:req.headers,
-                            query:req.query
+                            query: req.query
                             // url:r
 
                         },
                         remarks: ""
                     }
 
-                    console.log("doc", doc);
                     let request = await database.models.bulkUploadRequest.create(doc);
                     resolve({ result: { requestId: request._id }, message: constants.apiResponses.REQUEST_SUBMITTED });
+
+                 
+
+
                 } else {
                     resolve({
                         status: httpStatusCode["bad_request"].status,
@@ -69,7 +131,7 @@ module.exports = class UserCreationHelper {
     * @returns {json} Response consists sample csv data
     */
 
-    static list(userId, searchText, pageSize, pageNo,token) {
+    static list(userId, searchText, pageSize, pageNo, token) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -80,7 +142,12 @@ module.exports = class UserCreationHelper {
                     let columns = _bulkRequestList();
                     let count = await database.models.bulkUploadRequest.count({});
 
-                    let request = await database.models.bulkUploadRequest.find({}, {}, { skip: skip, limit: pageSize });
+                    let query = { };
+                    if(searchText){
+                        query = { $text: { $search: "java coffee shop" } }
+                    }
+
+                    let request = await database.models.bulkUploadRequest.find(query, {}, { skip: skip, limit: pageSize });
                     resolve({ result: { data: request, count: count, column: columns } });
                 } else {
                     resolve({
@@ -101,7 +168,7 @@ module.exports = class UserCreationHelper {
    * @returns {json} Response consists sample csv data
    */
 
-    static details(token,userId,requestId) {
+    static details(token, userId, requestId) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -126,6 +193,8 @@ module.exports = class UserCreationHelper {
             }
         })
     }
+
+
 
 
 
@@ -261,6 +330,40 @@ function _checkAccess(token, userId) {
             }
 
             return resolve(response);
+        } catch (error) {
+            return reject(error);
+        }
+    })
+}
+
+/**
+ * to upload file to _uploadFileToGcp
+ * @name _uploadFileToGcp
+ * @param {*} filePath filePath of the file to upload
+ * @param {*} gcp url
+ */
+function _uploadFileToGcp(filePath, url) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            let options = {
+                "headers": {
+                    'Content-Type': "multipart/form-data"
+                },
+                body: fs.createReadStream(filePath)
+            };
+
+            request.put(url, options, callback);
+            function callback(err, data) {
+                if (err) {
+                    return reject({
+                        message: constants.apiResponses.KENDRA_SERVICE_DOWN
+                    });
+                } else {
+
+                    return resolve(data);
+                }
+            }
         } catch (error) {
             return reject(error);
         }
