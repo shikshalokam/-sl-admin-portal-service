@@ -77,9 +77,56 @@ function checkIfStringIsUrl(str) {
   return pattern.test(str);
 }
 
+ /**
+  * Convert camel case to capitalize case.
+  * @function
+  * @name camelCaseToCapitalizeCase
+  * @param {String} str 
+  * @returns {String} Capitalize string 
+*/
+
+function camelCaseToCapitalizeCase(str) {
+  let capitalize = str.replace( /([A-Z])/g, " $1" );
+  return capitalize.charAt(0).toUpperCase() + capitalize.slice(1);
+}
+
+/**
+  * sort Array Of Objects  by key .
+  * @function
+  * @name sortArrayOfObjects
+  * @param {String} key and Order
+  * @returns {Object} array of objects 
+*/
+
+function sortArrayOfObjects(key, order = 'asc') {
+  return function innerSort(a, b) {
+    if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
+      // property doesn't exist on either object
+      return 0;
+    }
+
+    const varA = (typeof a[key] === 'string')
+      ? a[key].toUpperCase() : a[key];
+    const varB = (typeof b[key] === 'string')
+      ? b[key].toUpperCase() : b[key];
+
+    let comparison = 0;
+    if (varA > varB) {
+      comparison = 1;
+    } else if (varA < varB) {
+      comparison = -1;
+    }
+    return (
+      (order === 'desc') ? (comparison * -1) : comparison
+    );
+  };
+}
+
 module.exports = {
   camelCaseToTitleCase : camelCaseToTitleCase,
   lowerCase : lowerCase,
   checkIfStringIsUrl : checkIfStringIsUrl,
-  hyphenCaseToCamelCase : hyphenCaseToCamelCase
+  hyphenCaseToCamelCase : hyphenCaseToCamelCase,  
+  camelCaseToCapitalizeCase : camelCaseToCapitalizeCase,
+  sortArrayOfObjects:sortArrayOfObjects
 };

@@ -20,6 +20,14 @@ let db_connect = function (configData) {
   global.Abstract = require("../generics/abstract");
 };
 
+let cassandra_connect = function (configData) {
+  global.cassandraDatabase = require("./db/cassandra")(configData.db.connection.cassandra);
+  if(!global.Abstract){
+    global.Abstract = require("../generics/abstract");
+  }
+};
+
+
 const configuration = {
   root: require("path").normalize(__dirname + "/.."),
   app: {
@@ -36,6 +44,11 @@ const configuration = {
         options: {
           useNewUrlParser: true
         }
+      },
+      cassandra: {
+        host: process.env.CASSANDRA_HOST,
+        port:process.env.CASSANDRA_PORT,
+        keyspace: process.env.KEYSPACE,
       }
     }
   },
@@ -45,5 +58,6 @@ const configuration = {
 };
 
 db_connect(configuration);
+cassandra_connect(configuration);
 
 module.exports = configuration;

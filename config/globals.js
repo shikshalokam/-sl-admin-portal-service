@@ -14,9 +14,12 @@ module.exports = function () {
   global.ROOT_PATH = path.join(__dirname, '..')
   global.GENERIC_HELPERS_PATH = ROOT_PATH + "/generics/helpers"
   global.MODULES_BASE_PATH = ROOT_PATH + "/module"
+  global.CASSANDRA_MODULES_BASE_PATH = ROOT_PATH + "/cassandra_models"
   global._ = require("lodash");
   gen.utils = require(ROOT_PATH + "/generics/helpers/utils");
   global.config = require(".");
+
+  
 
   global.httpStatusCode = 
   require(ROOT_PATH + "/generics/http-status-codes");

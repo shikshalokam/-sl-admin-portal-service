@@ -76,11 +76,10 @@ var createPlatFormUser = function ( requestBody,token ) {
                 "content-type": "application/json",
                 "authorization" :  process.env.AUTHORIZATION,
                 "x-authenticated-user-token" : token,
-                "x-channel-id" : constants.SUNBIRD_ORGANISATION_ID 
                 },
                 json : requestBody
             };
-            
+
              request.post(platformUserRolesUrl,options,callback);
             
             function callback(err,data){
@@ -101,8 +100,149 @@ var createPlatFormUser = function ( requestBody,token ) {
 
 }
 
+/**
+  * to update PlatForm User data
+  * @function
+  * @name updatePlatFormUser
+  * @returns {Promise} returns a promise.
+*/
+
+var updatePlatFormUser = function ( requestBody,token ) {
+
+    const platformUserUpdateUrl = 
+    urlPrefix + constants.endpoints.PLATFORM_USER_UPDATE;
+    
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            let options = {
+                "headers":{
+                "content-type": "application/json",
+                "authorization" :  process.env.AUTHORIZATION,
+                "x-authenticated-user-token" : token,
+                },
+                json : requestBody
+            };
+
+             request.post(platformUserUpdateUrl,options,callback);
+            
+            function callback(err,data){
+                if( err ) {
+                    return reject({
+                        message : constants.apiResponses.SUNBIRD_SERVICE_DOWN
+                    });
+                } else {
+                    let dialCodeData = data.body;
+                    return resolve(dialCodeData);
+                }
+            }
+
+        } catch (error) {
+            return reject(error);
+        }
+    })
+
+}
+
+
+/**
+  * to update status of the user
+  * @function
+  * @name statusUpdate
+  * @returns {Promise} returns a promise.
+*/
+
+var statusUpdate = function ( userId,token,status ) {
+
+    const platformUserStatusUpdateUrl = 
+    urlPrefix + constants.endpoints.STATUS_UPDATE;
+    
+    return new Promise(async (resolve, reject) => {
+        try {
+
+
+            let options = {
+                "headers":{
+                "content-type": "application/json",
+                "authorization" :  process.env.AUTHORIZATION,
+                "x-authenticated-user-token" : token,
+                },
+                json : { userId : userId,status:status }
+            };
+
+             request.post(platformUserStatusUpdateUrl,options,callback);
+            
+            function callback(err,data){
+                if( err ) {
+                    return reject({
+                        message : constants.apiResponses.SUNBIRD_SERVICE_DOWN
+                    });
+                } else {
+                    let dialCodeData = data.body;
+                    return resolve(dialCodeData);
+                }
+            }
+
+        } catch (error) {
+            return reject(error);
+        }
+    })
+
+}
+
+
+/**
+  * to get user details from user-management service
+  * @function
+  * @name userDetails
+  * @returns {Promise} returns a promise.
+*/
+
+var userDetails = function ( userId,token ) {
+
+    const userDetailsAPIUrl = 
+    urlPrefix + constants.endpoints.USER_DETAILS;
+
+
+    
+    return new Promise(async (resolve, reject) => {
+        try {
+
+
+            let options = {
+                "headers":{
+                "content-type": "application/json",
+                "authorization" :  process.env.AUTHORIZATION,
+                "x-authenticated-user-token" : token,
+                },
+                json : { userId : userId }
+            };
+
+             request.post(userDetailsAPIUrl,options,callback);
+            
+            function callback(err,data){
+                if( err ) {
+                    return reject({
+                        message : constants.apiResponses.SUNBIRD_SERVICE_DOWN
+                    });
+                } else {
+
+                    return resolve(data.body);
+                }
+            }
+
+        } catch (error) {
+            return reject(error);
+        }
+    })
+
+}
+
 
 module.exports = {
     platformUserProfile : platformUserProfile,
-    createPlatFormUser:createPlatFormUser
+    createPlatFormUser:createPlatFormUser,
+    updatePlatFormUser:updatePlatFormUser,
+    statusUpdate:statusUpdate,
+    userDetails:userDetails
 };

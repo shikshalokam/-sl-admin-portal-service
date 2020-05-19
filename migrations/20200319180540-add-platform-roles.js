@@ -2,95 +2,63 @@ module.exports = {
   async up(db) {
     global.migrationMsg = "add platform roles"
 
+    let roles = [
+        {
+          "name": "Platform Admin", 
+          "id": "PLATFORM_ADMIN"
+        },{
+          "name": "Observation Reviewer",
+          "id": "OBS_REVIEWER",
 
-    let rolesObj = {
-      "roles": [
-        {
-          "actionGroups": [
-            { "name": "Course Mentor", "id": "COURSE_MENTOR", "actions": [] }
-          ], "name": "Course Mentor", "id": "COURSE_MENTOR"
-        }
-        ,
-        {
-          "actionGroups": [
-            { "name": "Content Creation", "id": "CONTENT_CREATION", "actions": [] },
-            { "name": "Content Curation", "id": "CONTENT_CURATION", "actions": [] },
-            { "name": "Content Review", "id": "CONTENT_REVIEW", "actions": [] }
-          ],
-          "name": "Content Reviewer", "id": "CONTENT_REVIEWER"
-        },
-        {
-          "actionGroups": [
-            { "name": "System Administration", "id": "SYSTEM_ADMINISTRATION", "actions": [] },
-            { "name": "Org Management", "id": "ORG_MANAGEMENT", "actions": [] }
-          ],
-          "name": "Admin", "id": "ADMIN"
-        },
-        {
-          "actionGroups": [
-            { "name": "Teacher Badge Issuer", "id": "TEACHER_BADGE_ISSUER", "actions": [] }
-          ],
-          "name": "Teacher Badge Issuer", "id": "TEACHER_BADGE_ISSUER"
-        },
-        {
-          "actionGroups": [
-            { "name": "Org Management", "id": "ORG_MANAGEMENT", "actions": [] },
-            { "name": "Membership Management", "id": "MEMBERSHIP_MANAGEMENT", "actions": [] }
-          ],
-          "name": "Org Admin", "id": "ORG_ADMIN"
-        }, {
-          "actionGroups": [
-            { "name": "Book Creator", "id": "BOOK_CREATOR", "actions": [] }
-          ],
-          "name": "Book Creator", "id": "BOOK_CREATOR"
-        },
-        {
-          "actionGroups": [
-            { "name": "Book Reviewer", "id": "BOOK_REVIEWER", "actions": [] }
-          ],
-          "name": "Book Reviewer", "id": "BOOK_REVIEWER"
-        },
-        {
-          "actionGroups": [
-            { "name": "Official TextBook Badge Issuer", "id": "OFFICIAL_TEXTBOOK_BADGE_ISSUER", "actions": [] }
-          ],
-          "name": "Official TextBook Badge Issuer", "id": "OFFICIAL_TEXTBOOK_BADGE_ISSUER"
-        },
-        {
-          "actionGroups": [
-            {
-              "name": "Course Creator", "id": "COURSE_CREATOR", "actions": []
-            }], "name": "Course Creator", "id": "COURSE_CREATOR"
-        }, { "actionGroups": [{ "name": "Course Admin", "id": "COURSE_ADMIN", "actions": [] }], "name": "Course Admin", "id": "COURSE_ADMIN" }, { "actionGroups": [{ "name": "Membership Management", "id": "MEMBERSHIP_MANAGEMENT", "actions": [] }], "name": "Org Moderator", "id": "ORG_MODERATOR" }, { "actionGroups": [{ "name": "Public", "id": "PUBLIC", "actions": [] }], "name": "Public", "id": "PUBLIC" }, { "actionGroups": [{ "name": "Announcement Sender", "id": "ANNOUNCEMENT_SENDER", "actions": [] }], "name": "Announcement Sender", "id": "ANNOUNCEMENT_SENDER" }, { "actionGroups": [{ "name": "Program Manager", "id": "PROGRAM_MANAGER", "actions": [] }], "name": "Program Manager", "id": "PROGRAM_MANAGER" }, { "actionGroups": [{ "name": "Assessor", "id": "ASSESSOR", "actions": [] }], "name": "Assessor", "id": "ASSESSOR" }, { "actionGroups": [{ "name": "Content Creation", "id": "CONTENT_CREATION", "actions": [] }], "name": "Content Creator", "id": "CONTENT_CREATOR" }, { "actionGroups": [{ "name": "Project Manager", "id": "PROJECT_MANAGER", "actions": [] }], "name": "Project Manager", "id": "PROJECT_MANAGER" },
-        { "actionGroups": [{ "name": "Lead Assessor", "id": "LEAD_ASSESSOR", "actions": [] }], "name": "Lead Assessor", "id": "LEAD_ASSESSOR" },
-        {
-          "actionGroups": [
-            { "name": "Flag Reviewer", "id": "FLAG_REVIEWER", "actions": [] }], "name": "Flag Reviewer", "id": "FLAG_REVIEWER"
+        },{
+          "name":"Observation Designer",
+          "id": "OBS_DESIGNER"
         }
       ]
-    }
 
+    
+    let result = {
+      "createdAt" : new Date,
+      "createdBy" : "SYSTEM",
+      "updatedBy" : "SYSTEM",
+      "status" : "active",
+      "isDeleted": false,
+      "platformRole" : false,
+      "programRole" : false,
+      "customRole" : false 
+    }  
 
     let platFormRoles = [];
-    await Promise.all(rolesObj.roles.map(async function(roleInfo){
 
-    
-        let role = {
-          "createdAt": new Date,
-          "createdBy": "SYSTEM",
-          "updatedBy": "SYSTEM",
-          "status": "active",
-          "isDeleted": false
-        }
-        role["code"] = roleInfo.id;
-        role["title"] = roleInfo.name;
-       
-        platFormRoles.push(role);
-    
+    await Promise.all(roles.map(async function (role) {
+
+      let platformRoleObj = {...result};
+
+      platformRoleObj["code"] = role.id;
+      platformRoleObj["title"] = role.name;
+
+      if ( 
+        role.id == "LEAD_ASSESSOR" || 
+        role.id == "ASSESSOR" || 
+        role.id == "PROGRAM_MANAGER" 
+      ) {
+        platformRoleObj["programRole"] = true;
+        platformRoleObj["customRole"] = true;
+        
+      } else if ( role.id == "PLATFORM_ADMIN" ) {
+        platformRoleObj["customRole"] = true;
+        platformRoleObj['isHidden']=true;
+        
+      } else {
+        platformRoleObj["platformRole"] =  true;
+        platformRoleObj['isHidden']=false;
+      } 
+      platFormRoles.push(platformRoleObj);
+
     }));
 
-    let dbRoles = await db.collection("platformRolesExt").insertMany(platFormRoles);
-
+    await db.collection("platformRolesExt").insertMany(platFormRoles);
+    db.collection('users').createIndex({ platformRole: 1 });
 
     // return await db.collection('albums').updateOne({artist: 'The Beatles'}, {$set: {blacklisted: true}});
   },

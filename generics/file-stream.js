@@ -9,7 +9,7 @@ const json2Csv = require('json2csv').Transform;
 const stream = require("stream");
 const fs = require("fs");
 const moment = require("moment-timezone");
-const DEFAULT_REPORTS_PATH = gen.utils.checkIfEnvDataExistsOrNot("DEFAULT_REPORTS_PATH");
+const DEFAULT_REPORTS_PATH = process.env.DEFAULT_REPORTS_PATH;
 
 /**
     * FileStream
@@ -20,7 +20,8 @@ let FileStream = class FileStream {
 
   constructor(fileName) {
     const currentDate = new Date();
-    const fileExtensionWithTime = moment(currentDate).tz("Asia/Kolkata").format("YYYY_MM_DD_HH_mm") + ".csv";
+    const fileExtensionWithTime = moment(currentDate).tz("Asia/Kolkata").format("YYYY_MM_DD_HH_mm_SS") + ".csv";
+
     if(!process.env.CSV_REPORTS_PATH){
       process.env.CSV_REPORTS_PATH = DEFAULT_REPORTS_PATH;
     }
@@ -54,9 +55,14 @@ let FileStream = class FileStream {
 
   ensureDirectoryPath(filePath) {
     try {
-      fs.mkdirSync(filePath, { recursive: true });
+   
+      if(!fs.existsSync(filePath)){
+
+         fs.mkdirSync(filePath, { recursive: true });
+      }
+      
     } catch (err) {
-      logger.info(err)
+      // logger.info(err)
       if (err.code !== 'EEXIST') throw err
     }
   }

@@ -12,7 +12,7 @@ const platformUserRolesHelper = require(MODULES_BASE_PATH + "/platform-user-role
     * @class
 */
 
-module.exports = class PlatformUserRoles {
+module.exports = class PlatformUserRoles extends Abstract {
   
    /**
      * @apiDefine errorBody
@@ -26,7 +26,9 @@ module.exports = class PlatformUserRoles {
      * @apiSuccess {String} result Data
      */
 
-  constructor() {}
+    constructor() {
+      super(schemas["platformUserRolesExt"]);
+    }
 
   static get name() {
     return "platform-user-roles";

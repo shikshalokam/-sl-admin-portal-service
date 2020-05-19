@@ -7,6 +7,7 @@ const mongoose_ttl = require("mongoose-ttl");
 let ObjectId = mongoose.Types.ObjectId;
 
 var DB = function(config) {
+
   mongoose.set('useCreateIndex', true)
   mongoose.set('useFindAndModify', false)
   mongoose.set('useUnifiedTopology', true)
@@ -20,7 +21,9 @@ var DB = function(config) {
     log.debug("Connected to DB");
   });
 
-  var createModel = function(opts) {
+  var createModel = function(opts) {  
+
+    
     if (typeof opts.schema.__proto__.instanceOfSchema === "undefined") {
       var schema = mongoose.Schema(opts.schema, opts.options);
     } else {
