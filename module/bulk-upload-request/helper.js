@@ -159,6 +159,10 @@ module.exports = class UserCreationHelper {
                         remarks: ""
                     }
                     let request = await database.models.bulkUploadRequest.create(doc);
+
+                    fs.unlink(fileCompletePath);
+                    fs.unlink(successFile);
+                    fs.unlink(failureFile);
                     resolve({ result: { requestId: request.requestId }, message: constants.apiResponses.REQUEST_SUBMITTED });
 
                 } else {
