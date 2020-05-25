@@ -32,7 +32,7 @@ function uploadFileToCloud(filePath, uploadPath,bucketName,token,endpoint) {
                 "headers": {
                     'Content-Type': "application/json",
                     "X-authenticated-user-token": token,
-                    "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN
+                     "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN
                 },
                 formData:{
                     filePath:uploadPath,

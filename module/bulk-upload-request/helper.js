@@ -350,6 +350,7 @@ function _bulkRequestList() {
 
     let columns = [
         'select',
+        'requestId',
         'requestType',
         'status',
         'createdAt',
