@@ -2,6 +2,10 @@ module.exports = {
     name: "bulkUploadRequest",
     schema: {
       id: "ObjectId",
+      requestId:{
+        type:String,
+        required:true
+      },
       requestType:{
         type: String,
         required: true
@@ -13,8 +17,14 @@ module.exports = {
         type: String,
         required: true
       },
-      file:{
+      inputFile:{
         type: Object
+      },
+      successFile:{
+        type:Object
+      },
+      errorFile:{
+        type:Object
       },
       metaInformation:{
         type:Object

@@ -30,7 +30,14 @@ module.exports = {
 
     GCP_PRESIGNED_URL:"/cloud-services/gcp/preSignedUrls",
     AWS_PRESIGNED_URL:"/cloud-services/aws/preSignedUrls",
-    AZURE_PRESIGNED_URL:"/cloud-services/azure/preSignedUrls"
+    AZURE_PRESIGNED_URL:"/cloud-services/azure/preSignedUrls",
+    UPLOAD_TO_GCP_PRESIGNED_URL:"/cloud-services/gcp/uploadFile",
+    UPLOAD_TO_AWS_PRESIGNED_URL:"/cloud-services/aws/uploadFile",
+    UPLOAD_TO_AZURE_PRESIGNED_URL:"/cloud-services/azure/uploadFile",
+
+    DOWNLOAD_GCP_URL:"/cloud-services/gcp/getDownloadableUrl",
+    DOWNLOAD_AWS_URL:"/cloud-services/aws/getDownloadableUrl",
+    DOWNLOAD_AZURE_URL:"/cloud-services/azure/getDownloadableUrl"
     
     
 }

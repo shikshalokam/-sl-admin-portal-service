@@ -44,7 +44,6 @@ module.exports = class PlatformRolesExt extends Abstract {
     try {
 
 
-      // console.log("req.files",req.files);
       if (!req.files || !req.files.userCreationFile) {
         throw { 
             status: httpStatusCode["bad_request"].status, 
@@ -99,7 +98,7 @@ module.exports = class PlatformRolesExt extends Abstract {
         req.searchText,
         req.pageSize,
         req.pageNo,
-        req.userDetails.userToken
+        req.userDetails.userToken,req.query.status
         );
       return resolve(list);
 
@@ -158,6 +157,51 @@ module.exports = class PlatformRolesExt extends Abstract {
     }
   });
 }
+
+    /**
+     * @api {get} /admin-service/api/v1/bulkUploadRequest/getDownloadableUrls 
+     * Upload bulk user Upload
+     * @apiVersion 1.0.0
+     * @apiGroup Bulk Upload
+     * @apiHeader {String} X-authenticated-user-token Authenticity token
+     * @apiSampleRequest /admin-service/api/v1/bulkUploadRequest/getDownloadableUrls
+     * @apiUse successBody
+     * @apiUse errorBodyuser
+    */
+
+  /**
+   * to get getDownloadable url
+   * @method
+   * @name details
+   * @param  {req}  - requested data.
+   * @returns {json} Response consists of getDownloadable Url
+  */
+
+ getDownloadableUrls(req) {
+  return new Promise(async (resolve, reject) => {
+    try {
+
+      console.log("req.body",req.params._id);
+
+      let response = await bulkUploadHelper.getDownloadableUrls(req.userDetails.userToken,req.params._id,req.query.fileType);
+      return resolve(response);
+
+    } catch (error) {
+
+      return reject({
+        status:
+          error.status ||
+          httpStatusCode["internal_server_error"].status,
+
+        message:
+          error.message ||
+          httpStatusCode["internal_server_error"].message
+      });
+    }
+  });
+}
+
+
   
   };
   

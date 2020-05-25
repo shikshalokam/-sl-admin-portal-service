@@ -10,12 +10,13 @@ let sunBirdService =
 let kendrService =
     require(ROOT_PATH + "/generics/services/kendra-service")
 
+
 const csv = require('csvtojson');
 const request = require('request');
-
-
-
+var uniqid = require('uniqid');
+const ObjectsToCsv = require('objects-to-csv');
 const fs = require('fs');
+const moment = require("moment");
 
 module.exports = class UserCreationHelper {
 
@@ -36,6 +37,17 @@ module.exports = class UserCreationHelper {
                 if (profileData && profileData['allowed']) {
                     let configData = await csv().fromString(req.files.userCreationFile.data.toString());
 
+                    let validateUser = await _validateUsers(configData);
+                    if (validateUser == false) {
+                        resolve({
+                            status: httpStatusCode["bad_request"].status,
+                            message: "Validation failed"
+                        })
+                    }
+
+
+
+
                     let randomNuumber = Math.floor(Math.random() * (100000 - 1) + 1);
                     var timestamp = Math.floor(new Date() / 1000);
                     let fileName = timestamp + "_" + randomNuumber + ".csv";
@@ -46,71 +58,108 @@ module.exports = class UserCreationHelper {
 
 
                     let files = [];
-                    files.push(userId+"/"+fileName);
-                    let fileInfo = { };
+                    files.push(userId + "/" + fileName);
+                    let fileInfo = {};
 
                     let fileCompletePath = ROOT_PATH + process.env.BATCH_FOLDER_PATH + fileName;
                     let data = fs.writeFileSync(fileCompletePath, req.files.userCreationFile.data);
 
+                    let cv = new ObjectsToCsv(configData);
+                    let successFile = timestamp + "_" + randomNuumber + "_success.csv";
+                    await cv.toDisk(ROOT_PATH + process.env.BATCH_FOLDER_PATH + successFile);
+                    files.push(userId + "/" + successFile);
+
+                    let failureCsv = new ObjectsToCsv(configData);
+                    let failureFile = timestamp + "_" + randomNuumber + "_failure.csv";
+                    await failureCsv.toDisk(ROOT_PATH + process.env.BATCH_FOLDER_PATH + successFile);
+                    files.push(userId + "/" + failureFile);
+
+                 
                     let requestBody = {
                         fileNames: files,
                     }
-                    let endPoint =  "";
-                    if(process.env.CLOUD_STORAGE== constants.common.AWS_SERVICE){
-                        requestBody['bucket'] = process.env.AWS_STORAGE_BUCKET;
-                        endPoint = constants.endpoints.AWS_PRESIGNED_URL;
+                    let uploadFileEndPoint = "";
+                    let storage = ""
+                    let bucketName = "";
 
-                    }else if(process.env.CLOUD_STORAGE== constants.common.GOOGLE_CLOUD_SERVICE){
+                    if (process.env.CLOUD_STORAGE == constants.common.AWS_SERVICE) {
+                        bucketName = process.env.STORAGE_BUCKET;
+                        uploadFileEndPoint = constants.endpoints.UPLOAD_TO_AWS_PRESIGNED_URL;
+                        storage = constants.common.AWS_SERVICE;
 
-                        requestBody['bucket'] = process.env.GCP_STORAGE_BUCKET;
-                        endPoint =constants.endpoints.GCP_PRESIGNED_URL;
-    
-                    }else if(process.env.CLOUD_STORAGE== constants.common.AZURE_SERVICE){
-                       
-                         requestBody['bucket'] = process.env.AZURE_STORAGE_BUCKET;
-                        endPoint = constants.endpoints.AZURE_PRESIGNED_URL;
+                    } else if (process.env.CLOUD_STORAGE == constants.common.GOOGLE_CLOUD_SERVICE) {
+
+                        bucketName = process.env.STORAGE_BUCKET;
+                        uploadFileEndPoint = constants.endpoints.UPLOAD_TO_GCP_PRESIGNED_URL;
+                        storage = constants.common.GOOGLE_CLOUD_SERVICE;
+
+                    } else if (process.env.CLOUD_STORAGE == constants.common.AZURE_SERVICE) {
+
+                        bucketName = process.env.STORAGE_BUCKET;
+                        uploadFileEndPoint = constants.endpoints.UPLOAD_TO_AZURE_PRESIGNED_URL;
+                        storage = constants.common.AZURE_SERVICE;
+
                     }
 
-                    let response = await kendrService.getPreSignedUrl(req.userDetails.userToken, 
-                        requestBody,endPoint
-                        );
-                    if(response.result){
-                       
-                        let uploadResp  = await _uploadFileToGcp(fileCompletePath,response.result[0].url);
-                        fileInfo = {
-                            sourcePath:response.result[0].payload.sourcePath,
-                            cloudStorage:response.result[0].cloudStorage,
-                            bucket:requestBody['bucket']
+                    
+                    let errorFileData = {};
+                    let successFileData = {};
+
+                    await Promise.all(files.map(async function (fileData) {
+
+                        let uploadResp = await kendrService.uploadFileToCloud(fileCompletePath,
+                            fileData, bucketName, req.userDetails.userToken, uploadFileEndPoint);
+
+                        uploadResp = JSON.parse(uploadResp);
+                        if (uploadResp.status != 200) {
+                            reject(uploadResp);
                         }
-                        
-                        fs.unlink(fileCompletePath);
-                        
-                    }else{
-                        return reject(response);
-                    }
-                
+
+                        if (uploadResp.result) {
+                            if (uploadResp.result.name == userId + "/" + successFile) {
+                                successFileData = {
+                                    sourcePath: uploadResp.result.name,
+                                    cloudStorage: storage,
+                                    bucket: bucketName
+                                }
+                            } else if (uploadResp.result.name == userId + "/" + fileName) {
+
+                                fileInfo = {
+                                    sourcePath: uploadResp.result.name,
+                                    cloudStorage: storage,
+                                    bucket: bucketName
+                                }
+
+                            } else if (uploadResp.result.name == userId + "/" + failureFile) {
+                                errorFileData = {
+                                    sourcePath: uploadResp.result.name,
+                                    cloudStorage: storage,
+                                    bucket: bucketName
+                                }
+                            }
+                        }
+
+                    }));
+
                     let type = "user-create";
                     if (req.query.requestType) {
                         type = req.query.requestType;
                     }
+                    let requestId = uniqid();
                     let doc = {
+                        requestId: requestId,
                         requestType: type,
                         userId: userId,
-                        file:fileInfo,
+                        inputFile: fileInfo,
+                        errorFile: errorFileData,
+                        successFile: successFileData,
                         metaInformation: {
-                            // headers:req.headers,
                             query: req.query
-                            // url:r
-
                         },
                         remarks: ""
                     }
-
                     let request = await database.models.bulkUploadRequest.create(doc);
-                    resolve({ result: { requestId: request._id }, message: constants.apiResponses.REQUEST_SUBMITTED });
-
-                 
-
+                    resolve({ result: { requestId: request.requestId }, message: constants.apiResponses.REQUEST_SUBMITTED });
 
                 } else {
                     resolve({
@@ -131,7 +180,7 @@ module.exports = class UserCreationHelper {
     * @returns {json} Response consists sample csv data
     */
 
-    static list(userId, searchText, pageSize, pageNo, token) {
+    static list(userId, searchText, pageSize, pageNo, token,status) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -140,15 +189,54 @@ module.exports = class UserCreationHelper {
                     let skip = pageSize * (pageNo - 1);
 
                     let columns = _bulkRequestList();
-                    let count = await database.models.bulkUploadRequest.count({});
-
-                    let query = { };
-                    if(searchText){
-                        query = { $text: { $search: "java coffee shop" } }
+                    let query = { deleted: false };
+                    if (searchText) {
+                        query = { deleted: false, requestId: { $regex: searchText } }
+                    }
+                    if(status){
+                        query['status'] = status;
                     }
 
-                    let request = await database.models.bulkUploadRequest.find(query, {}, { skip: skip, limit: pageSize });
+                    let count = await database.models.bulkUploadRequest.count(query);
+                    let request = await database.models.bulkUploadRequest.find(query,
+                        {
+                            requestId: 1,
+                            requestType: 1,
+                            inputFile: 1,
+                            successFile: 1,
+                            errorFile: 1,
+                            createdAt: 1,
+                            status:1
+                        }, { skip: skip, limit: pageSize }).lean();
+
+                    let responseData = [];
+                    await Promise.all(request.map(async function (element) {
+                        if (element.createdAt) {
+                            element.createdAt = moment(element.createdAt).format("Do MMM YYYY")
+                        }
+                        if (element.inputFile) {
+                            element['inputFileAvailable'] = true;
+                            delete element.inputFile;
+                        } else {
+                            element['inputFileAvailable'] = false;
+                        }
+                        if (element.successFile) {
+                            element['successFileAvailable'] = true;
+                            delete element.successFile;
+                        } else {
+                            element['successFileAvailable'] = false;
+                        }
+                        if (element.errorFile) {
+                            element['errorFileAvailable'] = true;
+                            delete element.errorFile;
+                        } else {
+                            element['errorFileAvailable'] = false;
+                        }
+                        responseData.push(element);
+                    }));
+
                     resolve({ result: { data: request, count: count, column: columns } });
+
                 } else {
                     resolve({
                         status: httpStatusCode["bad_request"].status,
@@ -175,7 +263,7 @@ module.exports = class UserCreationHelper {
                 let profileData = await _checkAccess(token, userId);
                 if (profileData && profileData['allowed']) {
 
-                    let requestDoc = await database.models.bulkUploadRequest.findOne({ _id: requestId });
+                    let requestDoc = await database.models.bulkUploadRequest.findOne({ requestId: requestId });
                     if (requestDoc) {
                         resolve({ result: { data: { requestDoc } } });
                     } else {
@@ -185,6 +273,45 @@ module.exports = class UserCreationHelper {
                     resolve({
                         status: httpStatusCode["bad_request"].status,
                         message: constants.apiResponses.INVALID_ACCESS
+                    });
+                }
+
+            } catch (error) {
+                return reject(error);
+            }
+        })
+    }
+
+    /**
+* to get request details.
+* @method
+* @name  getDownloadableUrls
+* @returns {json} Response consists downloadable url
+*/
+
+    static getDownloadableUrls(token, requestId, fileType) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+
+                let requestDoc = await database.models.bulkUploadRequest.findOne({ requestId: requestId })
+
+                if (requestDoc) {
+
+                    let fileInfo;
+                    if (fileType == "success") {
+                        fileInfo = requestDoc.successFile;
+                    } else if (fileType == "error") {
+                        fileInfo = requestDoc.errorFile;
+                    } else {
+                        fileInfo = requestDoc.inputFile;
+                    }
+                    let response = await kendrService.getDownloadableUrls(fileInfo, token);
+                    resolve(response);
+
+                } else {
+                    resolve({
+                        status: httpStatusCode["bad_request"].status
                     });
                 }
 
@@ -336,36 +463,61 @@ function _checkAccess(token, userId) {
     })
 }
 
+
 /**
- * to upload file to _uploadFileToGcp
- * @name _uploadFileToGcp
- * @param {*} filePath filePath of the file to upload
- * @param {*} gcp url
+ * to check weather user creation is valid or not
+ * @name _validateUsers
+ * @param {*} userJson user json
  */
-function _uploadFileToGcp(filePath, url) {
+function _validateUsers(inputArray) {
+
     return new Promise(async (resolve, reject) => {
-        try {
 
-            let options = {
-                "headers": {
-                    'Content-Type': "multipart/form-data"
-                },
-                body: fs.createReadStream(filePath)
-            };
+        let valid = true;
 
-            request.put(url, options, callback);
-            function callback(err, data) {
-                if (err) {
-                    return reject({
-                        message: constants.apiResponses.KENDRA_SERVICE_DOWN
-                    });
+        await Promise.all(inputArray.map(async function (element) {
+            if (element) {
+
+                let keys = Object.keys(element);
+                // if(keys)
+                if (element.EMAIL) {
+                    var re = /^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$/;
+                    let result = re.test(String(element.EMAIL).toLowerCase());
+                    if (result == false) {
+                        valid = false;
+                    }
+
+                }
+                else if (element.name) {
+
+                    var re = /^[a-zA-Z0-9]+$/;
+                    let result = re.test(String(element.name).toLowerCase());
+                    if (result == false) {
+                        valid = false;
+                    }
+
+                } else if (element.roles) {
+
+                    // }else if(element.password){
+
+                } else if (element.phone) {
+
+                    var re = /^[(0/91)?[7-9][0-9]{9}]$/;
+                    let result = re.test(String(element.phone).toLowerCase());
+                    if (result == false) {
+
+                        console.log("phone failed")
+                        valid = false;
+                    }
+
                 } else {
-
-                    return resolve(data);
+                    valid = false;
                 }
             }
-        } catch (error) {
-            return reject(error);
-        }
-    })
+        }));
+
+        resolve(valid);
+    });
+
+
 }
