@@ -201,7 +201,7 @@ module.exports = class UserCreationHelper {
                         query['status'] = status;
                     }
 
-                    let count = await database.models.bulkUploadRequest.count(query);
+                    let count = await database.models.bulkUploadRequest.countDocuments(query);
                     let request = await database.models.bulkUploadRequest.find(query,
                         {
                             requestId: 1,
@@ -211,7 +211,7 @@ module.exports = class UserCreationHelper {
                             errorFile: 1,
                             createdAt: 1,
                             status:1
-                        }, { skip: skip, limit: pageSize }).lean();
+                        }, { skip: skip, limit: pageSize }).sort({_id:-1}).lean();
 
                     let responseData = [];
                     await Promise.all(request.map(async function (element) {
@@ -358,7 +358,7 @@ function _bulkRequestList() {
         'requestType',
         'status',
         'createdAt',
-        'actions'
+        'files'
     ];
 
     let defaultColumn = {

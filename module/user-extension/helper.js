@@ -467,7 +467,10 @@ module.exports = class UserCreationHelper {
 
                         let reponseObj = profileData.result.response;
 
+                        let userDeactiveStatus = await _checkDeactiveAccess(profileData, orgAdminUserId);
+                       
                         userDetails = {
+                            userDeactiveAccess:userDeactiveStatus.userDeactiveAccess,
                             firstName: reponseObj.firstName,
                             gender: gender,
                             userName: reponseObj.userName,
@@ -696,6 +699,71 @@ function _getOrganisationlist(userProfileInfo, userId, token) {
 
             resolve(organisations);
 
+        } catch (err) {
+            return reject(err);
+        }
+    });
+
+   
+}
+
+ /**
+  * check user deactive access
+  * @method
+  * @name _checkDeactiveAccess
+  * @param { object }  - userprofile infomration.
+  * @returns {Object}
+  * */
+function  _checkDeactiveAccess(userProfileInfo, userId){
+    return new Promise(async (resolve, reject) => {
+        try {
+            let profileRoles;
+            if (userProfileInfo &&
+                userProfileInfo.result &&
+                userProfileInfo.result.response &&
+                userProfileInfo.result.response.roles
+            ) {
+                profileRoles = userProfileInfo.result.response.roles;
+            }
+
+            let userCustomeRole = await database.models.userExtension.findOne({ userId: userId }, { roles: 1 });
+            if (userCustomeRole && userCustomeRole.roles && userCustomeRole.roles.length > 0) {
+                userCustomeRole.roles.map(customRole => {
+                    if (!profileRoles.includes(customRole.code)) {
+                        profileRoles.push(customRole.code)
+                    }
+                })
+            }
+
+            if (profileRoles.includes(constants.common.PLATFROM_ADMIN_ROLE)) {
+                resolve({ userDeactiveAccess:true })
+            }else if (
+                userProfileInfo &&
+                userProfileInfo.result &&
+                userProfileInfo.result.response &&
+                userProfileInfo.result.response.organisations
+            ){
+
+                let orgInfo = [];
+                 orgInfo = userProfileInfo.result.response.organisations;
+                    if(orgInfo.length > 0){
+                        let count = 0;
+                        await Promise.all(orgInfo.map(function (element){
+                            if(element.roles.includes(constants.common.ORG_ADMIN_ROLE)){
+                                count = count + 1;
+                            }
+                        }));
+                        if(count==orgInfo.length){
+                            resolve({ userDeactiveAccess:true })
+                        }else{
+                            resolve({ userDeactiveAccess:false })
+                        }
+                    }else{
+                        resolve({ userDeactiveAccess:false })
+                    }
+                
+            }
+            
         } catch (err) {
             return reject(err);
         }

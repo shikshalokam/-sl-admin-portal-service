@@ -164,11 +164,14 @@ var statusUpdate = function ( userId,token,status ) {
             let options = {
                 "headers":{
                 "content-type": "application/json",
-                "authorization" :  process.env.AUTHORIZATION,
+                 "authorization" :  process.env.AUTHORIZATION,
                 "x-authenticated-user-token" : token,
+                "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN
                 },
                 json : { userId : userId,status:status }
             };
+
+            console.log(platformUserStatusUpdateUrl,"options",options);
 
              request.post(platformUserStatusUpdateUrl,options,callback);
             
