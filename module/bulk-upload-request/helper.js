@@ -45,9 +45,6 @@ module.exports = class UserCreationHelper {
                         })
                     }
 
-
-
-
                     let randomNuumber = Math.floor(Math.random() * (100000 - 1) + 1);
                     var timestamp = Math.floor(new Date() / 1000);
                     let fileName = timestamp + "_" + randomNuumber + ".csv";
@@ -109,10 +106,10 @@ module.exports = class UserCreationHelper {
                     await Promise.all(files.map(async function (fileData) {
 
                         let uploadResp = await kendrService.uploadFileToCloud(fileCompletePath,
-                            fileData, bucketName, req.userDetails.userToken, uploadFileEndPoint);
-                    
+                        fileData, bucketName, req.userDetails.userToken, uploadFileEndPoint);
+
                         uploadResp = JSON.parse(uploadResp);
-                        if (uploadResp.status != 200) {
+                        if (uploadResp.status != httpStatusCode["ok"].status) {
                             reject(uploadResp);
                         }
 
@@ -376,7 +373,7 @@ function _bulkRequestList() {
         obj["label"] = gen.utils.camelCaseToCapitalizeCase(field);
         obj["key"] = field
 
-        if (field === "actions") {
+        if (field === "files") {
             obj["type"] = "action";
             obj["actions"] = _actions();
         } else if (field === "select") {

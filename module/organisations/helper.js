@@ -434,28 +434,29 @@ module.exports = class OrganisationsHelper {
                     _id: 1, code: 1, title: 1
                 }).lean();
 
-                await Promise.all(orgnisationInfo.roles.map(async function (roleInfo) {
-
-                    let found = false;
-                    await Promise.all(rolesDocuments.map(roleDoc => {
-                        if (roleDoc.code === roleInfo) {
-                            found = true;
-                            let roleObj = {
-                                roleId: roleDoc._id,
-                                code: roleDoc.code,
-                                name: roleDoc.title
+                if(orgnisationInfo.roles){
+                    await Promise.all(orgnisationInfo.roles.map(async function (roleInfo) {
+                        let found = false;
+                        await Promise.all(rolesDocuments.map(roleDoc => {
+                            if (roleDoc.code === roleInfo) {
+                                found = true;
+                                let roleObj = {
+                                    roleId: roleDoc._id,
+                                    code: roleDoc.code,
+                                    name: roleDoc.title
+                                }
+                                rolesId.push(roleObj);
                             }
-                            rolesId.push(roleObj);
+                        }));
+    
+                        if (!found) {
+                            if (roleInfo) {
+                                plaformRoles.push(roleInfo);
+                            }
                         }
                     }));
-
-                    if (!found) {
-                        if (roleInfo) {
-                            plaformRoles.push(roleInfo);
-                        }
-                    }
-                }));
-
+                }
+               
                 if (plaformRoles.length == 0) {
                     plaformRoles.push("PUBLIC");
                 }
