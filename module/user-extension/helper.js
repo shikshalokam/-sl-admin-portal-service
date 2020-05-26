@@ -427,7 +427,7 @@ module.exports = class UserCreationHelper {
                                 if (data && data.roles && data.roles.length > 0) {
                                     data.roles.map(function (sunbirdUserRole) {
 
-                                        if (sunbirdUserRole && sunbirdUserRole != constants.common.PUBLIC_ROLE) {
+                                         if (sunbirdUserRole && sunbirdUserRole != constants.common.PUBLIC_ROLE) {
 
                                             let roleInfo = roles.filter(function (roleDetails) {
                                                 return roleDetails.value === sunbirdUserRole
