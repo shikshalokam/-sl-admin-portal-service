@@ -43,7 +43,6 @@ module.exports = class PlatformRolesExt extends Abstract {
   return new Promise(async (resolve, reject) => {
     try {
 
-
       if (!req.files || !req.files.userCreationFile) {
         throw { 
             status: httpStatusCode["bad_request"].status, 

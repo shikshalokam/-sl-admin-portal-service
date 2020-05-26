@@ -174,9 +174,9 @@ module.exports = class OrganisationsHelper {
                         let allRoles = {};
                         if (sunBirdRoles) {
                             sunBirdRoles.map(function (sunBirdrole) {
-                                if (sunBirdrole.id != constants.common.PUBLIC_ROLE) {
+                                // if (sunBirdrole.id != constants.common.PUBLIC_ROLE) {
                                     allRoles[sunBirdrole.id] = sunBirdrole.name;
-                                }
+                                // }
 
                             });
                         }

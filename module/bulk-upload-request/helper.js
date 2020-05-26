@@ -105,11 +105,12 @@ module.exports = class UserCreationHelper {
                     let errorFileData = {};
                     let successFileData = {};
 
+                   
                     await Promise.all(files.map(async function (fileData) {
 
                         let uploadResp = await kendrService.uploadFileToCloud(fileCompletePath,
                             fileData, bucketName, req.userDetails.userToken, uploadFileEndPoint);
-
+                    
                         uploadResp = JSON.parse(uploadResp);
                         if (uploadResp.status != 200) {
                             reject(uploadResp);
