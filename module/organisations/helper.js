@@ -465,14 +465,20 @@ module.exports = class OrganisationsHelper {
                 let response = await sunBirdService.assignRoles(orgnisationInfo, token);
                 if (response && response.responseCode == constants.common.RESPONSE_OK) {
                     if (response.result.response == constants.common.SUCCESS_RESPONSE) {
-                        console.log(orgnisationInfo.organisationId, "rolesId", rolesId)
                         let userDetails = await database.models.userExtension.updateOne({
                             userId: orgnisationInfo.userId, "organisationRoles.organisationId": orgnisationInfo.organisationId
                         }, {
                             $set: { "organisationRoles.$.roles": rolesId }
                         });
                     }
-                    resolve({ result: response.result, message: constants.apiResponses.ASSIGNED_ROLE_SUCCESSFULLY });
+                
+                    let message = constants.apiResponses.ASSIGNED_ROLE_SUCCESSFULLY;
+                    if(orgnisationInfo && orgnisationInfo.removeRoles){
+
+                       
+                        message = constants.apiResponses.ROLES_REMOVED;
+                    }
+                    resolve({ result: response.result, message: message });
                 } else {
                     reject({ message: response });
                 }

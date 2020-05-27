@@ -14,9 +14,9 @@ module.exports = {
 
     // ORGANISATION
     NO_ORG_FOUND : "No organations Found",
-    ORG_INFO_FETCHED : "Organisation list fetched Successfully",
-    USER_ADDED_TO_ORG : "User added to organisation Successfully",
-    ASSIGNED_ROLE_SUCCESSFULLY : "User roles added to organisation  Successfully",
+    ORG_INFO_FETCHED : "Organisation list fetched successfully",
+    USER_ADDED_TO_ORG : "User added to organisation successfully",
+    ASSIGNED_ROLE_SUCCESSFULLY : "User roles added to organisation  successfully",
     ORG_CREATED: "Organisation Created Successfully",
     ORG_FORM_FETCHED: "Organisation Create Form Fetched Successfully",
     ORG_FORM_NOT_FOUND: "Organisation Create Form Not Found",
@@ -25,6 +25,7 @@ module.exports = {
     ORG_DEACTIVATED: "Organisation Deactivated Successfully",
     ORG_UPDATED: "Organisation Details Updated Successfully",
     FAILED_TO_ADD_USER_TO_ORG: "Failed to add user to organisation",
+    ROLES_REMOVED:"Roles removed successfully",
 
    
     // USER
@@ -39,6 +40,9 @@ module.exports = {
     REQUEST_SUBMITTED:"Request Submitted Successfully",
 
     //Kendra APIS
-    KENDRA_SERVICE_DOWN:"Kendra serviece down"
+    KENDRA_SERVICE_DOWN:"Kendra serviece down",
+
+    //entities
+    ENTITIES_FETCHED:"List of entities fetched successfully"
 
 };

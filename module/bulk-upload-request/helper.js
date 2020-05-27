@@ -8,7 +8,7 @@
 let sunBirdService =
     require(ROOT_PATH + "/generics/services/sunbird");
 let kendrService =
-    require(ROOT_PATH + "/generics/services/kendra-service")
+    require(ROOT_PATH + "/generics/services/kendra-service");
 
 
 const csv = require('csvtojson');

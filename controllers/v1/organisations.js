@@ -331,7 +331,8 @@ module.exports = class Organisations extends Abstract {
         let orgDetails = {
           organisationId: req.body.organisationId,
           userId: req.body.userId,
-          roles: req.body.roles
+          roles: req.body.roles,
+          removeRoles:req.body.removeRoles ? req.body.removeRoles : false
         }
 
         
