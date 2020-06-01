@@ -43,6 +43,7 @@ module.exports = {
     KENDRA_SERVICE_DOWN:"Kendra serviece down",
 
     //entities
-    ENTITIES_FETCHED:"List of entities fetched successfully"
+    ENTITIES_FETCHED:"List of entities fetched successfully",
+    ENTITY_NOT_FOUND:"Requested entity not found"
 
 };

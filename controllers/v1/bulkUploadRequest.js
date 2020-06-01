@@ -6,126 +6,122 @@
  */
 
 const bulkUploadHelper = require(MODULES_BASE_PATH + "/bulk-upload-request/helper.js");
- 
-  /**
-     * Forms
-     * @class
- */
+
+/**
+   * Forms
+   * @class
+*/
 module.exports = class PlatformRolesExt extends Abstract {
-    constructor() {
-      super(schemas["bulkUploadRequest"]);
-    }
-  
-    static get name() {
-      return "bulkUploadRequest";
-    }
+  constructor() {
+    super(schemas["bulkUploadRequest"]);
+  }
 
-    /**
-     * @api {get} /admin-service/api/v1/bulkUploadRequest/bulkUserUpload 
-     * Upload bulk user Upload
-     * @apiVersion 1.0.0
-     * @apiGroup Bulk Upload
-     * @apiHeader {String} X-authenticated-user-token Authenticity token
-     * @apiSampleRequest /admin-service/api/v1/bulkUploadRequest/bulkUserUpload
-     * @apiUse successBody
-     * @apiUse errorBodyuser
-    */
+  static get name() {
+    return "bulkUploadRequest";
+  }
 
   /**
-   * bulk User Upload
+   * @api {get} /admin-service/api/v1/bulkUploadRequest/bulkUserUpload 
+   * Bulk user upload
+   * @apiVersion 1.0.0
+   * @apiGroup Bulk Upload
+   * @apiHeader {String} X-authenticated-user-token Authenticity token
+   * @apiSampleRequest /admin-service/api/v1/bulkUploadRequest/bulkUserUpload
+   * @apiUse successBody
+   * @apiUse errorBodyuser
+  */
+
+  /**
+   * Bulk user upload
    * @method
    * @name bulkUserUpload
    * @param  {req}  - requested data.
-   * @returns {json} Response consists of created user details
+   * @returns {json} Response consists of request details
   */
 
- bulkUserUpload(req) {
-  return new Promise(async (resolve, reject) => {
-    try {
+  bulkUserUpload(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        if (!req.files || !req.files.userCreationFile) {
+          throw {
+            status: httpStatusCode["bad_request"].status,
+            message: httpStatusCode["bad_request"].message
+          };
+        }
+        let uploadRequest = await bulkUploadHelper.bulkUserUpload(req, req.userDetails.userId);
+        return resolve(uploadRequest);
 
-      if (!req.files || !req.files.userCreationFile) {
-        throw { 
-            status: httpStatusCode["bad_request"].status, 
-            message: httpStatusCode["bad_request"].message 
-        };
-      } 
+      } catch (error) {
 
-      let uploadRequest = await bulkUploadHelper.bulkUserUpload(req,req.userDetails.userId);
-      
-      
+        return reject({
+          status:
+            error.status ||
+            httpStatusCode["internal_server_error"].status,
 
-      return resolve(uploadRequest);
-    } catch (error) {
-
-      return reject({
-        status:
-          error.status ||
-          httpStatusCode["internal_server_error"].status,
-
-        message:
-          error.message ||
-          httpStatusCode["internal_server_error"].message
-      });
-    }
-  });
-}
-
-    /**
-     * @api {get} /admin-service/api/v1/bulkUploadRequest/list 
-     * Upload bulk user Upload
-     * @apiVersion 1.0.0
-     * @apiGroup Bulk Upload
-     * @apiHeader {String} X-authenticated-user-token Authenticity token
-     * @apiSampleRequest /admin-service/api/v1/bulkUploadRequest/list
-     * @apiUse successBody
-     * @apiUse errorBodyuser
-    */
+          message:
+            error.message ||
+            httpStatusCode["internal_server_error"].message
+        });
+      }
+    });
+  }
 
   /**
-   * to get list of bulk upload request
+   * @api {get} /admin-service/api/v1/bulkUploadRequest/list 
+   * Bulk request list
+   * @apiVersion 1.0.0
+   * @apiGroup Bulk Upload
+   * @apiHeader {String} X-authenticated-user-token Authenticity token
+   * @apiSampleRequest /admin-service/api/v1/bulkUploadRequest/list
+   * @apiUse successBody
+   * @apiUse errorBodyuser
+  */
+
+  /**
+   * Bulk request list
    * @method
    * @name list
    * @param  {req}  - requested data.
    * @returns {json} Response consists of created user details
   */
 
- list(req) {
-  return new Promise(async (resolve, reject) => {
-    try {
+  list(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
 
-      let list = await bulkUploadHelper.list(req.userDetails.userId,
-        req.searchText,
-        req.pageSize,
-        req.pageNo,
-        req.userDetails.userToken,req.query.status
+        let list = await bulkUploadHelper.list(req.userDetails.userId,
+          req.searchText,
+          req.pageSize,
+          req.pageNo,
+          req.userDetails.userToken, req.query.status
         );
-      return resolve(list);
+        return resolve(list);
 
-    } catch (error) {
+      } catch (error) {
 
-      return reject({
-        status:
-          error.status ||
-          httpStatusCode["internal_server_error"].status,
+        return reject({
+          status:
+            error.status ||
+            httpStatusCode["internal_server_error"].status,
 
-        message:
-          error.message ||
-          httpStatusCode["internal_server_error"].message
-      });
-    }
-  });
-}
+          message:
+            error.message ||
+            httpStatusCode["internal_server_error"].message
+        });
+      }
+    });
+  }
 
-    /**
-     * @api {get} /admin-service/api/v1/bulkUploadRequest/details 
-     * Upload bulk user Upload
-     * @apiVersion 1.0.0
-     * @apiGroup Bulk Upload
-     * @apiHeader {String} X-authenticated-user-token Authenticity token
-     * @apiSampleRequest /admin-service/api/v1/bulkUploadRequest/details
-     * @apiUse successBody
-     * @apiUse errorBodyuser
-    */
+  /**
+   * @api {get} /admin-service/api/v1/bulkUploadRequest/details 
+   * Upload bulk user Upload
+   * @apiVersion 1.0.0
+   * @apiGroup Bulk Upload
+   * @apiHeader {String} X-authenticated-user-token Authenticity token
+   * @apiSampleRequest /admin-service/api/v1/bulkUploadRequest/details
+   * @apiUse successBody
+   * @apiUse errorBodyuser
+  */
 
   /**
    * to get details of the upload request
@@ -135,38 +131,38 @@ module.exports = class PlatformRolesExt extends Abstract {
    * @returns {json} Response consists of request details
   */
 
- details(req) {
-  return new Promise(async (resolve, reject) => {
-    try {
+  details(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
 
-      let details = await bulkUploadHelper.details(req.userDetails.userToken,req.userDetails.userId,req.params._id);
-      return resolve(details);
+        let details = await bulkUploadHelper.details(req.userDetails.userToken, req.userDetails.userId, req.params._id);
+        return resolve(details);
 
-    } catch (error) {
+      } catch (error) {
 
-      return reject({
-        status:
-          error.status ||
-          httpStatusCode["internal_server_error"].status,
+        return reject({
+          status:
+            error.status ||
+            httpStatusCode["internal_server_error"].status,
 
-        message:
-          error.message ||
-          httpStatusCode["internal_server_error"].message
-      });
-    }
-  });
-}
+          message:
+            error.message ||
+            httpStatusCode["internal_server_error"].message
+        });
+      }
+    });
+  }
 
-    /**
-     * @api {get} /admin-service/api/v1/bulkUploadRequest/getDownloadableUrls 
-     * Upload bulk user Upload
-     * @apiVersion 1.0.0
-     * @apiGroup Bulk Upload
-     * @apiHeader {String} X-authenticated-user-token Authenticity token
-     * @apiSampleRequest /admin-service/api/v1/bulkUploadRequest/getDownloadableUrls
-     * @apiUse successBody
-     * @apiUse errorBodyuser
-    */
+  /**
+   * @api {get} /admin-service/api/v1/bulkUploadRequest/getDownloadableUrls 
+   * Upload bulk user Upload
+   * @apiVersion 1.0.0
+   * @apiGroup Bulk Upload
+   * @apiHeader {String} X-authenticated-user-token Authenticity token
+   * @apiSampleRequest /admin-service/api/v1/bulkUploadRequest/getDownloadableUrls
+   * @apiUse successBody
+   * @apiUse errorBodyuser
+  */
 
   /**
    * to get getDownloadable url
@@ -176,31 +172,30 @@ module.exports = class PlatformRolesExt extends Abstract {
    * @returns {json} Response consists of getDownloadable Url
   */
 
- getDownloadableUrls(req) {
-  return new Promise(async (resolve, reject) => {
-    try {
+  getDownloadableUrls(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
 
-      console.log("req.body",req.params._id);
+        console.log("req.body", req.params._id);
 
-      let response = await bulkUploadHelper.getDownloadableUrls(req.userDetails.userToken,req.params._id,req.query.fileType);
-      return resolve(response);
+        let response = await bulkUploadHelper.getDownloadableUrls(req.userDetails.userToken, req.params._id, req.query.fileType);
+        return resolve(response);
 
-    } catch (error) {
+      } catch (error) {
 
-      return reject({
-        status:
-          error.status ||
-          httpStatusCode["internal_server_error"].status,
+        return reject({
+          status:
+            error.status ||
+            httpStatusCode["internal_server_error"].status,
 
-        message:
-          error.message ||
-          httpStatusCode["internal_server_error"].message
-      });
-    }
-  });
-}
+          message:
+            error.message ||
+            httpStatusCode["internal_server_error"].message
+        });
+      }
+    });
+  }
 
 
-  
-  };
-  
+
+};

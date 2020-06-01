@@ -254,8 +254,7 @@ module.exports = class UserCreationHelper {
                         userToken
                     );
 
-                console.log("updateUser", updateUser);
-
+              
                 return resolve(updateUser);
             } catch (error) {
                 return reject(error);
@@ -386,12 +385,12 @@ module.exports = class UserCreationHelper {
                         if (sunBirdRoles) {
                             sunBirdRoles.map(function (sunBirdrole) {
 
-                                if (sunBirdrole.id != constants.common.PUBLIC_ROLE) {
+                                // if (sunBirdrole.id != constants.common.PUBLIC_ROLE) {
                                     roles.push({
                                         label: sunBirdrole.name,
                                         value: sunBirdrole.id
                                     })
-                                }
+                            //    }
 
                             });
                         }
@@ -427,7 +426,9 @@ module.exports = class UserCreationHelper {
                                 if (data && data.roles && data.roles.length > 0) {
                                     data.roles.map(function (sunbirdUserRole) {
 
-                                         if (sunbirdUserRole && sunbirdUserRole != constants.common.PUBLIC_ROLE) {
+                                         if (sunbirdUserRole) {
+
+                                            console.log("sunbirdUserRole",sunbirdUserRole);
 
                                             let roleInfo = roles.filter(function (roleDetails) {
                                                 return roleDetails.value === sunbirdUserRole
@@ -493,14 +494,14 @@ module.exports = class UserCreationHelper {
 
                     } else {
 
-                        reject({ message: profileData });
+                        reject({ message: profileData.params.errmsg });
                     }
                
                
                 }
                
                 } else {
-                    reject({ message: profileData });
+                    reject({ message: profileData.params.errmsg });
                 }
             } catch (error) {
                 console.log("error", error);

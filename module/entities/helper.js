@@ -1,4 +1,5 @@
 const moment = require("moment");
+let entityTypesHelper = require(MODULES_BASE_PATH + "/entityTypes/helper");
 
 
 module.exports = class entitiesHelper {
@@ -66,7 +67,10 @@ module.exports = class entitiesHelper {
                     .skip(skippingValue)
                     .lean();
                 }
-                return resolve(entitiesDocuments);
+                let count = await database.models.entities
+                .countDocuments(queryObject);
+
+                return resolve({ count:count, data:entitiesDocuments });
             } catch (error) {
                 return reject(error);
             }
@@ -98,9 +102,11 @@ module.exports = class entitiesHelper {
 
                 let projection = [entityName, entityExternalId,createdAt];
 
+
                 let skippingValue = data.pageSize * (data.pageNo - 1);
 
-                let entityDocuments = await this.entityDocuments({
+                
+                let entityDocs = await this.entityDocuments({
                     entityType: data.entityType
                 },
                     projection,
@@ -111,6 +117,7 @@ module.exports = class entitiesHelper {
                         [entityName]: 1
                     }
                 );
+                let  entityDocuments = entityDocs.data;
 
                 if (entityDocuments.length < 1) {
                     throw {
@@ -121,18 +128,24 @@ module.exports = class entitiesHelper {
 
                 entityDocuments = entityDocuments.map(entityDocument => {
 
-                    // console.log("entityDocument",entityDocument);
                     return {
                         externalId: entityDocument.metaInformation.externalId,
                         name: entityDocument.metaInformation.name,
                         _id: entityDocument._id,
                         createdAt: moment(entityDocument.createdAt).format("Do MMM YYYY")
+
                     }
                 });
 
+                let columns = _entityListColumns();
                 return resolve({
                     message: constants.apiResponses.ENTITIES_FETCHED,
-                    result: entityDocuments
+                    result:{
+                        count: entityDocs.count,
+                        columns: columns,
+                        data: entityDocuments
+                    }
+                     
                 });
 
             } catch (error) {
@@ -199,9 +212,14 @@ module.exports = class entitiesHelper {
                     })
                 }
     
+                let columns = _subEntityListColumns();
                 resolve({
                     message: constants.apiResponses.ENTITIES_FETCHED,
-                    result: result
+                    result: {
+                        count:result.count,
+                        columns:columns,
+                        data: result.data
+                    }
                 });   
             } catch(error) {
                 return reject(error);
@@ -243,7 +261,8 @@ module.exports = class entitiesHelper {
                     );
                 }
                 
-                return resolve(entitiesDocument);
+                
+                return resolve(entitiesDocument );
             } catch(error) {
                 return reject(error);
             }
@@ -270,7 +289,7 @@ module.exports = class entitiesHelper {
              
              let entityTraversal = `groups.${entityTraversalType}`;
 
-             let entitiesDocument = 
+             let entityDocs =
              await this.entityDocuments(
                  { 
                      _id: entityId,
@@ -279,6 +298,8 @@ module.exports = class entitiesHelper {
                  },
                  [ entityTraversal ]
              );
+
+             let entitiesDocument = entityDocs.data;
 
              if( !entitiesDocument[0] ) {
                  return resolve([]);
@@ -339,6 +360,11 @@ module.exports = class entitiesHelper {
                 ];
             }
 
+            // let countDoc = await database.models.entities.aggregate(
+            //     queryObject);
+
+            // console.log("countDoc",countDoc);
+
             let entityDocuments = await database.models.entities.aggregate([
                 queryObject,
                 {
@@ -370,6 +396,8 @@ module.exports = class entitiesHelper {
                 }
             ]);
 
+            
+
             return resolve(entityDocuments);
 
         } catch (error) {
@@ -378,4 +406,228 @@ module.exports = class entitiesHelper {
     })
   }
 
+      /**
+    * Get immediate entities.
+    * @method
+    * @name listByEntityType
+    * @param {Object} entityId
+    * @returns {Array} - List of all immediateEntities based on entityId.
+    */
+
+   static immediateEntities(entityId, searchText = "",pageSize="",pageNo="") {
+    return new Promise(async (resolve, reject) => {
+
+        try {
+            
+            let projection = [
+                constants.schema.ENTITYTYPE,
+                constants.schema.GROUPS
+            ];
+
+            let entiesDocs =
+            await this.entityDocuments({
+                _id: entityId
+            }, projection);
+
+            let entitiesDocument = entiesDocs.data;
+            let immediateEntities = [];
+
+            if (entitiesDocument[0] &&
+                entitiesDocument[0].groups &&
+                Object.keys(entitiesDocument[0].groups).length > 0
+            ) {
+
+                let getImmediateEntityTypes =
+                    await entityTypesHelper.list({
+                        name : entitiesDocument[0].entityType
+                    },["immediateChildrenEntityType"]
+                    );
+
+                let immediateEntitiesIds;
+
+                Object.keys(entitiesDocument[0].groups).forEach(entityGroup => {
+                    if (
+                        getImmediateEntityTypes[0].immediateChildrenEntityType &&
+                        getImmediateEntityTypes[0].immediateChildrenEntityType.length > 0 &&
+                        getImmediateEntityTypes[0].immediateChildrenEntityType.includes(entityGroup)
+                    ) {
+                        immediateEntitiesIds = 
+                        entitiesDocument[0].groups[entityGroup];
+                    }
+                })
+
+                if (
+                    Array.isArray(immediateEntitiesIds) &&
+                    immediateEntitiesIds.length > 0
+                ) {
+               
+                    let searchImmediateData = await this.search(
+                        searchText, 
+                        pageSize, 
+                        pageNo, 
+                        immediateEntitiesIds
+                    );
+
+                    immediateEntities = searchImmediateData[0];
+                }
+            }
+
+            return resolve(immediateEntities);
+
+        } catch(error) {
+            return reject(error);
+        }
+    })
+}
+
+   /**
+   * Entity details information.
+   * @method 
+   * @name details
+   * @param {String} entityId - _id of entity.
+   * @return {Object} - consists of entity details information. 
+   */
+
+  static details( entityId ) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            
+            let entityDocument = await this.entityDocuments(
+                {
+                    _id : entityId
+                },
+                "all",
+                ["groups"]
+            );
+
+            console.log("entityDocument",entityDocument.data);
+
+            if ( !entityDocument.data ) {
+                return resolve({
+                    status : httpStatusCode.bad_request.status,
+                    message : constants.apiResponses.ENTITY_NOT_FOUND
+                })
+            }
+
+            resolve({
+                message : constants.apiResponses.ENTITY_INFORMATION_FETCHED,
+                result : entityDocument.data
+            });
+
+        } catch (error) {
+            return reject(error);
+        }
+    })
+  }
+
+}
+
+
+
+/**
+   * 
+   * @method
+   * @name _entityListColumns
+   * @returns {json} - User columns data
+*/
+function _subEntityListColumns() {
+
+    let columns = [
+        'select',
+        'externalId',
+        'name',
+        'label',
+        'addressLine1',
+        'actions'
+    ];
+
+    let defaultColumn = {
+        "type": "column",
+        "visible": true
+    }
+
+    let result = [];
+
+    for (let column = 0; column < columns.length; column++) {
+        let obj = { ...defaultColumn };
+        let field = columns[column];
+
+        obj["label"] = gen.utils.camelCaseToCapitalizeCase(field);
+        obj["key"] = field
+
+        if (field === "actions") {
+            obj["type"] = "action";
+            obj["actions"] = _actions();
+        }
+        
+        result.push(obj);
+
+    }
+    return result;
+}
+
+/**
+   * 
+   * @method
+   * @name _entityListColumns
+   * @returns {json} - User columns data
+*/
+function _entityListColumns() {
+
+    let columns = [
+        'select',
+        'externalId',
+        'name',
+        'createdAt',
+        'actions'
+    ];
+
+    let defaultColumn = {
+        "type": "column",
+        "visible": true
+    }
+
+    let result = [];
+
+    for (let column = 0; column < columns.length; column++) {
+        let obj = { ...defaultColumn };
+        let field = columns[column];
+
+        obj["label"] = gen.utils.camelCaseToCapitalizeCase(field);
+        obj["key"] = field
+
+        if (field === "actions") {
+            obj["type"] = "action";
+            obj["actions"] = _actions();
+        }
+
+        result.push(obj);
+
+    }
+    return result;
+}
+
+/**
+   * User columns action data.
+   * @method
+   * @name _actions 
+   * @returns {json}
+*/
+
+function _actions() {
+
+    let actions = ["view"];
+    let actionsColumn = [];
+
+    for (let action = 0; action < actions.length; action++) {
+        actionsColumn.push({
+            key: actions[action],
+            label: gen.utils.camelCaseToCapitalizeCase(actions[action]),
+            visible: true,
+            icon: actions[action]
+        })
+    }
+
+    return actionsColumn;
 }

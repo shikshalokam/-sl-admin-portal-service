@@ -175,7 +175,7 @@ module.exports = class OrganisationsHelper {
                         if (sunBirdRoles) {
                             sunBirdRoles.map(function (sunBirdrole) {
                                 // if (sunBirdrole.id != constants.common.PUBLIC_ROLE) {
-                                    allRoles[sunBirdrole.id] = sunBirdrole.name;
+                                allRoles[sunBirdrole.id] = sunBirdrole.name;
                                 // }
 
                             });
@@ -198,15 +198,15 @@ module.exports = class OrganisationsHelper {
                             if (customRoles) {
                                 if (customRoles.organisationRoles) {
                                     let orgRolesOfUser = [];
-                                     customRoles.organisationRoles.map(userRoles=>{
-                                         if(organisationId ==userRoles.organisationId){
+                                    customRoles.organisationRoles.map(userRoles => {
+                                        if (organisationId == userRoles.organisationId) {
                                             orgRolesOfUser.push(...userRoles.roles);
-                                         }
+                                        }
                                     })
 
-                                    let disctinctRoles =[];
-                                    orgRolesOfUser.map(element=>{
-                                        if(!disctinctRoles.includes(element.code)){
+                                    let disctinctRoles = [];
+                                    orgRolesOfUser.map(element => {
+                                        if (!disctinctRoles.includes(element.code)) {
                                             disctinctRoles.push(element.code);
                                             if (rolesOfUser == "") {
                                                 rolesOfUser = allRoles[element.code];
@@ -221,17 +221,17 @@ module.exports = class OrganisationsHelper {
 
                             await Promise.all(userItem.organisations.map(async orgInfo => {
                                 if (orgInfo.organisationId == organisationId) {
-                                    
-                                    
-                                    let orgRoles =[];
+
+
+                                    let orgRoles = [];
                                     orgInfo.roles.map(roleItem => {
-                                        if(roleItem!="PUBLIC"){
-                                               if(allRoles[roleItem]){
-                                                orgRoles.push(allRoles[roleItem]);
-                                               }
+                                        // if(roleItem!="PUBLIC"){
+                                        if (allRoles[roleItem]) {
+                                            orgRoles.push(allRoles[roleItem]);
                                         }
+                                        // }
                                     });
-                                    
+
                                     orgRoles = (orgRoles).toString();
                                     if (orgRoles) {
                                         if (rolesOfUser == "") {
@@ -351,21 +351,25 @@ module.exports = class OrganisationsHelper {
                 }).lean();
 
 
+
                 plaformRoles.push("PUBLIC");
                 await Promise.all(orgnaisationInfo.roles.map(async function (roleInfo) {
 
                     let found = false;
-                    await Promise.all(rolesDocuments.map(roleDoc => {
-                        if (roleDoc.code === roleInfo) {
-                            found = true;
-                            let roleObj = {
-                                roleId: roleDoc._id,
-                                code: roleDoc.code,
-                                name: roleDoc.title
+
+                    if (rolesDocuments) {
+                        await Promise.all(rolesDocuments.map(roleDoc => {
+                            if (roleDoc.code === roleInfo) {
+                                found = true;
+                                let roleObj = {
+                                    roleId: roleDoc._id,
+                                    code: roleDoc.code,
+                                    name: roleDoc.title
+                                }
+                                rolesId.push(roleObj);
                             }
-                            rolesId.push(roleObj);
-                        }
-                    }));
+                        }));
+                    }
 
                     if (!found) {
                         if (roleInfo) {
@@ -394,15 +398,17 @@ module.exports = class OrganisationsHelper {
                         let updateUser = await database.models.userExtension.findOneAndUpdate({ userId: orgnaisationInfo.userId },
                             { $push: { organisations: orgnaisationInfo.organisation, organisationRoles: organisationsRoles } });
 
-                            resolve({ result: response.result, message: constants.apiResponses.USER_ADDED_TO_ORG });
-                    }else{
+                        resolve({ result: response.result, message: constants.apiResponses.USER_ADDED_TO_ORG });
+                    } else {
 
-                        reject({ result: response.result, status: httpStatusCode["bad_request"].status, 
-                        message:constants.apiResponses.FAILED_TO_ADD_USER_TO_ORG });
+                        reject({
+                            result: response.result, status: httpStatusCode["bad_request"].status,
+                            message: constants.apiResponses.FAILED_TO_ADD_USER_TO_ORG
+                        });
                     }
 
                 } else {
-                    reject({ message: response.result.response,status: httpStatusCode["bad_request"].status });
+                    reject({ message: response.params.errmsg, status: httpStatusCode["bad_request"].status });
                 }
 
             } catch (error) {
@@ -434,7 +440,7 @@ module.exports = class OrganisationsHelper {
                     _id: 1, code: 1, title: 1
                 }).lean();
 
-                if(orgnisationInfo.roles){
+                if (orgnisationInfo.roles) {
                     await Promise.all(orgnisationInfo.roles.map(async function (roleInfo) {
                         let found = false;
                         await Promise.all(rolesDocuments.map(roleDoc => {
@@ -448,7 +454,7 @@ module.exports = class OrganisationsHelper {
                                 rolesId.push(roleObj);
                             }
                         }));
-    
+
                         if (!found) {
                             if (roleInfo) {
                                 plaformRoles.push(roleInfo);
@@ -456,7 +462,7 @@ module.exports = class OrganisationsHelper {
                         }
                     }));
                 }
-               
+
                 if (plaformRoles.length == 0) {
                     plaformRoles.push("PUBLIC");
                 }
@@ -471,16 +477,16 @@ module.exports = class OrganisationsHelper {
                             $set: { "organisationRoles.$.roles": rolesId }
                         });
                     }
-                
-                    let message = constants.apiResponses.ASSIGNED_ROLE_SUCCESSFULLY;
-                    if(orgnisationInfo && orgnisationInfo.removeRoles){
 
-                       
+                    let message = constants.apiResponses.ASSIGNED_ROLE_SUCCESSFULLY;
+                    if (orgnisationInfo && orgnisationInfo.removeRoles) {
+
+
                         message = constants.apiResponses.ROLES_REMOVED;
                     }
                     resolve({ result: response.result, message: message });
                 } else {
-                    reject({ message: response });
+                    reject({ message: response.params.errmsg });
                 }
 
             } catch (error) {
@@ -619,15 +625,15 @@ module.exports = class OrganisationsHelper {
             try {
 
                 let requestBody = {
-                     "channel":process.env.SUNBIRD_CHANNEL,
+                    "channel": process.env.SUNBIRD_CHANNEL,
                     "description": inputData.description,
                     "externalId": inputData.externalId,
                     // "isRootOrg": true,
                     "provider": process.env.SUNBIRD_PROVIDER,
                     "orgName": inputData.name,
-                    "address":{
+                    "address": {
                         addressLine1: inputData.address,
-                        city:inputData.address
+                        city: inputData.address
                     },
                     // "orgType": "string",
                     // "orgTypeId": "string",
@@ -640,7 +646,7 @@ module.exports = class OrganisationsHelper {
                 if (createOrg && createOrg.responseCode == constants.common.RESPONSE_OK) {
                     resolve({ result: createOrg.result, message: constants.apiResponses.ORG_CREATED });
                 } else {
-                    reject({ message: createOrg });
+                    reject({ message: createOrg.params.errmsg });
                 }
 
             } catch (error) {
@@ -718,7 +724,7 @@ module.exports = class OrganisationsHelper {
                 if (updateOrg && updateOrg.responseCode == constants.common.RESPONSE_OK) {
                     resolve({ result: updateOrg.result, message: constants.apiResponses.ORG_UPDATED });
                 } else {
-                    reject({ message: updateOrg });
+                    reject({ message: updateOrg.params.errmsg });
                 }
 
             } catch (error) {
@@ -771,7 +777,7 @@ module.exports = class OrganisationsHelper {
                     }
                     resolve({ result: responseObj, message: constants.apiResponses.ORG_DETAILS_FOUND });
                 } else {
-                    reject({ message: orgDetails });
+                    reject({ message: orgDetails.params.errmsg });
                 }
 
             } catch (error) {
