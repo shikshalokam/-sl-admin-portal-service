@@ -100,7 +100,9 @@ module.exports = class entitiesHelper {
 
                 let createdAt = constants.schema.CREATED_AT;
 
-                let projection = [entityName, entityExternalId,createdAt];
+                let childHierarchyPath = constants.schema.CHILD_HIERARCHY_PATH;
+
+                let projection = [childHierarchyPath,entityName, entityExternalId,createdAt];
 
 
                 let skippingValue = data.pageSize * (data.pageNo - 1);
@@ -109,7 +111,7 @@ module.exports = class entitiesHelper {
                 let entityDocs = await this.entityDocuments({
                     entityType: data.entityType
                 },
-                    projection,
+                projection,
                     "none",
                     data.pageSize,
                     skippingValue,
@@ -132,6 +134,7 @@ module.exports = class entitiesHelper {
                         externalId: entityDocument.metaInformation.externalId,
                         name: entityDocument.metaInformation.name,
                         _id: entityDocument._id,
+                        childHierarchyPath:entityDocument.childHierarchyPath,
                         createdAt: moment(entityDocument.createdAt).format("Do MMM YYYY")
 
                     }
@@ -491,7 +494,6 @@ module.exports = class entitiesHelper {
   static details( entityId ) {
     return new Promise(async (resolve, reject) => {
         try {
-
             
             let entityDocument = await this.entityDocuments(
                 {
@@ -501,8 +503,7 @@ module.exports = class entitiesHelper {
                 ["groups"]
             );
 
-            console.log("entityDocument",entityDocument.data);
-
+          
             if ( !entityDocument.data ) {
                 return resolve({
                     status : httpStatusCode.bad_request.status,
@@ -510,6 +511,7 @@ module.exports = class entitiesHelper {
                 })
             }
 
+            
             resolve({
                 message : constants.apiResponses.ENTITY_INFORMATION_FETCHED,
                 result : entityDocument.data
@@ -528,13 +530,12 @@ module.exports = class entitiesHelper {
 /**
    * 
    * @method
-   * @name _entityListColumns
+   * @name _subEntityListColumns
    * @returns {json} - User columns data
 */
 function _subEntityListColumns() {
 
     let columns = [
-        'select',
         'externalId',
         'name',
         'label',
@@ -576,10 +577,10 @@ function _subEntityListColumns() {
 function _entityListColumns() {
 
     let columns = [
-        'select',
         'externalId',
         'name',
         'createdAt',
+        'childHierarchyPath',
         'actions'
     ];
 

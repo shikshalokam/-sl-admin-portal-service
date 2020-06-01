@@ -12,5 +12,6 @@ module.exports = {
     ENTITYTYPE : "entityType",
     GROUPS : "groups",
     ID : "_id",
-    CREATED_AT:"createdAt"
+    CREATED_AT:"createdAt",
+    CHILD_HIERARCHY_PATH:"childHierarchyPath"
 }

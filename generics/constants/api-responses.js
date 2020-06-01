@@ -44,6 +44,7 @@ module.exports = {
 
     //entities
     ENTITIES_FETCHED:"List of entities fetched successfully",
-    ENTITY_NOT_FOUND:"Requested entity not found"
+    ENTITY_NOT_FOUND:"Requested entity not found",
+    ENTITY_INFORMATION_FETCHED: "Entity information fetched successfully"
 
 };
