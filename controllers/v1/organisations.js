@@ -293,11 +293,9 @@ module.exports = class Organisations extends Abstract {
  * @apiSampleRequest /admin-service/api/v1/organisations/assignRoles
  * {
  *   "userId":"",
- *   "organisationId":"",
+ *   "organisationId":"0125747659358699520",
  *   "roles":["ASSESSOR"]
  * }
- * 
- * 
  * 
  * @apiUse successBody
  * @apiUse errorBody
@@ -305,7 +303,7 @@ module.exports = class Organisations extends Abstract {
  * 
  * {
  *  "status": 200,
- *  "message": ""message": "roles updated to organisation Successfully"
+ *  "message": ""message": "User roles added to organisation  successfully"
  *      "result": {
  *          "response": "SUCCESS"
  *      }
@@ -316,7 +314,7 @@ module.exports = class Organisations extends Abstract {
 */
 
   /**
-  * to add roles to organisation
+  * To assign Roles to the organisation for the user
   * @method
   * @name addUser
   * @param  {req}  - requested data.
@@ -461,7 +459,7 @@ module.exports = class Organisations extends Abstract {
  */
 
   /**
-  * to get create create
+  * to create the organisation
   * @method
   * @name create
   * @param  {req}  - requested data.
@@ -492,7 +490,7 @@ module.exports = class Organisations extends Abstract {
 
 /**
    * @api {get} /admin-service/api/v1/organisations/getForm 
-   * To get create form organisation
+   * Organisation create form
    * @apiVersion 1.0.0
    * @apiGroup Organisations
    * @apiHeader {String} X-authenticated-user-token Authenticity token
@@ -529,7 +527,7 @@ module.exports = class Organisations extends Abstract {
    * 
  */
  /**
-  * to get create organisation form
+  * to get organisation create form
   * @method
   * @name getForm
   * @param  {req}  - requested data.

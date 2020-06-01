@@ -163,6 +163,28 @@ module.exports = class userExtension extends Abstract {
    * @apiGroup User Creation
    * @apiHeader {String} X-authenticated-user-token Authenticity token
    * @apiSampleRequest /admin-service/api/v1/userExtension/create
+   * {
+   *   "firstName":"test",
+   *   "lastName":"test",
+   *   "email":"testUser12333@gmail.com",
+   *   "phoneNumber":"1234567890",
+   *   "userName":"testUser33@1234",
+   *   "state":{
+   *      "label":"Karnataka",
+   *      "value":"5d6609ef81a57a6173a79e7a"
+   *   },
+   *   "organisation":{
+   *      "label":"ShikshaLokamDev",
+   *      "value":"0125747659358699520"
+   *    },
+	 *  "roles":[
+   *   {
+   *      "label":"ORG_ADMIN",
+   *      "value":"ORG_ADMIN"
+   *   }
+   *  ],
+   * "dateofbirth":"1994-0-01"
+   * }
    * @apiUse successBody
    * @apiUse errorBodyuser
    * @apiParamExample {json} Response:
@@ -264,19 +286,28 @@ module.exports = class userExtension extends Abstract {
 
 
   /**
-  * @api {get} /admin-service/api/v1/userExtension/statusUpdate 
-  * to Update status of the user 
+  * @api {get} /admin-service/api/v1/userExtension/statusUpdate/:userid?status=
+  * To update status of the user 
   * @apiVersion 1.0.0
   * @apiGroup User Creation
   * @apiHeader {String} X-authenticated-user-token Authenticity token
-  * @apiSampleRequest /admin-service/api/v1/userExtension/statusUpdate
+  * @apiSampleRequest /admin-service/api/v1/userExtension/statusUpdate/a082787f-8f8f-42f2-a706-35457ca6f1fd?status=Active
   * @apiUse successBody
   * @apiUse errorBodyuser
   * @apiParamExample {json} Response:
+  * 
+  * {
+  *  "message": "User activated successfully",
+  *  "status": 200,
+  *  "result": {
+  *     "response": "SUCCESS"
+  *  }
+  * }
+  * 
  */
 
   /**
-   * Status Update to the user  
+   * To update status of the user 
    * @method
    * @name statusUpdate
    * @param  {req}  - requested data.
@@ -323,10 +354,59 @@ module.exports = class userExtension extends Abstract {
      * @apiUse successBody
      * @apiUse errorBodyuser
      * @apiParamExample {json} Response:
-    */
+     * 
+     * {
+     * "status": 200,
+     *  "result": {
+     *   "userDeactiveAccess": true,
+     *   "firstName": "ManthraHM",
+     *   "gender": "Male",
+     *   "lastName": "one",
+     *   "email": "",
+     *   "phoneNumber": null,
+     *   "status": 1,
+     *   "dob": null,
+     *   "lastLoginTime": 0,
+     *   "createdDate": "2020-04-22 08:58:19:450+0000",
+     *   "organisations": [
+     *       {
+     *           "label": "Mantra4Change",
+     *           "value": "01291096296221081622",
+     *           "roles": [
+     *               {
+     *                   "label": "Assessor",
+     *                   "value": "ASSESSOR"
+     *               }
+     *           ]
+     *       }
+     *   ],
+     *   "roles": [
+     *       {
+     *           "label": "Announcement Sender",
+     *           "value": "ANNOUNCEMENT_SENDER"
+     *       }
+     *       
+     *  ],
+     *   "organisationsList": [
+     *       {
+     *           "label": "aaaa",
+     *           "value": "013020074837278720848"
+     *       },
+     *       {
+     *           "label": "Anudip",
+     *           "value": "013015694888280064602"
+     *       }
+     *   ]
+     * }
+     * }
+     * 
+    **/
+
+
+
   /**
     * details  
-    * @method
+    * @method details
     * @name create
     * @param  {req}  - requested data.
     * @returns {json} Response consists updated user details
@@ -345,61 +425,6 @@ module.exports = class userExtension extends Abstract {
 
         return resolve(userDetails);
 
-      } catch (error) {
-
-        return reject({
-          status:
-            error.status ||
-            httpStatusCode["internal_server_error"].status,
-
-          message:
-            error.message ||
-            httpStatusCode["internal_server_error"].message
-        });
-      }
-    });
-  }
-
-  /**
-     * @api {get} /admin-service/api/v1/userExtension/bulkUserSampleCsvDwonload 
-     * to download sample csv 
-     * @apiVersion 1.0.0
-     * @apiGroup User Creation
-     * @apiHeader {String} X-authenticated-user-token Authenticity token
-     * @apiSampleRequest /admin-service/api/v1/userExtension/bulkUserSampleCsvDwonload
-     * @apiUse successBody
-     * @apiUse errorBodyuser
-    */
-
-  /**
-   * create User
-   * @method
-   * @name create
-   * @param  {req}  - requested data.
-   * @returns {json} Response consists of created user details
-  */
-
-  bulkUserSampleCsvDwonload(req) {
-    return new Promise(async (resolve, reject) => {
-      try {
-
-        let csvData = await userExtensionHelper.bulkUserSampleCsvDwonload();
-        const fileName = `sample-bulk-user.csv`;
-        let fileStream = new csvFileStream(fileName);
-        let input = fileStream.initStream();
-
-        if (csvData) {
-          csvData.map(async userMap => {
-            input.push(userMap);
-          })
-        } else {
-          return resolve(csvData);
-        }
-
-        return resolve({
-          isResponseAStream: true,
-          fileNameWithPath: fileStream.fileNameWithPath()
-        });
       } catch (error) {
 
         return reject({

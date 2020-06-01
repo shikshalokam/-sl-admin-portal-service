@@ -219,7 +219,7 @@ module.exports = class entitiesHelper {
                 resolve({
                     message: constants.apiResponses.ENTITIES_FETCHED,
                     result: {
-                        count:result.count,
+                        count:result.count ? result.count :0,
                         columns:columns,
                         data: result.data
                     }
@@ -362,11 +362,6 @@ module.exports = class entitiesHelper {
                     { "metaInformation.addressLine2": new RegExp(searchText, 'i') }
                 ];
             }
-
-            // let countDoc = await database.models.entities.aggregate(
-            //     queryObject);
-
-            // console.log("countDoc",countDoc);
 
             let entityDocuments = await database.models.entities.aggregate([
                 queryObject,
