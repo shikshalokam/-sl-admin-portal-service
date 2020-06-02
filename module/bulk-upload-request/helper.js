@@ -2,7 +2,7 @@
  * name : bulk-upload-request/helper.js
  * author : Rakesh Kumar
  * Date : 18-March-2020
- * Description : Consist of User creation and user related information.
+ * Description : Consist of bulk upload request information.
  */
 
 let sunBirdService =
@@ -19,7 +19,6 @@ const fs = require('fs');
 const moment = require("moment");
 
 module.exports = class UserCreationHelper {
-
 
 
     /**
@@ -53,7 +52,6 @@ module.exports = class UserCreationHelper {
                         fs.mkdirSync(dir);
                     }
 
-
                     let files = [];
                     files.push(userId + "/" + fileName);
                     let fileInfo = {};
@@ -70,7 +68,6 @@ module.exports = class UserCreationHelper {
                     let failureFile = timestamp + "_" + randomNuumber + "_failure.csv";
                     await failureCsv.toDisk(ROOT_PATH + process.env.BATCH_FOLDER_PATH + successFile);
                     files.push(userId + "/" + failureFile);
-
                  
                     let requestBody = {
                         fileNames: files,
@@ -95,24 +92,18 @@ module.exports = class UserCreationHelper {
                         bucketName = process.env.STORAGE_BUCKET;
                         uploadFileEndPoint = constants.endpoints.UPLOAD_TO_AZURE_PRESIGNED_URL;
                         storage = constants.common.AZURE_SERVICE;
-
                     }
-
                     
                     let errorFileData = {};
                     let successFileData = {};
 
-                   
                     await Promise.all(files.map(async function (fileData) {
-
                         let uploadResp = await kendrService.uploadFileToCloud(fileCompletePath,
                         fileData, bucketName, req.userDetails.userToken, uploadFileEndPoint);
-
                         uploadResp = JSON.parse(uploadResp);
                         if (uploadResp.status != httpStatusCode["ok"].status) {
                             reject(uploadResp);
                         }
-
                         if (uploadResp.result) {
                             if (uploadResp.result.name == userId + "/" + successFile) {
                                 successFileData = {
@@ -136,7 +127,6 @@ module.exports = class UserCreationHelper {
                                 }
                             }
                         }
-
                     }));
 
                     let type = "user-create";
@@ -158,9 +148,9 @@ module.exports = class UserCreationHelper {
                     }
                     let request = await database.models.bulkUploadRequest.create(doc);
 
-                    // fs.unlink(fileCompletePath);
-                    // fs.unlink(successFile);
-                    // fs.unlink(failureFile);
+                    fs.unlink(fileCompletePath);
+                    fs.unlink(successFile);
+                    fs.unlink(failureFile);
                     resolve({ result: { requestId: request.requestId }, message: constants.apiResponses.REQUEST_SUBMITTED });
 
                 } else {
@@ -175,13 +165,13 @@ module.exports = class UserCreationHelper {
         })
     }
 
+
     /**
     * to get request List.
     * @method
     * @name  list
     * @returns {json} Response consists sample csv data
     */
-
     static list(userId, searchText, pageSize, pageNo, token,status) {
         return new Promise(async (resolve, reject) => {
             try {
@@ -284,7 +274,7 @@ module.exports = class UserCreationHelper {
         })
     }
 
-    /**
+/**
 * to get request details.
 * @method
 * @name  getDownloadableUrls
@@ -331,6 +321,13 @@ module.exports = class UserCreationHelper {
 }
 
 
+/**
+* Action column generation 
+* @method
+* @name  _actions
+* @returns {json} Response consist of dynamic table action columns
+*/
+
 function _actions() {
 
     let actions = ["view", "edit"];
@@ -347,6 +344,13 @@ function _actions() {
 
     return actionsColumn;
 }
+
+/**
+* Bulk request grid columns 
+* @method
+* @name  _bulkRequestList
+* @returns {json} Response consist of dynamic table columns
+**/
 
 function _bulkRequestList() {
 
@@ -470,14 +474,12 @@ function _checkAccess(token, userId) {
 /**
  * to check weather user creation is valid or not
  * @name _validateUsers
- * @param {*} userJson user json
+ * @param {*} inputArray user json
  */
 function _validateUsers(inputArray) {
-
     return new Promise(async (resolve, reject) => {
 
         let valid = true;
-
         await Promise.all(inputArray.map(async function (element) {
             if (element) {
 
@@ -489,7 +491,6 @@ function _validateUsers(inputArray) {
                     if (result == false) {
                         valid = false;
                     }
-
                 }
                 else if (element.name) {
 
@@ -518,7 +519,6 @@ function _validateUsers(inputArray) {
                 }
             }
         }));
-
         resolve(valid);
     });
 

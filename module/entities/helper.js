@@ -134,7 +134,7 @@ module.exports = class entitiesHelper {
                         externalId: entityDocument.metaInformation.externalId,
                         name: entityDocument.metaInformation.name,
                         _id: entityDocument._id,
-                        childHierarchyPath:entityDocument.childHierarchyPath,
+                        subEntities:entityDocument.childHierarchyPath,
                         createdAt: moment(entityDocument.createdAt).format("Do MMM YYYY")
 
                     }
@@ -208,9 +208,15 @@ module.exports = class entitiesHelper {
 
                 if( result.data && result.data.length > 0 ) {
                     result.data = result.data.map(data=>{
+                        // console.log("data",data);
+
                         let cloneData = {...data};
-                        cloneData["label"] = cloneData.name;
-                        cloneData["value"] = cloneData._id;
+                        // cloneData["label"] = cloneData.name;
+                        // cloneData["_id"] = cloneData._id;
+                        cloneData['address'] = cloneData.addressLine1;
+                        if(cloneData.addressLine1){
+                            delete cloneData.addressLine1;
+                        }
                         return cloneData;
                     })
                 }
@@ -533,8 +539,8 @@ function _subEntityListColumns() {
     let columns = [
         'externalId',
         'name',
-        'label',
-        'addressLine1',
+        // 'label',
+        'address',
         'actions'
     ];
 
@@ -575,7 +581,7 @@ function _entityListColumns() {
         'externalId',
         'name',
         'createdAt',
-        'childHierarchyPath',
+        'subEntities',
         'actions'
     ];
 

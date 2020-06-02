@@ -11,7 +11,7 @@ const bulkUploadHelper = require(MODULES_BASE_PATH + "/bulk-upload-request/helpe
    * Forms
    * @class
 */
-module.exports = class PlatformRolesExt extends Abstract {
+module.exports = class BulkUploadRequest extends Abstract {
   constructor() {
     super(schemas["bulkUploadRequest"]);
   }
