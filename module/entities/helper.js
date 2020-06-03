@@ -208,7 +208,7 @@ module.exports = class entitiesHelper {
 
                 if( result.data && result.data.length > 0 ) {
                     result.data = result.data.map(data=>{
-                        // console.log("data",data);
+                        console.log("data",data);
 
                         let cloneData = {...data};
                         // cloneData["label"] = cloneData.name;
@@ -523,6 +523,107 @@ module.exports = class entitiesHelper {
         }
     })
   }
+
+
+
+    /**
+   * All the related entities and metainfomration for the given entity
+   * @method
+   * @name relatedEntities
+   * @param {String} entityId - entity id.
+   * @returns {Array} - returns an entities with related entity information.
+   */
+  static relatedEntities(entityId){
+
+    return new Promise(async (resolve, reject) => {
+        try {
+    let result = {}
+    let projection = ["metaInformation.externalId", "metaInformation.name", 
+    "metaInformation.addressLine1", "metaInformation.addressLine2", 
+    "metaInformation.administration", "metaInformation.city", 
+    "metaInformation.country", "entityTypeId", "entityType"];
+    let entityDocs = await this.entityDocuments({ _id: entityId }, projection);
+
+    let entityDocument = entityDocs.data;
+   
+    if (entityDocument.length < 1) {
+      throw { 
+        status: httpStatusCode.not_found.status, 
+        message: constants.apiResponses.ENTITY_NOT_FOUND 
+      };
+    }
+
+    let relatedEntitiesDocs = await this.relatedEntitiesDetails(entityDocument[0]._id, entityDocument[0].entityTypeId, entityDocument[0].entityType, projection);
+
+    let relatedEntities = relatedEntitiesDocs.data;
+    
+    _.merge(result, entityDocument[0])
+    result["relatedEntities"] = (relatedEntities.length > 0) ? relatedEntities : [];
+    resolve({ message:constants.apiResponses.ENTITY_INFORMATION_FETCHED, result:result });
+
+} catch (error) {
+    return reject({
+        status: error.status || httpStatusCode.internal_server_error.status,
+        message: error.message || httpStatusCode.internal_server_error.message
+    });
+}
+})
+
+  }
+
+
+  /**
+   * All the related entities for the given entities.
+   * @method
+   * @name relatedEntitiesDetails
+   * @param {String} entityId - entity id.
+   * @param {String} entityTypeId - entity type id.
+   * @param {String} entityType - entity type.
+   * @param {Array} [projection = "all"] - total fields to be projected.
+   * @returns {Array} - returns an array of related entities data.
+   */
+
+  static relatedEntitiesDetails(entityId, entityTypeId, entityType, projection = "all") {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            
+
+            if(this.entityMapProcessData && this.entityMapProcessData.relatedEntities && this.entityMapProcessData.relatedEntities[entityId.toString()]) {
+                return resolve(this.entityMapProcessData.relatedEntities[entityId.toString()]);
+            }
+
+            let relatedEntitiesQuery = {};
+
+            if (entityTypeId && entityId && entityType) {
+                relatedEntitiesQuery[`groups.${entityType}`] = entityId;
+                relatedEntitiesQuery["entityTypeId"] = {};
+                relatedEntitiesQuery["entityTypeId"]["$ne"] = entityTypeId;
+            } else {
+                throw { 
+                    status: httpStatusCode.bad_request.status, 
+                    message: constants.apiResponses.MISSING_ENTITYID_ENTITYTYPE_ENTITYTYPEID 
+                };
+            }
+
+            let relatedEntitiesDocument = await this.entityDocuments(relatedEntitiesQuery, projection);
+            relatedEntitiesDocument = relatedEntitiesDocument ? relatedEntitiesDocument : [];
+
+            if(this.entityMapProcessData && this.entityMapProcessData.relatedEntities) {
+                this.entityMapProcessData.relatedEntities[entityId.toString()] = relatedEntitiesDocument;
+            }
+
+            return resolve(relatedEntitiesDocument);
+
+
+        } catch (error) {
+            return reject({
+                status: error.status || httpStatusCode.internal_server_error.status,
+                message: error.message || httpStatusCode.internal_server_error.message
+            });
+        }
+    })
+}
 
 }
 

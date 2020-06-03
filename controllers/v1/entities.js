@@ -235,7 +235,7 @@ module.exports = class Entities extends Abstract {
  * @api {get} /admin-service/api/v1/entities/details/:entityId
  * Get entities details information
  * @apiVersion 1.0.0
- * @apiGroup User
+ * @apiGroup Entities
  * @apiHeader {String} X-authenticated-user-token Authenticity token
  * @apiSampleRequest /admin-service/api/v1/entities/details/5db173598a8e070bedca6ba1
  * @apiUse successBody
@@ -290,6 +290,105 @@ module.exports = class Entities extends Abstract {
       }
     })
   }
+
+    /**
+  * @api {get} /admin-service/api/v1/entities/relatedEntities/:entityId Get Related Entities
+  * @apiVersion 1.0.0
+  * @apiName Get Related Entities
+  * @apiGroup Entities
+  * @apiSampleRequest /admin-service/api/v1/entities/relatedEntities/5dc9266ce153ef2dc4b8ca48
+  * @apiUse successBody
+  * @apiUse errorBody
+  * @apiParamExample {json} Response:
+  * {
+    "message": "Entity information fetched successfully",
+    "status": 200,
+    "result": {
+        "_id": "5dc9266ce153ef2dc4b8ca48",
+        "entityTypeId": "5d15a959e9185967a6d5e8a6",
+        "entityType": "school",
+        "metaInformation": {
+            "externalId": "KAES07",
+            "name": "GHPS DEVANGA PET",
+            "addressLine1": "",
+            "city": "",
+            "country": "INDIA"
+        },
+        "relatedEntities": [
+            {
+                "_id": "5dc92818e153ef2dc4b8cb4a",
+                "entityTypeId": "5d7a290e6371783ceb11064c",
+                "entityType": "state",
+                "metaInformation": {
+                    "externalId": "KA",
+                    "name": "Karnataka"
+                }
+            },
+            {
+                "_id": "5dc9368ae153ef2dc4b8cb4b",
+                "entityTypeId": "5d15a959e9185967a6d5e8ac",
+                "entityType": "district",
+                "metaInformation": {
+                    "externalId": "KA-Bangalore Urban",
+                    "name": "Bangalore Urban"
+                }
+            },
+            {
+                "_id": "5dc93779e153ef2dc4b8cb4c",
+                "entityTypeId": "5d15a959e9185967a6d5e8ab",
+                "entityType": "block",
+                "metaInformation": {
+                    "externalId": "BU- Anekal",
+                    "name": "Anekal"
+                }
+            },
+            {
+                "_id": "5dc937b6e153ef2dc4b8cb55",
+                "entityTypeId": "5d15c4ec03cbf959ccabdd2b",
+                "entityType": "cluster",
+                "metaInformation": {
+                    "externalId": "KA-B01",
+                    "name": "Anekal Town",
+                    "city": ""
+                }
+            }
+        ]
+    }
+}
+  */
+
+    /**
+   * Related entities of the given entity.
+   * @method
+   * @name relatedEntities
+   * @param {Object} req - requested data.
+   * @param {String} req.params._id - requested entity id.         
+   * @returns {JSON} - response consist of related entity details
+   */
+
+  relatedEntities(req) {
+    return new Promise(async (resolve, reject) => {
+
+      try {
+        
+        let result = await entitiesHelper.relatedEntities(req.params._id); 
+
+        return resolve(result);
+
+      } catch (error) {
+
+        return reject({
+          status: error.status || httpStatusCode.internal_server_error.status,
+          message: error.message || httpStatusCode.internal_server_error.message,
+          errorObject: error
+        })
+
+      }
+
+
+    })
+  }
+
 
 }
 
