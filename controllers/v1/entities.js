@@ -390,5 +390,176 @@ module.exports = class Entities extends Abstract {
   }
 
 
+  /**
+  * @api {get} /admin-service/api/v1/entities/stateCreateForm
+  * @apiVersion 1.0.0
+  * @apiName Get state create form
+  * @apiGroup Entities
+  * @apiSampleRequest /admin-service/api/v1/entities/stateCreateForm
+  * @apiUse successBody
+  * @apiUse errorBody
+  * @apiParamExample {json} Response:
+  * {
+    "message": "State create form fetched succefully",
+    "status": 200,
+    "result": [
+        {
+            "field": "name",
+            "value": "",
+            "visible": true,
+            "editable": true,
+            "label": "Name",
+            "input": "text",
+            "validation": [
+                {
+                    "name": "required",
+                    "validator": "required",
+                    "message": "Name required"
+                },
+                {
+                    "name": "pattern",
+                    "validator": "[^a-zA-Zs:]*",
+                    "message": "Please provide a valid name"
+                }
+            ]
+        },
+        {
+            "field": "externalId",
+            "value": "",
+            "visible": true,
+            "editable": true,
+            "label": "External Id",
+            "input": "text",
+            "validation": [
+                {
+                    "name": "required",
+                    "validator": "required",
+                    "message": "External Id required"
+                },
+                {
+                    "name": "pattern",
+                    "validator": "[^a-zA-Z0-9s:]*",
+                    "message": "Please provide a valid external id"
+                }
+            ]
+        },
+        {
+            "field": "capital",
+            "value": "",
+            "visible": true,
+            "editable": true,
+            "label": "Capital",
+            "input": "text",
+            "validation": [
+                {
+                    "name": "required",
+                    "validator": "required",
+                    "message": "Capital required"
+                },
+                {
+                    "name": "pattern",
+                    "validator": "[^a-zA-Zs:]*",
+                    "message": "Please provide a valid capital"
+                }
+            ]
+        },
+        {
+            "field": "region",
+            "value": "",
+            "visible": true,
+            "editable": true,
+            "label": "Region",
+            "input": "text",
+            "validation": [
+                {
+                    "name": "required",
+                    "validator": "required",
+                    "message": "Region required"
+                },
+                {
+                    "name": "pattern",
+                    "validator": "[^a-zA-Zs:]*",
+                    "message": "Please provide a valid region"
+                }
+            ]
+        }
+    ]
+}
+  * 
+  **/
+
+  /**
+   * Get state create form
+   * @method
+   * @name stateCreateForm
+   * @param {Object} req - requested data.
+   * @returns {JSON} - response consist of state create form
+   */
+
+  stateCreateForm(req) {
+    return new Promise(async (resolve, reject) => {
+
+      try {
+        
+        let result = await entitiesHelper.stateCreateForm(); 
+
+        return resolve(result);
+
+      } catch (error) {
+
+        return reject({
+          status: error.status || httpStatusCode.internal_server_error.status,
+          message: error.message || httpStatusCode.internal_server_error.message,
+          errorObject: error
+        })
+      }
+    })
+  }
+
+  
+   /**
+  * @api {get} /admin-service/api/v1/entities/createStateEntity
+  * @apiVersion 1.0.0
+  * @apiName To create state entity
+  * @apiGroup Entities
+  * @apiSampleRequest /admin-service/api/v1/entities/createStateEntity
+  * @apiUse successBody
+  * @apiUse errorBody
+  * @apiParamExample {json} Response:
+  * {
+  *  "message": "Entity created successfully",
+  *  "status": 200
+  * }
+  **/
+
+    /**
+   * Get state create form
+   * @method
+   * @name createStateEntity
+   * @param {Object} req - requested data.
+   * @returns {JSON} - response consist of state create form
+   */
+
+  createStateEntity(req) {
+    return new Promise(async (resolve, reject) => {
+
+      try {
+
+        
+        let result = await entitiesHelper.createStateEntity(req.body); 
+        return resolve(result);
+
+      } catch (error) {
+
+        return reject({
+          status: error.status || httpStatusCode.internal_server_error.status,
+          message: error.message || httpStatusCode.internal_server_error.message,
+          errorObject: error
+        })
+      }
+    })
+  }
+
+
 }
 
