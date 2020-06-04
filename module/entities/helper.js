@@ -1,5 +1,7 @@
 const moment = require("moment");
-let entityTypesHelper = require(MODULES_BASE_PATH + "/entityTypes/helper");
+let entityTypesHelper = require(MODULES_BASE_PATH + "/entity-types/helper");
+
+const csv = require('csvtojson');
 
 
 module.exports = class entitiesHelper {
@@ -671,7 +673,7 @@ module.exports = class entitiesHelper {
                 let entityType = await database.models.entityTypes.findOne({ name: constants.common.STATE_ENTITY_TYPE });
 
                 let stateEntityDocument = {
-                    entityTypeId:entityType._id,
+                    entityTypeId: entityType._id,
                     entityType: entityType.name,
                     metaInformation: {
                         name: entityDocument.name,
@@ -681,11 +683,11 @@ module.exports = class entitiesHelper {
                     }
                 }
 
-               let entityDoc = await database.models.entities.create(stateEntityDocument);
+                let entityDoc = await database.models.entities.create(stateEntityDocument);
 
                 if (!entityDoc) {
                     reject({
-                        status:httpStatusCode.bad_request.status,
+                        status: httpStatusCode.bad_request.status,
                         message: constants.apiResponses.FAILED_TO_CREATED_ENTITY
                     });
                 }
@@ -701,6 +703,76 @@ module.exports = class entitiesHelper {
             }
         });
     }
+
+    /**
+    * to get bulkEntitiesSampleCsvDwonload.
+    * @method
+    * @name  bulkEntitiesSampleCsvDwonload
+    * @returns {json} Response consists sample csv data
+    */
+
+    static bulkEntitiesSampleCsvDwonload() {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                const csvData = await csv().fromFile('sample-bulk-entities.csv');
+                resolve(csvData);
+            } catch (error) {
+                console.log("error", error);
+                return reject(error);
+            }
+        })
+    }
+
+
+    /**
+    * to get state list.
+    * @method
+    * @name  stateList
+    * @returns {json} Response consists state list
+    */
+
+   static stateList() {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            let stateInfo = await database.models.entities.find(
+                {
+                    entityType: constants.common.STATE_ENTITY_TYPE
+                },
+                {
+                    entityTypeId: 1,
+                    _id: 1,
+                    metaInformation: 1,
+                    groups: 1,
+                    childHierarchyPath: 1
+                }
+            ).lean();
+
+            if(!stateInfo){
+                reject({ 
+                    message:constants.apiResponses.STATES_NOT_FOUND, 
+                    status: httpStatusCode.bad_request.status
+                });
+            }
+            let states = [];
+            await Promise.all(stateInfo.map(async function (state) {
+                states.push({
+                    label: state.metaInformation.name,
+                    value: state._id
+                });
+            }));
+
+            
+            resolve({ message:constants.apiResponses.STATE_LIST_FETCHED,result:states });
+
+        } catch (error) {
+            return reject(error);
+        }
+    })
+}
+
+
 
 
 }

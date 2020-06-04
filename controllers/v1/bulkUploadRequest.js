@@ -48,7 +48,7 @@ module.exports = class BulkUploadRequest extends Abstract {
   bulkUserUpload(req) {
     return new Promise(async (resolve, reject) => {
       try {
-        if (!req.files || !req.files.userCreationFile) {
+        if (!req.files || !req.files.userCreationFile ) {
           throw {
             status: httpStatusCode["bad_request"].status,
             message: httpStatusCode["bad_request"].message

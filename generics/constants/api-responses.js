@@ -49,7 +49,11 @@ module.exports = {
     STATE_CREATE_FORM: "State create form fetched successfully",
     STATE_CREATE_FORM_NOT_FOUND: "State create form not found",
     ENTITY_CREATED: "Entity created successfully",
-    FAILED_TO_CREATED_ENTITY: "Failed to create entity"
+    FAILED_TO_CREATED_ENTITY: "Failed to create entity",
+    STATES_NOT_FOUND: "State not found",
+    STATE_LIST_FETCHED: "State list fetched successfully",
+    ENTITY_TYPE_NOT_FOUND: "Entity type not found",
+    ENTITY_TYPE_FETCHED: "Entity type featched successfully"
 
 
 };

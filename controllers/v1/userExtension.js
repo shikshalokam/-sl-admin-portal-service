@@ -443,7 +443,7 @@ module.exports = class userExtension extends Abstract {
 
   /**
      * @api {get} /admin-service/api/v1/userExtension/bulkUserSampleCsvDwonload 
-     * to download sample csv 
+     * To download sample csv 
      * @apiVersion 1.0.0
      * @apiGroup User Creation
      * @apiHeader {String} X-authenticated-user-token Authenticity token
@@ -453,9 +453,9 @@ module.exports = class userExtension extends Abstract {
     */
 
   /**
-   * create User
+   * Bulk user sample csv 
    * @method
-   * @name create
+   * @name bulkUserSampleCsvDwonload
    * @param  {req}  - requested data.
    * @returns {json} Response consists of created user details
   */
