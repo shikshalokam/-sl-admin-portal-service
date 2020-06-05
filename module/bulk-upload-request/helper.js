@@ -38,25 +38,37 @@ module.exports = class UserCreationHelper {
                 let profileData = await _checkAccess(req.userDetails.userToken, userId);
                 if (profileData && profileData['allowed']) {
 
-                    
-                    let userCreateData = await csv().fromString(req.files.userCreationFile.data.toString());
-                    if (req.query.requestType == "entity-creation" && req.query.entityType) {
+                    let userCreateData = await csv().fromString(req.files.uploadFile.data.toString());
+                    if (req.query.requestType == "entityMapping") {
 
-                    } else {
+                    }
+                    else if (req.query.requestType == "entityCreation") {
+                        if (!req.query.entityType) {
+                            reject({
+                                status: httpStatusCode["bad_request"].status,
+                                message: "Validation failed"
+                            })
+                        }
+                    } else if (req.query.requestType == "userCreation") {
 
                         let validateUser = await _validateUsers(userCreateData);
                         if (validateUser == false) {
-                            resolve({
+                            reject({
                                 status: httpStatusCode["bad_request"].status,
                                 message: "Validation failed"
                             })
                         }
 
+                    }else{
+                        reject({
+                            status: httpStatusCode["bad_request"].status,
+                            message:httpStatusCode["bad_request"].message
+                        })
                     }
 
 
-                    
-                    let fileName =  gen.utils.generateUniqueId() + ".csv";
+
+                    let fileName = gen.utils.generateUniqueId() + ".csv";
                     var dir = ROOT_PATH + process.env.BATCH_FOLDER_PATH;
                     if (!fs.existsSync(dir)) {
                         fs.mkdirSync(dir);
@@ -67,7 +79,7 @@ module.exports = class UserCreationHelper {
                     let fileInfo = {};
 
                     let fileCompletePath = ROOT_PATH + process.env.BATCH_FOLDER_PATH + fileName;
-                    let data = fs.writeFileSync(fileCompletePath, req.files.userCreationFile.data);
+                    let data = fs.writeFileSync(fileCompletePath, req.files.uploadFile.data);
 
                     // // let cv = new ObjectsToCsv(userCreateData);
                     // // let successFile = timestamp + "_" + randomNuumber + "_success.csv";
@@ -82,8 +94,8 @@ module.exports = class UserCreationHelper {
                     let requestBody = {
                         fileNames: files,
                     }
-                    
-                    let config  = _getCloudUploadConfig();
+
+                    let config = _getCloudUploadConfig();
 
                     let uploadFileEndPoint = config.uploadFileEndPoint;
                     let storage = config.storage;
@@ -94,7 +106,7 @@ module.exports = class UserCreationHelper {
 
                     await Promise.all(files.map(async function (fileData) {
                         let uploadResp = await kendrService.uploadFileToCloud(fileCompletePath,
-                        fileData, bucketName, req.userDetails.userToken, uploadFileEndPoint);
+                            fileData, bucketName, req.userDetails.userToken, uploadFileEndPoint);
                         uploadResp = JSON.parse(uploadResp);
                         if (uploadResp.status != httpStatusCode["ok"].status) {
                             reject(uploadResp);
@@ -115,7 +127,7 @@ module.exports = class UserCreationHelper {
                                     bucket: bucketName
                                 }
 
-                            } 
+                            }
                             // else if (uploadResp.result.name == userId + "/" + failureFile) {
                             //     errorFileData = {
                             //         sourcePath: uploadResp.result.name,
@@ -126,11 +138,12 @@ module.exports = class UserCreationHelper {
                         }
                     }));
 
-                    let type = "user-create";
+                    let type = "";
                     if (req.query.requestType) {
                         type = req.query.requestType;
                     }
                     let requestId = uniqid();
+
                     let doc = {
                         requestId: requestId,
                         requestType: type,
@@ -139,17 +152,28 @@ module.exports = class UserCreationHelper {
                         errorFile: errorFileData,
                         successFile: successFileData,
                         metaInformation: {
-                            query: req.query
+                            state:req.query.state,
+                            entityType:req.query.entityType 
                         },
                         remarks: ""
                     }
                     let request = await database.models.bulkUploadRequest.create(doc);
 
 
-                    if (req.body.type == "entityCreation") {
-                        _bulkUploadEntities(request.requestId,fileCompletePath, req.userDetails.userToken, req.query.entityType, req.userDetails.userId);
+                    if (req.body.requestType == "entityCreation") {
+                        _bulkUploadEntities(request.requestId, 
+                            fileCompletePath, 
+                            req.userDetails.userToken, 
+                            req.query.entityType, 
+                            req.userDetails.userId);
+                    }else if (req.query.requestType == "entityMapping") {
+                        _entityMapping(request.requestId, 
+                            fileCompletePath, 
+                            req.userDetails.userToken, 
+                            req.userDetails.userId,
+                            req.query.programId,
+                            req.query.solutionId);
                     }
-
                     resolve({ result: { requestId: request.requestId }, message: constants.apiResponses.REQUEST_SUBMITTED });
 
                 } else {
@@ -483,7 +507,6 @@ function _validateUsers(inputArray) {
             if (element) {
 
                 let keys = Object.keys(element);
-                // if(keys)
                 if (element.EMAIL) {
                     var re = /^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$/;
                     let result = re.test(String(element.EMAIL).toLowerCase());
@@ -500,8 +523,6 @@ function _validateUsers(inputArray) {
                     }
 
                 } else if (element.roles) {
-
-                    // }else if(element.password){
 
                 } else if (element.phone) {
 
@@ -524,16 +545,16 @@ function _validateUsers(inputArray) {
 
 }
 
-function _bulkUploadEntities(bulkRequestId,fileCompletePath, token, entityType, userId) {
+function _bulkUploadEntities(bulkRequestId, fileCompletePath, token, entityType, userId) {
     return new Promise(async (resolve, reject) => {
 
         let samikshaResponse = await samikshaService.bulkUploadEntities(fileCompletePath, token, entityType);
-        if (samikshaResponse && samikshaResponse.statusCode ==  httpStatusCode["ok"].status) {
+        if (samikshaResponse && samikshaResponse.statusCode == httpStatusCode["ok"].status) {
             let responseData = await csv().fromString(samikshaResponse.body.toString());
             let config = _getCloudUploadConfig();
             let files = [];
             let cv = new ObjectsToCsv(responseData);
-            let successFile =  gen.utils.generateUniqueId() + "_success.csv";
+            let successFile = gen.utils.generateUniqueId() + "_success.csv";
             await cv.toDisk(ROOT_PATH + process.env.BATCH_FOLDER_PATH + successFile);
             files.push(userId + "/" + successFile);
 
@@ -552,22 +573,31 @@ function _bulkUploadEntities(bulkRequestId,fileCompletePath, token, entityType, 
                     bucket: config.bucketName
                 }
                 let update = await database.models.bulkUploadRequest.findOneAndUpdate(
-                    { requestId:bulkRequestId },
-                    { $set: { "successFile":successFileData,status:"completed"  } }
+                    { requestId: bulkRequestId },
+                    { $set: { "successFile": successFileData, status: "completed" } }
                 )
+                resolve();
 
-            }else{
+            } else {
 
                 let update = await database.models.bulkUploadRequest.findOneAndUpdate(
-                    { requestId:bulkRequestId },
-                    { $set: { status:"failed"  } }
+                    { requestId: bulkRequestId },
+                    { $set: { status: "failed" } }
                 )
+                resolve();
 
             }
         }
     });
 }
 
+
+/**
+   * To get cloud configaraton
+   * @method
+   * @name _getCloudUploadConfig 
+   * @returns {json} return the cloud configaraton
+*/
 function _getCloudUploadConfig() {
 
     let config = {
@@ -579,21 +609,58 @@ function _getCloudUploadConfig() {
 
     if (process.env.CLOUD_STORAGE == constants.common.AWS_SERVICE) {
         config.bucketName = process.env.STORAGE_BUCKET;
-        config.uploadFileEndPoint = constants.endpoints.UPLOAD_TO_AWS_PRESIGNED_URL;
+        config.uploadFileEndPoint = constants.endpoints.UPLOAD_TO_AWS;
         config.storage = constants.common.AWS_SERVICE;
 
     } else if (process.env.CLOUD_STORAGE == constants.common.GOOGLE_CLOUD_SERVICE) {
 
         config.bucketName = process.env.STORAGE_BUCKET;
-        config.uploadFileEndPoint = constants.endpoints.UPLOAD_TO_GCP_PRESIGNED_URL;
+        config.uploadFileEndPoint = constants.endpoints.UPLOAD_TO_GCP;
         config.storage = constants.common.GOOGLE_CLOUD_SERVICE;
 
     } else if (process.env.CLOUD_STORAGE == constants.common.AZURE_SERVICE) {
 
         config.bucketName = process.env.STORAGE_BUCKET;
-        config.uploadFileEndPoint = constants.endpoints.UPLOAD_TO_AZURE_PRESIGNED_URL;
+        config.uploadFileEndPoint = constants.endpoints.UPLOAD_TO_AZURE;
         config.storage = constants.common.AZURE_SERVICE;
     }
 
     return config;
+}
+
+
+/**
+   * User columns action data.
+   * @method
+   * @name _actions 
+   * @returns {json}
+*/
+function _entityMapping(bulkRequestId, 
+    filePath, 
+    userToken, 
+    userId,
+    programId = "",
+    solutionId = "") {
+    return new Promise(async (resolve, reject) => {
+       
+        let samikshaResponse = await samikshaService.entityMapping(filePath, userToken, programId,solutionId);
+        if (samikshaResponse && samikshaResponse.statusCode == httpStatusCode["ok"].status) {
+
+            let update = await database.models.bulkUploadRequest.findOneAndUpdate(
+                { requestId: bulkRequestId },
+                { $set: { status: "completed" } }
+            );
+            resolve();
+
+        } else {
+
+            let update = await database.models.bulkUploadRequest.findOneAndUpdate(
+                { requestId: bulkRequestId },
+                { $set: { status: "failed" } }
+            )
+            resolve();
+
+        }
+
+    });
 }

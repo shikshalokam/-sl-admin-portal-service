@@ -1,6 +1,9 @@
 const moment = require("moment");
 let entityTypesHelper = require(MODULES_BASE_PATH + "/entity-types/helper");
 
+let kendrService =
+    require(ROOT_PATH + "/generics/services/kendra-service");
+
 const csv = require('csvtojson');
 
 
@@ -705,24 +708,61 @@ module.exports = class entitiesHelper {
     }
 
     /**
-    * to get bulkEntitiesSampleCsvDwonload.
+    * to get entities Sample Csv
     * @method
     * @name  bulkEntitiesSampleCsvDwonload
-    * @returns {json} Response consists sample csv data
+    * @returns {json} Response consists of sample csv file information
     */
 
-    static bulkEntitiesSampleCsvDwonload() {
+    static bulkEntitiesSampleCsvDwonload(token) {
         return new Promise(async (resolve, reject) => {
             try {
 
-                const csvData = await csv().fromFile('sample-bulk-entities.csv');
-                resolve(csvData);
+              
+               let fileInfo = {
+                sourcePath: constants.common.SAMPLE_ENTITIES_CSV,
+                bucket:process.env.STORAGE_BUCKET,
+                cloudStorage:process.env.CLOUD_STORAGE,
+               }
+
+                let response = await kendrService.getDownloadableUrls(fileInfo, token);
+                resolve(response);
             } catch (error) {
                 console.log("error", error);
                 return reject(error);
             }
         })
     }
+
+    /**
+    * to get Entity Mapping Sample Csv
+    * @method
+    * @name  bulkEntityMappingSampleCsvDwonload
+    * @returns {json} Response consists of sample csv file information
+    */
+
+   static bulkEntityMappingSampleCsvDwonload(token) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+          
+           let fileInfo = {
+            sourcePath: constants.common.SAMPLE_ENTITY_MAPPING_CSV,
+            bucket:process.env.STORAGE_BUCKET,
+            cloudStorage:process.env.CLOUD_STORAGE,
+           }
+
+            let response = await kendrService.getDownloadableUrls(fileInfo, token);
+
+            resolve(response);
+        } catch (error) {
+            console.log("error", error);
+            return reject(error);
+        }
+    })
+}
+
+    
 
 
     /**
@@ -883,3 +923,4 @@ function _actions() {
 
     return actionsColumn;
 }
+

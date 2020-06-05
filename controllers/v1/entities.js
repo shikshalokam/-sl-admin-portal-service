@@ -571,6 +571,15 @@ module.exports = class Entities extends Abstract {
    * @apiSampleRequest /admin-service/api/v1/entities/bulkEntitiesSampleCsvDwonload
    * @apiUse successBody
    * @apiUse errorBodyuser
+   * @apiParamExample {json} Response:
+   * {
+    "message": "Url's generated successfully",
+    "status": 200,
+    "result": {
+        "filePath": "bulkUploadSamples/users.csv",
+        "url": "https://storage.googleapis.com/download/storage/v1/b/sl-dev-storage/o/bulkUploadSamples%2Fusers.csv?generation=1591340672710362&alt=media"
+    }
+}
   */
 
   /**
@@ -578,31 +587,16 @@ module.exports = class Entities extends Abstract {
    * @method
    * @name bulkEntitiesSampleCsvDwonload
    * @param  {req}  - requested data.
-   * @returns {json} Response consists of created user details
+   * @returns {json} Response consists of sample csv info
   */
 
   bulkEntitiesSampleCsvDwonload(req) {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let csvData = await entitiesHelper.bulkEntitiesSampleCsvDwonload();
-        const fileName = `sample-bulk-user.csv`;
-        let fileStream = new csvFileStream(fileName);
-        let input = fileStream.initStream();
-
-        if (csvData) {
-          csvData.map(async entities => {
-            input.push(entities);
-          })
-        } else {
-          return resolve(csvData);
-        }
-
-        return resolve({
-          isResponseAStream: true,
-          fileNameWithPath: fileStream.fileNameWithPath()
-        });
-      } catch (error) {
+        let sampleCsvFile = await entitiesHelper.bulkEntitiesSampleCsvDwonload(req.userDetails.userToken);
+          return resolve(sampleCsvFile);
+        } catch (error) {
 
         return reject({
           status:
@@ -616,6 +610,56 @@ module.exports = class Entities extends Abstract {
       }
     });
   }
+
+
+   /**
+   * @api {get} /admin-service/api/v1/entities/bulkEntityMappingSampleCsvDwonload 
+   * Sample csv for bulk entities  
+   * @apiVersion 1.0.0
+   * @apiGroup Entities
+   * @apiHeader {String} X-authenticated-user-token Authenticity token
+   * @apiSampleRequest /admin-service/api/v1/entities/bulkEntityMappingSampleCsvDwonload
+   * @apiUse successBody
+   * @apiUse errorBodyuser
+   * @apiParamExample {json} Response:
+   * {
+    "message": "Url's generated successfully",
+    "status": 200,
+    "result": {
+        "filePath": "bulkUploadSamples/users.csv",
+        "url": "https://storage.googleapis.com/download/storage/v1/b/sl-dev-storage/o/bulkUploadSamples%2Fusers.csv?generation=1591340672710362&alt=media"
+    }
+}
+  */
+
+  /**
+   * Bulk entity mapping sample csv 
+   * @method
+   * @name bulkEntityMappingSampleCsvDwonload
+   * @param  {req}  - requested data.
+   * @returns {json} Response consists of sample csv info
+  */
+
+ bulkEntityMappingSampleCsvDwonload(req) {
+  return new Promise(async (resolve, reject) => {
+    try {
+
+      let sampleCsvFile = await entitiesHelper.bulkEntityMappingSampleCsvDwonload(req.userDetails.userToken);
+        return resolve(sampleCsvFile);
+      } catch (error) {
+
+      return reject({
+        status:
+          error.status ||
+          httpStatusCode["internal_server_error"].status,
+
+        message:
+          error.message ||
+          httpStatusCode["internal_server_error"].message
+      });
+    }
+  });
+}
 
 
   /**

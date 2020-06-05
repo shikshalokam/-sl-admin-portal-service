@@ -17,5 +17,10 @@ module.exports = {
     SUCCESS_RESPONSE:"SUCCESS",
     "AWS_SERVICE": "AWS",
     "GOOGLE_CLOUD_SERVICE": "GC",
-    "AZURE_SERVICE": "AZURE"
+    "AZURE_SERVICE": "AZURE",
+    "SAMPLE_USERS_CSV":"bulkUploadSamples/users.csv",
+    "SAMPLE_ENTITIES_CSV": "bulkUploadSamples/entities.csv",
+    "SAMPLE_ENTITY_MAPPING_CSV": "bulkUploadSamples/entityMapping.csv"
+
+
 };

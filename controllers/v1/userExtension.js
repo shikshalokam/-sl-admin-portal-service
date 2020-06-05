@@ -464,23 +464,9 @@ module.exports = class userExtension extends Abstract {
   return new Promise(async (resolve, reject) => {
     try {
 
-      let csvData = await userExtensionHelper.bulkUserSampleCsvDwonload();
-      const fileName = `sample-bulk-user.csv`;
-      let fileStream = new csvFileStream(fileName);
-      let input = fileStream.initStream();
-
-      if (csvData) {
-        csvData.map(async userMap => {
-          input.push(userMap);
-        })
-      } else {
-        return resolve(csvData);
-      }
-
-      return resolve({
-        isResponseAStream: true,
-        fileNameWithPath: fileStream.fileNameWithPath()
-      });
+      let sampleCsvFile = await userExtensionHelper.bulkUserSampleCsvDwonload(req.userDetails.userToken);
+      return resolve(sampleCsvFile);
+     
     } catch (error) {
 
       return reject({

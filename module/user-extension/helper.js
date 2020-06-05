@@ -13,6 +13,9 @@ let userManagementService =
 let sunBirdService =
     require(ROOT_PATH + "/generics/services/sunbird");
 
+let kendrService =
+    require(ROOT_PATH + "/generics/services/kendra-service");
+
 const csv = require('csvtojson');
 
 module.exports = class UserCreationHelper {
@@ -254,7 +257,7 @@ module.exports = class UserCreationHelper {
                         userToken
                     );
 
-              
+
                 return resolve(updateUser);
             } catch (error) {
                 return reject(error);
@@ -317,189 +320,193 @@ module.exports = class UserCreationHelper {
                     let organisationsList = await _getOrganisationlist(profileData, orgAdminUserId, userToken);
 
                     let apiAccessUserData =
-                    await sunBirdService.getUserProfileInfo(userToken, orgAdminUserId);
+                        await sunBirdService.getUserProfileInfo(userToken, orgAdminUserId);
 
                     apiAccessUserData = JSON.parse(apiAccessUserData);
-                    if(apiAccessUserData.responseCode != constants.common.RESPONSE_OK){
-                        reject({status: httpStatusCode["bad_request"].status,
-                        message: constants.apiResponses.INVALID_ACCESS });
+                    if (apiAccessUserData.responseCode != constants.common.RESPONSE_OK) {
+                        reject({
+                            status: httpStatusCode["bad_request"].status,
+                            message: constants.apiResponses.INVALID_ACCESS
+                        });
                     }
-                    let orgFound =false;
+                    let orgFound = false;
 
-                    if(userCustomeRole && userCustomeRole.roles){
-                        userCustomeRole.roles.map(custRole=>{
-                          if(custRole.code==  constants.common.PLATFROM_ADMIN_ROLE){
-                            orgFound = true;
-                          }
+                    if (userCustomeRole && userCustomeRole.roles) {
+                        userCustomeRole.roles.map(custRole => {
+                            if (custRole.code == constants.common.PLATFROM_ADMIN_ROLE) {
+                                orgFound = true;
+                            }
                         })
                     }
-                    
-                   let adminUserOrganisation = [];
-                    if(apiAccessUserData.result.response &&
+
+                    let adminUserOrganisation = [];
+                    if (apiAccessUserData.result.response &&
                         apiAccessUserData.result.response.organisations &&
                         apiAccessUserData.result.response.organisations.length > 0) {
-                            apiAccessUserData.result.response.organisations.map(data => {
+                        apiAccessUserData.result.response.organisations.map(data => {
                             adminUserOrganisation.push(data.organisationId);
-                            
+
                         })
 
                     }
-                    if(adminUserOrganisation && adminUserOrganisation.length > 0){
-                       
+                    if (adminUserOrganisation && adminUserOrganisation.length > 0) {
+
                         if (profileData.result.response &&
                             profileData.result.response.organisations &&
                             profileData.result.response.organisations.length > 0) {
                             profileData.result.response.organisations.map(data => {
-                                
-                                if(adminUserOrganisation.includes(data.organisationId)){
-                                    orgFound =true;
+
+                                if (adminUserOrganisation.includes(data.organisationId)) {
+                                    orgFound = true;
                                 }
                             });
                         }
                     }
-    
-                  if(orgFound==false){
-                        reject({status: httpStatusCode["bad_request"].status,
-                        message: constants.apiResponses.INVALID_ACCESS });
-                
-                  }else{
-                     
-                    let userDetails = {};
-                    if (profileData.result) {
-                        let platformRoles =
-                            await database.models.platformRolesExt.find({ isDeleted: false }, {
-                                code: 1,
-                                title: 1,
-                                isHidden: 1
-                            }).lean();
 
-                        let roles = [];
-                        let sunBirdRoles =
-                            await cassandraDatabase.models.role.findAsync(
-                                {
-                                    status: 1
-                                }, {
-                                select: ["id", "name"], raw: true, allow_filtering: true
-                            });
+                    if (orgFound == false) {
+                        reject({
+                            status: httpStatusCode["bad_request"].status,
+                            message: constants.apiResponses.INVALID_ACCESS
+                        });
 
-                        if (sunBirdRoles) {
-                            sunBirdRoles.map(function (sunBirdrole) {
+                    } else {
 
-                                // if (sunBirdrole.id != constants.common.PUBLIC_ROLE) {
+                        let userDetails = {};
+                        if (profileData.result) {
+                            let platformRoles =
+                                await database.models.platformRolesExt.find({ isDeleted: false }, {
+                                    code: 1,
+                                    title: 1,
+                                    isHidden: 1
+                                }).lean();
+
+                            let roles = [];
+                            let sunBirdRoles =
+                                await cassandraDatabase.models.role.findAsync(
+                                    {
+                                        status: 1
+                                    }, {
+                                    select: ["id", "name"], raw: true, allow_filtering: true
+                                });
+
+                            if (sunBirdRoles) {
+                                sunBirdRoles.map(function (sunBirdrole) {
+
+                                    // if (sunBirdrole.id != constants.common.PUBLIC_ROLE) {
                                     roles.push({
                                         label: sunBirdrole.name,
                                         value: sunBirdrole.id
                                     })
-                            //    }
+                                    //    }
 
-                            });
-                        }
-
-                        if (platformRoles.length > 0) {
-
-                            await Promise.all(platformRoles.map(platformRole => {
-
-                                if (!platformRole.isHidden || platformRole.isHidden != true) {
-                                    roles.push({
-                                        label: platformRole.title,
-                                        value: platformRole.code
-                                    })
-                                }
-                            }));
-                        }
-
-                        if (roles) {
-                            roles = roles.sort(gen.utils.sortArrayOfObjects("label"));
-                        }
-
-                        let userDoc = await database.models.userExtension.findOne({ userId: userId }, { organisationRoles: 1 });
-
-                        if (profileData.result.response &&
-                            profileData.result.response.organisations &&
-                            profileData.result.response.organisations.length > 0) {
-                            profileData.result.response.organisations.map(data => {
-                                var results = organisationsList.filter(function (orgData) {
-                                    return orgData.value === data.organisationId
                                 });
+                            }
 
-                                let allRoles = [];
-                                if (data && data.roles && data.roles.length > 0) {
-                                    data.roles.map(function (sunbirdUserRole) {
+                            if (platformRoles.length > 0) {
 
-                                         if (sunbirdUserRole) {
+                                await Promise.all(platformRoles.map(platformRole => {
 
-                                            console.log("sunbirdUserRole",sunbirdUserRole);
+                                    if (!platformRole.isHidden || platformRole.isHidden != true) {
+                                        roles.push({
+                                            label: platformRole.title,
+                                            value: platformRole.code
+                                        })
+                                    }
+                                }));
+                            }
 
-                                            let roleInfo = roles.filter(function (roleDetails) {
-                                                return roleDetails.value === sunbirdUserRole
-                                            });
-                                            allRoles.push(roleInfo[0]);
-                                        }
-                                    })
-                                }
+                            if (roles) {
+                                roles = roles.sort(gen.utils.sortArrayOfObjects("label"));
+                            }
 
-                                if (userDoc) {
-                                    if (userDoc.organisationRoles) {
-                                        let orgRolesOfUser = [];
-                                        userDoc.organisationRoles.map(userRoles => {
-                                            if (data.organisationId == userRoles.organisationId) {
-                                                orgRolesOfUser.push(...userRoles.roles);
+                            let userDoc = await database.models.userExtension.findOne({ userId: userId }, { organisationRoles: 1 });
+
+                            if (profileData.result.response &&
+                                profileData.result.response.organisations &&
+                                profileData.result.response.organisations.length > 0) {
+                                profileData.result.response.organisations.map(data => {
+                                    var results = organisationsList.filter(function (orgData) {
+                                        return orgData.value === data.organisationId
+                                    });
+
+                                    let allRoles = [];
+                                    if (data && data.roles && data.roles.length > 0) {
+                                        data.roles.map(function (sunbirdUserRole) {
+
+                                            if (sunbirdUserRole) {
+
+                                                console.log("sunbirdUserRole", sunbirdUserRole);
+
+                                                let roleInfo = roles.filter(function (roleDetails) {
+                                                    return roleDetails.value === sunbirdUserRole
+                                                });
+                                                allRoles.push(roleInfo[0]);
                                             }
                                         })
-
-                                        orgRolesOfUser.map(element => {
-                                            let roleInfo = roles.filter(function (roleDetails) {
-                                                return roleDetails.value === element.code
-                                            });
-                                            allRoles.push(roleInfo[0]);
-                                        });
                                     }
-                                }
 
-                                orgInfo.push({
-                                    label: results[0].label,
-                                    value: data.organisationId,
-                                    roles: allRoles
-                                })
-                            });
+                                    if (userDoc) {
+                                        if (userDoc.organisationRoles) {
+                                            let orgRolesOfUser = [];
+                                            userDoc.organisationRoles.map(userRoles => {
+                                                if (data.organisationId == userRoles.organisationId) {
+                                                    orgRolesOfUser.push(...userRoles.roles);
+                                                }
+                                            })
+
+                                            orgRolesOfUser.map(element => {
+                                                let roleInfo = roles.filter(function (roleDetails) {
+                                                    return roleDetails.value === element.code
+                                                });
+                                                allRoles.push(roleInfo[0]);
+                                            });
+                                        }
+                                    }
+
+                                    orgInfo.push({
+                                        label: results[0].label,
+                                        value: data.organisationId,
+                                        roles: allRoles
+                                    })
+                                });
+                            }
+
+                            let gender = profileData.result.response.gender == "M" ? "Male" : profileData.result.response.gender == "F" ? "Female" : "";
+
+                            let reponseObj = profileData.result.response;
+
+                            let userDeactiveStatus = await _checkDeactiveAccess(profileData, orgAdminUserId);
+
+                            userDetails = {
+                                userDeactiveAccess: userDeactiveStatus.userDeactiveAccess,
+                                firstName: reponseObj.firstName,
+                                gender: gender,
+                                userName: reponseObj.userName,
+                                lastName: reponseObj.lastName,
+                                email: reponseObj.email,
+                                phoneNumber: reponseObj.phone,
+                                status: reponseObj.status,
+                                dob: reponseObj.dob,
+                                lastLoginTime: reponseObj.lastLoginTime,
+                                createdDate: reponseObj.createdDate,
+                                organisations: orgInfo,
+                                roles: [],
+                                organisationsList: []
+                            }
+
+
+                            userDetails.roles = roles;
+                            userDetails.organisationsList = organisationsList;
+                            resolve({ result: userDetails });
+
+                        } else {
+
+                            reject({ message: profileData.params.errmsg });
                         }
 
-                        let gender = profileData.result.response.gender == "M" ? "Male" : profileData.result.response.gender == "F" ? "Female" : "";
 
-                        let reponseObj = profileData.result.response;
-
-                        let userDeactiveStatus = await _checkDeactiveAccess(profileData, orgAdminUserId);
-                       
-                        userDetails = {
-                            userDeactiveAccess:userDeactiveStatus.userDeactiveAccess,
-                            firstName: reponseObj.firstName,
-                            gender: gender,
-                            userName: reponseObj.userName,
-                            lastName: reponseObj.lastName,
-                            email: reponseObj.email,
-                            phoneNumber: reponseObj.phone,
-                            status: reponseObj.status,
-                            dob: reponseObj.dob,
-                            lastLoginTime: reponseObj.lastLoginTime,
-                            createdDate: reponseObj.createdDate,
-                            organisations: orgInfo,
-                            roles: [],
-                            organisationsList: []
-                        }
-
-
-                        userDetails.roles = roles;
-                        userDetails.organisationsList = organisationsList;
-                        resolve({ result: userDetails });
-
-                    } else {
-
-                        reject({ message: profileData.params.errmsg });
                     }
-               
-               
-                }
-               
+
                 } else {
                     reject({ message: profileData.params.errmsg });
                 }
@@ -517,12 +524,19 @@ module.exports = class UserCreationHelper {
     * @returns {json} Response consists sample csv data
     */
 
-    static bulkUserSampleCsvDwonload() {
+    static bulkUserSampleCsvDwonload(token) {
         return new Promise(async (resolve, reject) => {
             try {
 
-                const csvData = await csv().fromFile('sample-bulk-user.csv');
-                resolve(csvData);
+                let fileInfo = {
+                    sourcePath: constants.common.SAMPLE_USERS_CSV,
+                    bucket: process.env.STORAGE_BUCKET,
+                    cloudStorage: process.env.CLOUD_STORAGE,
+                }
+
+                let response = await kendrService.getDownloadableUrls(fileInfo, token);
+                resolve(response);
+
             } catch (error) {
                 console.log("error", error);
                 return reject(error);
@@ -705,17 +719,17 @@ function _getOrganisationlist(userProfileInfo, userId, token) {
         }
     });
 
-   
+
 }
 
- /**
-  * check user deactive access
-  * @method
-  * @name _checkDeactiveAccess
-  * @param { object }  - userprofile infomration.
-  * @returns {Object}
-  * */
-function  _checkDeactiveAccess(userProfileInfo, userId){
+/**
+ * check user deactive access
+ * @method
+ * @name _checkDeactiveAccess
+ * @param { object }  - userprofile infomration.
+ * @returns {Object}
+ * */
+function _checkDeactiveAccess(userProfileInfo, userId) {
     return new Promise(async (resolve, reject) => {
         try {
             let profileRoles;
@@ -737,34 +751,34 @@ function  _checkDeactiveAccess(userProfileInfo, userId){
             }
 
             if (profileRoles.includes(constants.common.PLATFROM_ADMIN_ROLE)) {
-                resolve({ userDeactiveAccess:true })
-            }else if (
+                resolve({ userDeactiveAccess: true })
+            } else if (
                 userProfileInfo &&
                 userProfileInfo.result &&
                 userProfileInfo.result.response &&
                 userProfileInfo.result.response.organisations
-            ){
+            ) {
 
                 let orgInfo = [];
-                 orgInfo = userProfileInfo.result.response.organisations;
-                    if(orgInfo.length > 0){
-                        let count = 0;
-                        await Promise.all(orgInfo.map(function (element){
-                            if(element.roles.includes(constants.common.ORG_ADMIN_ROLE)){
-                                count = count + 1;
-                            }
-                        }));
-                        if(count==orgInfo.length){
-                            resolve({ userDeactiveAccess:true })
-                        }else{
-                            resolve({ userDeactiveAccess:false })
+                orgInfo = userProfileInfo.result.response.organisations;
+                if (orgInfo.length > 0) {
+                    let count = 0;
+                    await Promise.all(orgInfo.map(function (element) {
+                        if (element.roles.includes(constants.common.ORG_ADMIN_ROLE)) {
+                            count = count + 1;
                         }
-                    }else{
-                        resolve({ userDeactiveAccess:false })
+                    }));
+                    if (count == orgInfo.length) {
+                        resolve({ userDeactiveAccess: true })
+                    } else {
+                        resolve({ userDeactiveAccess: false })
                     }
-                
+                } else {
+                    resolve({ userDeactiveAccess: false })
+                }
+
             }
-            
+
         } catch (err) {
             return reject(err);
         }
