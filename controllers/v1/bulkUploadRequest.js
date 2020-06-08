@@ -173,7 +173,9 @@ module.exports = class BulkUploadRequest extends Abstract {
           req.searchText,
           req.pageSize,
           req.pageNo,
-          req.userDetails.userToken, req.query.status
+          req.userDetails.userToken, 
+          req.query.status,
+          req.query.requestType
         );
         return resolve(list);
 
@@ -243,6 +245,87 @@ module.exports = class BulkUploadRequest extends Abstract {
       }
     });
   }
+
+
+   /**
+   * @api {get} /admin-service/api/v1/bulkUploadRequest/getStatus 
+   * Upload bulk user Upload
+   * @apiVersion 1.0.0
+   * @apiGroup Bulk Upload
+   * @apiHeader {String} X-authenticated-user-token Authenticity token
+   * @apiSampleRequest /admin-service/api/v1/bulkUploadRequest/getStatus
+   * @apiUse successBody
+   * @apiUse errorBodyuser
+   * @apiParamExample {json} Response:
+   * {
+   * "message": "Url's generated successfully",
+   * "status": 200,
+   * "result": {
+   *     "filePath": "d04c5432-cb7e-4bbe-ace9-1df412117ae5/1590414313_52082.csv",
+   *     "url": "https://storage.googleapis.com/download/storage/v1/b/sl-dev-storage/o/d04c5432-cb7e-4bbe-ace9-1df412117ae5%2F1590414313_52082.csv?generation=1590414313701670&alt=media"
+   *  }
+   * }
+  */
+
+  /**
+   * to get all status
+   * @method
+   * @name getStatus
+   * @param  {req}  - requested data.
+   * @returns {json} Response consists of status list
+  */
+
+ getStatus(req) {
+  return new Promise(async (resolve, reject) => {
+    try {
+
+      let response = await bulkUploadHelper.getStatus();
+      return resolve(response);
+
+    } catch (error) {
+
+      return reject({
+        status:
+          error.status ||
+          httpStatusCode["internal_server_error"].status,
+
+        message:
+          error.message ||
+          httpStatusCode["internal_server_error"].message
+      });
+    }
+  });
+}
+
+  /**
+   * to get all request types
+   * @method
+   * @name getTypes
+   * @param  {req}  - requested data.
+   * @returns {json} Response consists of request types 
+  */
+
+ getTypes(req) {
+  return new Promise(async (resolve, reject) => {
+    try {
+
+      let response = await bulkUploadHelper.getTypes();
+      return resolve(response);
+
+    } catch (error) {
+
+      return reject({
+        status:
+          error.status ||
+          httpStatusCode["internal_server_error"].status,
+
+        message:
+          error.message ||
+          httpStatusCode["internal_server_error"].message
+      });
+    }
+  });
+}
 
 
 

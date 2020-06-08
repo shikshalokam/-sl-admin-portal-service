@@ -48,11 +48,11 @@ module.exports = {
           message = "Please provide a valid region";
         }
 
-        inputObj.validation.push({
-          "name": "pattern",
-          "validator": validator,
-          "message": message
-        });
+        // inputObj.validation.push({
+        //   "name": "pattern",
+        //   "validator": validator,
+        //   "message": message
+        // });
         inputObj.validation[0].message = inputObj.label + " required";
         allFields.push(inputObj);
 

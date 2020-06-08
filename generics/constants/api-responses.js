@@ -53,7 +53,11 @@ module.exports = {
     STATES_NOT_FOUND: "State not found",
     STATE_LIST_FETCHED: "State list fetched successfully",
     ENTITY_TYPE_NOT_FOUND: "Entity type not found",
-    ENTITY_TYPE_FETCHED: "Entity type featched successfully"
+    ENTITY_TYPE_FETCHED: "Entity type featched successfully",
+    BULK_REQUEST_TYPE: "Request type featched successfully",
+    BULK_REQUEST_TYPE_NOT_FOUND: "Request type not found",
+    STATUS_LIST_NOT_FOUND: "Status list not found",
+    STATUS_LIST: "Status list featched successfully"
 
 
 };

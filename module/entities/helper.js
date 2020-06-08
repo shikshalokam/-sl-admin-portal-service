@@ -213,8 +213,7 @@ module.exports = class entitiesHelper {
 
                 if (result.data && result.data.length > 0) {
                     result.data = result.data.map(data => {
-                        console.log("data", data);
-
+                       
                         let cloneData = { ...data };
                         // cloneData["label"] = cloneData.name;
                         // cloneData["_id"] = cloneData._id;
@@ -562,8 +561,32 @@ module.exports = class entitiesHelper {
 
                 let relatedEntities = relatedEntitiesDocs.data;
 
+                let order = []
+                relatedEntities.map(relatedEnt =>{
+
+                });
+
+
+                let entityTypes = await database.models.entityTypes.find(
+                    {  immediateChildrenEntityType:{ $ne:null } },
+                    { name:1,immediateChildrenEntityType:1 }
+                );
+                console.log("entityTypes",entityTypes);
+                let entityOrders = ["state","district","block","cluster","zone","school"];
+
+                let relatedEntityDocument = [];
+                if(relatedEntities.length > 0){
+                    entityOrders.map(entityOrder =>{
+                    relatedEntities.filter(item =>{
+                        if(item.entityType==entityOrder){
+                            relatedEntityDocument.push(item);
+                        }
+                    })
+                })
+            }
+
                 _.merge(result, entityDocument[0])
-                result["relatedEntities"] = (relatedEntities.length > 0) ? relatedEntities : [];
+                result["relatedEntities"] = relatedEntityDocument;
                 resolve({ message: constants.apiResponses.ENTITY_INFORMATION_FETCHED, result: result });
 
             } catch (error) {
@@ -802,6 +825,10 @@ module.exports = class entitiesHelper {
                     value: state._id
                 });
             }));
+
+            if (states) {
+                states = states.sort(gen.utils.sortArrayOfObjects('label'));
+            }
 
             
             resolve({ message:constants.apiResponses.STATE_LIST_FETCHED,result:states });

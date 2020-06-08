@@ -59,10 +59,10 @@ module.exports = class UserCreationHelper {
                             })
                         }
 
-                    }else{
+                    } else {
                         reject({
                             status: httpStatusCode["bad_request"].status,
-                            message:httpStatusCode["bad_request"].message
+                            message: httpStatusCode["bad_request"].message
                         })
                     }
 
@@ -152,8 +152,8 @@ module.exports = class UserCreationHelper {
                         errorFile: errorFileData,
                         successFile: successFileData,
                         metaInformation: {
-                            state:req.query.state,
-                            entityType:req.query.entityType 
+                            state: req.query.state,
+                            entityType: req.query.entityType
                         },
                         remarks: ""
                     }
@@ -161,15 +161,15 @@ module.exports = class UserCreationHelper {
 
 
                     if (req.body.requestType == "entityCreation") {
-                        _bulkUploadEntities(request.requestId, 
-                            fileCompletePath, 
-                            req.userDetails.userToken, 
-                            req.query.entityType, 
+                        _bulkUploadEntities(request.requestId,
+                            fileCompletePath,
+                            req.userDetails.userToken,
+                            req.query.entityType,
                             req.userDetails.userId);
-                    }else if (req.query.requestType == "entityMapping") {
-                        _entityMapping(request.requestId, 
-                            fileCompletePath, 
-                            req.userDetails.userToken, 
+                    } else if (req.query.requestType == "entityMapping") {
+                        _entityMapping(request.requestId,
+                            fileCompletePath,
+                            req.userDetails.userToken,
                             req.userDetails.userId,
                             req.query.programId,
                             req.query.solutionId);
@@ -195,7 +195,7 @@ module.exports = class UserCreationHelper {
     * @name  list
     * @returns {json} Response consists sample csv data
     */
-    static list(userId, searchText, pageSize, pageNo, token, status) {
+    static list(userId, searchText, pageSize, pageNo, token, status,requestType="") {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -210,6 +210,10 @@ module.exports = class UserCreationHelper {
                     }
                     if (status) {
                         query['status'] = status;
+                    }
+
+                    if (requestType) {
+                        query['requestType'] = requestType;
                     }
 
                     let count = await database.models.bulkUploadRequest.countDocuments(query);
@@ -333,13 +337,79 @@ module.exports = class UserCreationHelper {
             } catch (error) {
                 return reject(error);
             }
-        })
+        });
     }
 
+    /**
+   * to get all request status.
+   * @method
+   * @name  getStatus
+   * @returns {json} Response consists status list
+   */
+  static getStatus() {
+    return new Promise(async (resolve, reject) => {
+        try {
 
+            let bulkRequestDocument = await database.models.bulkUploadRequest.distinct("status");
+            
 
+            let status = [];
 
+            if(bulkRequestDocument && bulkRequestDocument.length == 0){
 
+                reject({
+                    message: constants.apiResponses.STATUS_LIST_NOT_FOUND,
+                });
+            }
+            bulkRequestDocument.map(item=>{
+                status.push({ label:gen.utils.camelCaseToCapitalizeCase(item),value:item });
+            });
+
+            resolve({
+                message: constants.apiResponses.STATUS_LIST,
+                result: status
+            });
+
+        } catch (error) {
+            return reject(error);
+        }
+    });
+}
+
+    /**
+   * to get request types.
+   * @method
+   * @name  getTypes
+   * @returns {json} Response consists of request types
+   */
+  static getTypes() {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            let bulkRequestDocument = await database.models.bulkUploadRequest.distinct("requestType");
+            
+            let status = [];
+
+            if(bulkRequestDocument && bulkRequestDocument.length == 0){
+                reject({
+                    message:constants.apiResponses.BULK_REQUEST_TYPE_NOT_FOUND,
+                });
+            }
+
+            bulkRequestDocument.map(item=>{
+                status.push({ label:gen.utils.camelCaseToCapitalizeCase(item),value:item });
+            });
+
+            resolve({
+                message:constants.apiResponses.BULK_REQUEST_TYPE,
+                result: status
+            });
+
+        } catch (error) {
+            return reject(error);
+        }
+    });
+}
 
 }
 
@@ -635,15 +705,15 @@ function _getCloudUploadConfig() {
    * @name _actions 
    * @returns {json}
 */
-function _entityMapping(bulkRequestId, 
-    filePath, 
-    userToken, 
+function _entityMapping(bulkRequestId,
+    filePath,
+    userToken,
     userId,
     programId = "",
     solutionId = "") {
     return new Promise(async (resolve, reject) => {
-       
-        let samikshaResponse = await samikshaService.entityMapping(filePath, userToken, programId,solutionId);
+
+        let samikshaResponse = await samikshaService.entityMapping(filePath, userToken, programId, solutionId);
         if (samikshaResponse && samikshaResponse.statusCode == httpStatusCode["ok"].status) {
 
             let update = await database.models.bulkUploadRequest.findOneAndUpdate(
