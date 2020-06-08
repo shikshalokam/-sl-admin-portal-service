@@ -351,12 +351,9 @@ module.exports = class UserCreationHelper {
         try {
 
             let bulkRequestDocument = await database.models.bulkUploadRequest.distinct("status");
-            
-
+        
             let status = [];
-
             if(bulkRequestDocument && bulkRequestDocument.length == 0){
-
                 reject({
                     message: constants.apiResponses.STATUS_LIST_NOT_FOUND,
                 });
@@ -364,7 +361,8 @@ module.exports = class UserCreationHelper {
             bulkRequestDocument.map(item=>{
                 status.push({ label:gen.utils.camelCaseToCapitalizeCase(item),value:item });
             });
-
+            status = status.sort(gen.utils.sortArrayOfObjects('label'));
+            
             resolve({
                 message: constants.apiResponses.STATUS_LIST,
                 result: status
@@ -388,7 +386,7 @@ module.exports = class UserCreationHelper {
 
             let bulkRequestDocument = await database.models.bulkUploadRequest.distinct("requestType");
             
-            let status = [];
+            let requestTypes = [];
 
             if(bulkRequestDocument && bulkRequestDocument.length == 0){
                 reject({
@@ -397,12 +395,14 @@ module.exports = class UserCreationHelper {
             }
 
             bulkRequestDocument.map(item=>{
-                status.push({ label:gen.utils.camelCaseToCapitalizeCase(item),value:item });
+                requestTypes.push({ label:gen.utils.camelCaseToCapitalizeCase(item),value:item });
             });
+
+            requestTypes = requestTypes.sort(gen.utils.sortArrayOfObjects('label'));
 
             resolve({
                 message:constants.apiResponses.BULK_REQUEST_TYPE,
-                result: status
+                result: requestTypes
             });
 
         } catch (error) {

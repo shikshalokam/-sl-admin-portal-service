@@ -508,6 +508,25 @@ module.exports = class entitiesHelper {
                     ["groups"]
                 );
 
+                let projection = ["metaInformation.externalId", "metaInformation.name",
+                    "metaInformation.addressLine1", "metaInformation.addressLine2",
+                    "metaInformation.administration", "metaInformation.city",
+                    "metaInformation.country", "entityTypeId", "entityType"];
+
+                
+                if(entityDocument && entityDocument.data && entityDocument.data.length == 0){
+                    reject({
+                        message: constants.apiResponses.ENTITY_NOT_FOUND,
+                        result: result
+                    });
+                }
+
+                let relatedEntitiesDocs = await this.relatedEntitiesDetails(entityDocument.data[0]._id, entityDocument.data[0].entityTypeId, entityDocument.data[0].entityType, projection);
+                let relatedEntities = relatedEntitiesDocs.data;
+                let result = {};
+
+                _.merge(result, entityDocument.data[0]);
+                result["relatedEntities"] = relatedEntities;
 
                 if (!entityDocument.data) {
                     return resolve({
@@ -516,10 +535,9 @@ module.exports = class entitiesHelper {
                     })
                 }
 
-
                 resolve({
                     message: constants.apiResponses.ENTITY_INFORMATION_FETCHED,
-                    result: entityDocument.data
+                    result: result
                 });
 
             } catch (error) {
@@ -549,7 +567,6 @@ module.exports = class entitiesHelper {
                 let entityDocs = await this.entityDocuments({ _id: entityId }, projection);
 
                 let entityDocument = entityDocs.data;
-
                 if (entityDocument.length < 1) {
                     throw {
                         status: httpStatusCode.not_found.status,
@@ -571,8 +588,8 @@ module.exports = class entitiesHelper {
                     {  immediateChildrenEntityType:{ $ne:null } },
                     { name:1,immediateChildrenEntityType:1 }
                 );
-                console.log("entityTypes",entityTypes);
-                let entityOrders = ["state","district","block","cluster","zone","school"];
+               
+                let entityOrders = ["state","district","block","taluk","cluster","zone","school"];
 
                 let relatedEntityDocument = [];
                 if(relatedEntities.length > 0){
@@ -655,7 +672,7 @@ module.exports = class entitiesHelper {
     /**
        * State create entity form
        * @method
-       * @name relatedEntitiesDetails
+       * @name stateCreateForm
        * @returns {json} - response consist of state create dynamic form
        */
     static stateCreateForm() {
