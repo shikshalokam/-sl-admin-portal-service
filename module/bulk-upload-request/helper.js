@@ -39,10 +39,17 @@ module.exports = class UserCreationHelper {
                 if (profileData && profileData['allowed']) {
 
                     let userCreateData = await csv().fromString(req.files.uploadFile.data.toString());
+
+                    let status = "";
                     if (req.query.requestType == "entityMapping") {
+
+                        status = "Entity Mapping";
 
                     }
                     else if (req.query.requestType == "entityCreation") {
+
+                        status = "Entity Creation";
+
                         if (!req.query.entityType) {
                             reject({
                                 status: httpStatusCode["bad_request"].status,
@@ -50,6 +57,8 @@ module.exports = class UserCreationHelper {
                             })
                         }
                     } else if (req.query.requestType == "userCreation") {
+
+                        status = "User Creation";
 
                         let validateUser = await _validateUsers(userCreateData);
                         if (validateUser == false) {
@@ -138,15 +147,15 @@ module.exports = class UserCreationHelper {
                         }
                     }));
 
-                    let type = "";
-                    if (req.query.requestType) {
-                        type = req.query.requestType;
-                    }
+                    // let type = "";
+                    // if (req.query.requestType) {
+                    //     type = req.query.requestType;
+                    // }
                     let requestId = uniqid();
 
                     let doc = {
                         requestId: requestId,
-                        requestType: type,
+                        requestType: status,
                         userId: userId,
                         inputFile: fileInfo,
                         errorFile: errorFileData,
@@ -361,8 +370,10 @@ module.exports = class UserCreationHelper {
             bulkRequestDocument.map(item=>{
                 status.push({ label:gen.utils.camelCaseToCapitalizeCase(item),value:item });
             });
+            status.push({ label:"All",value:"all" });
+
             status = status.sort(gen.utils.sortArrayOfObjects('label'));
-            
+
             resolve({
                 message: constants.apiResponses.STATUS_LIST,
                 result: status
@@ -397,6 +408,7 @@ module.exports = class UserCreationHelper {
             bulkRequestDocument.map(item=>{
                 requestTypes.push({ label:gen.utils.camelCaseToCapitalizeCase(item),value:item });
             });
+            requestTypes.push({ label:"All",value:"all" });
 
             requestTypes = requestTypes.sort(gen.utils.sortArrayOfObjects('label'));
 
