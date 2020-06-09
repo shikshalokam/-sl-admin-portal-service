@@ -44,7 +44,6 @@ function uploadFileToCloud(filePath, uploadPath, bucketName, token, endpoint) {
             request.post(apiUrl, options, callback);
             function callback(err, data) {
 
-                fs.unlink(filePath);
                 if (err) {
                     return reject({
                         message: constants.apiResponses.KENDRA_SERVICE_DOWN

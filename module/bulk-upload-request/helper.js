@@ -379,7 +379,9 @@ module.exports = class UserCreationHelper {
 
                 status = status.sort(gen.utils.sortArrayOfObjects('label'));
                 let allField = _getAllField();
-                status.push(allField);
+                status.unshift(allField);
+
+
 
                 resolve({
                     message: constants.apiResponses.STATUS_LIST,
@@ -419,7 +421,7 @@ module.exports = class UserCreationHelper {
                 requestTypes = requestTypes.sort(gen.utils.sortArrayOfObjects('label'));
                
                 let allField = _getAllField();
-                requestTypes.push(allField);
+                requestTypes.unshift(allField);
 
                 resolve({
                     message: constants.apiResponses.BULK_REQUEST_TYPE,

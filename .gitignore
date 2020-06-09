@@ -41,6 +41,7 @@ build/Release
 node_modules/
 public/users/
 jspm_packages/
+public/batch/
 
 # TypeScript v1 declaration files
 typings/

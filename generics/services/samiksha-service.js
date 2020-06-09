@@ -57,13 +57,13 @@ function entityMapping(filePath,token,programId,solutionId) {
                 entityMap: fs.createReadStream(filePath)
             }
             let apiUrl =
-                urlPrefix + constants.endpoints.BULK_ENTITY_MAPPING+"?programId=" + programId + "&solutionId="+solutionId;
+                urlPrefix + constants.endpoints.BULK_ENTITY_MAPPING;
+
             let response = await httpCall(apiUrl, token, formData);
 
            return resolve(response);
 
         } catch (error) {
-            console.log("error",error);
             return reject(error);
         }
     })
@@ -83,7 +83,7 @@ function httpCall(url, token, formData) {
 
             let options = {
                 "headers": {
-                    'Content-Type': "application/json",
+                     'Content-Type': "application/json",
                     "X-authenticated-user-token": token,
                     "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN
                 },
