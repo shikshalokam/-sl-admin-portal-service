@@ -14,6 +14,8 @@ module.exports = {
     PLATFORM_USER_UPDATE: "/platformUserRoles/update",
     STATUS_UPDATE: "/userExtension/statusUpdate",
     USER_DETAILS: "/userExtension/userDetails",
+    INACTIVE_USER: "/userExtension/inActivateUser",
+    ACTIVE_USER: "/userExtension/activateUser",
 
     // subird API's
     SUNBIRD_ADD_USER_TO_ORG: "/api/org/v1/member/add",

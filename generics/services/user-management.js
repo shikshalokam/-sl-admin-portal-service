@@ -7,10 +7,10 @@
 
 //dependencies
 
-let urlPrefix = 
-process.env.USER_MANAGEMENT_HOST + 
-process.env.USER_MANAGEMENT_BASE_URL +
-process.env.URL_PREFIX; 
+let urlPrefix =
+    process.env.USER_MANAGEMENT_HOST +
+    process.env.USER_MANAGEMENT_BASE_URL +
+    process.env.URL_PREFIX;
 
 const request = require('request');
 
@@ -18,16 +18,14 @@ const request = require('request');
   * Get platform user roles
   * @function
   * @name platformUserProfile
-  * @returns {Promise} returns a promise.
+  * @returns {Json} returns a platform user profile info.
 */
 
-var platformUserProfile = function ( userId,token ) {
-
-    const platformUserRolesUrl = 
-    urlPrefix + constants.endpoints.PLATFORM_USER_PROFILE+"/"+userId;
-    
+const platformUserProfile = function (userId, token) {
     return new Promise(async (resolve, reject) => {
         try {
+            let platformUserRolesUrl =
+            urlPrefix + constants.endpoints.PLATFORM_USER_PROFILE + "/" + userId;
 
             const _userManagementCallBack = function (err, response) {
                 if (err) {
@@ -39,15 +37,14 @@ var platformUserProfile = function ( userId,token ) {
             }
 
             request.get(
-                platformUserRolesUrl,{
-                    headers: {
-                        "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN,
-                        "X-authenticated-user-token" : token 
-                    }
-                },
+                platformUserRolesUrl, {
+                headers: {
+                    "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN,
+                    "X-authenticated-user-token": token
+                }
+            },
                 _userManagementCallBack
             )
-
         } catch (error) {
             return reject(error);
         }
@@ -59,40 +56,35 @@ var platformUserProfile = function ( userId,token ) {
   * post create PlatForm User 
   * @function
   * @name createPlatFormUser
-  * @returns {Promise} returns a promise.
+  * @returns {json} returns created user details
 */
 
-var createPlatFormUser = function ( requestBody,token ) {
-
-    const platformUserRolesUrl = 
-    urlPrefix + constants.endpoints.PLATFORM_USER_CREATE;
-    
+const createPlatFormUser = function (requestBody, token) {
     return new Promise(async (resolve, reject) => {
         try {
 
-
+            let platformUserRolesUrl =
+        urlPrefix + constants.endpoints.PLATFORM_USER_CREATE;
             let options = {
-                "headers":{
-                "content-type": "application/json",
-                "authorization" :  process.env.AUTHORIZATION,
-                "x-authenticated-user-token" : token,
+                "headers": {
+                    "content-type": "application/json",
+                    "authorization": process.env.AUTHORIZATION,
+                    "x-authenticated-user-token": token,
                 },
-                json : requestBody
+                json: requestBody
             };
 
-             request.post(platformUserRolesUrl,options,callback);
-            
-            function callback(err,data){
-                if( err ) {
+            request.post(platformUserRolesUrl, options, callback);
+            function callback(err, data) {
+                if (err) {
                     return reject({
-                        message : constants.apiResponses.SUNBIRD_SERVICE_DOWN
+                        message: constants.apiResponses.SUNBIRD_SERVICE_DOWN
                     });
                 } else {
                     let dialCodeData = data.body;
                     return resolve(dialCodeData);
                 }
             }
-
         } catch (error) {
             return reject(error);
         }
@@ -104,36 +96,73 @@ var createPlatFormUser = function ( requestBody,token ) {
   * to update PlatForm User data
   * @function
   * @name updatePlatFormUser
-  * @returns {Promise} returns a promise.
+  * @returns {Json} returns user details
 */
 
-var updatePlatFormUser = function ( requestBody,token ) {
-
-    const platformUserUpdateUrl = 
-    urlPrefix + constants.endpoints.PLATFORM_USER_UPDATE;
-    
+const updatePlatFormUser = function (requestBody, token) {
     return new Promise(async (resolve, reject) => {
         try {
 
+            let platformUserUpdateUrl =
+        urlPrefix + constants.endpoints.PLATFORM_USER_UPDATE;
             let options = {
-                "headers":{
-                "content-type": "application/json",
-                "authorization" :  process.env.AUTHORIZATION,
-                "x-authenticated-user-token" : token,
+                "headers": {
+                    "content-type": "application/json",
+                    "authorization": process.env.AUTHORIZATION,
+                    "x-authenticated-user-token": token,
                 },
-                json : requestBody
+                json: requestBody
             };
 
-             request.post(platformUserUpdateUrl,options,callback);
-            
-            function callback(err,data){
-                if( err ) {
+            request.post(platformUserUpdateUrl, options, callback);
+            function callback(err, data) {
+                if (err) {
                     return reject({
-                        message : constants.apiResponses.SUNBIRD_SERVICE_DOWN
+                        message: constants.apiResponses.SUNBIRD_SERVICE_DOWN
                     });
                 } else {
                     let dialCodeData = data.body;
                     return resolve(dialCodeData);
+                }
+            }
+        } catch (error) {
+            return reject(error);
+        }
+    })
+
+}
+
+/**
+  * To activate the user
+  * @function
+  * @name activateUser
+  * @returns {json} consists of response from the actiavte api
+*/
+
+const activateUser = function (userId, token) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            let platformUserStatusUpdateUrl =
+        urlPrefix + constants.endpoints.ACTIVE_USER;
+
+            let options = {
+                "headers": {
+                    "content-type": "application/json",
+                    "authorization": process.env.AUTHORIZATION,
+                    "x-authenticated-user-token": token,
+                    "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN
+                },
+                json: { userId: userId }
+            };
+            request.post(platformUserStatusUpdateUrl, options, callback);
+            function callback(err, data) {
+                if (err) {
+                    return reject({
+                        message: constants.apiResponses.SUNBIRD_SERVICE_DOWN
+                    });
+                } else {
+                    return resolve(data.body);
                 }
             }
 
@@ -144,45 +173,37 @@ var updatePlatFormUser = function ( requestBody,token ) {
 
 }
 
-
 /**
-  * to update status of the user
+  * To deactivate the user
   * @function
-  * @name statusUpdate
-  * @returns {Promise} returns a promise.
+  * @name inActivateUser
+  * @returns consists of response from the deactiavte api
 */
 
-var statusUpdate = function ( userId,token,status ) {
-
-    const platformUserStatusUpdateUrl = 
-    urlPrefix + constants.endpoints.STATUS_UPDATE;
-    
+const inActivateUser = function (userId, token) {
     return new Promise(async (resolve, reject) => {
         try {
 
+            let platformUserStatusUpdateUrl =
+        urlPrefix + constants.endpoints.INACTIVE_USER;
 
             let options = {
-                "headers":{
-                "content-type": "application/json",
-                 "authorization" :  process.env.AUTHORIZATION,
-                "x-authenticated-user-token" : token,
-                "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN
+                "headers": {
+                    "content-type": "application/json",
+                    "authorization": process.env.AUTHORIZATION,
+                    "x-authenticated-user-token": token,
+                    "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN
                 },
-                json : { userId : userId,status:status }
+                json: { userId: userId }
             };
-
-            console.log(platformUserStatusUpdateUrl,"options",options);
-
-             request.post(platformUserStatusUpdateUrl,options,callback);
-            
-            function callback(err,data){
-                if( err ) {
+            request.post(platformUserStatusUpdateUrl, options, callback);
+            function callback(err, data) {
+                if (err) {
                     return reject({
-                        message : constants.apiResponses.SUNBIRD_SERVICE_DOWN
+                        message: constants.apiResponses.SUNBIRD_SERVICE_DOWN
                     });
                 } else {
-                    let dialCodeData = data.body;
-                    return resolve(dialCodeData);
+                    return resolve(data.body);
                 }
             }
 
@@ -201,32 +222,26 @@ var statusUpdate = function ( userId,token,status ) {
   * @returns {Promise} returns a promise.
 */
 
-var userDetails = function ( userId,token ) {
-
-    const userDetailsAPIUrl = 
-    urlPrefix + constants.endpoints.USER_DETAILS;
-
-
-    
+const userDetails = function (userId, token) {
     return new Promise(async (resolve, reject) => {
         try {
-
+            const userDetailsAPIUrl =
+                urlPrefix + constants.endpoints.USER_DETAILS;
 
             let options = {
-                "headers":{
-                "content-type": "application/json",
-                "authorization" :  process.env.AUTHORIZATION,
-                "x-authenticated-user-token" : token,
+                "headers": {
+                    "content-type": "application/json",
+                    "authorization": process.env.AUTHORIZATION,
+                    "x-authenticated-user-token": token,
                 },
-                json : { userId : userId }
+                json: { userId: userId }
             };
+            request.post(userDetailsAPIUrl, options, callback);
 
-             request.post(userDetailsAPIUrl,options,callback);
-            
-            function callback(err,data){
-                if( err ) {
+            function callback(err, data) {
+                if (err) {
                     return reject({
-                        message : constants.apiResponses.SUNBIRD_SERVICE_DOWN
+                        message: constants.apiResponses.SUNBIRD_SERVICE_DOWN
                     });
                 } else {
 
@@ -238,14 +253,14 @@ var userDetails = function ( userId,token ) {
             return reject(error);
         }
     })
-
 }
 
 
 module.exports = {
-    platformUserProfile : platformUserProfile,
-    createPlatFormUser:createPlatFormUser,
-    updatePlatFormUser:updatePlatFormUser,
-    statusUpdate:statusUpdate,
-    userDetails:userDetails
+    platformUserProfile: platformUserProfile,
+    createPlatFormUser: createPlatFormUser,
+    updatePlatFormUser: updatePlatFormUser,
+    userDetails: userDetails,
+    activateUser: activateUser,
+    inActivateUser:inActivateUser
 };

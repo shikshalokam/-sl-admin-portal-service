@@ -7,15 +7,13 @@
 
 //dependencies
 
-let urlPrefix = 
-process.env.KENDRA_SERIVCE_HOST + 
-process.env.KENDRA_SERIVCE_BASE_URL +
-process.env.URL_PREFIX; 
+let urlPrefix =
+    process.env.KENDRA_SERIVCE_HOST +
+    process.env.KENDRA_SERIVCE_BASE_URL +
+    process.env.URL_PREFIX;
 
 const request = require('request');
 const fs = require('fs');
-
-
 
 /**
  * to upload file to uploadFileToCloud
@@ -23,38 +21,36 @@ const fs = require('fs');
  * @param {*} filePath filePath of the file to upload
  * @param {*} gcp url
  */
-function uploadFileToCloud(filePath, uploadPath,bucketName,token,endpoint) {
+function uploadFileToCloud(filePath, uploadPath, bucketName, token, endpoint) {
     return new Promise(async (resolve, reject) => {
         try {
-
-            // console.log("filePath, uploadPath,bucketName,token,endpoint",filePath,"--", uploadPath,"--",bucketName,"--",token,"--",endpoint)
             let options = {
                 "headers": {
                     'Content-Type': "application/json",
                     "X-authenticated-user-token": token,
-                     "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN
+                    "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN
                 },
-                formData:{
-                    filePath:uploadPath,
-                    bucketName:bucketName,
-                    file:fs.createReadStream(filePath)
+                formData: {
+                    filePath: uploadPath,
+                    bucketName: bucketName,
+                    file: fs.createReadStream(filePath)
 
                 }
             };
 
-            
-
-            let apiUrl = 
-            urlPrefix + endpoint;
+            let apiUrl =
+                urlPrefix + endpoint;
 
             request.post(apiUrl, options, callback);
             function callback(err, data) {
+
+                fs.unlink(filePath);
                 if (err) {
                     return reject({
                         message: constants.apiResponses.KENDRA_SERVICE_DOWN
                     });
                 } else {
-                        return resolve(data.body);
+                    return resolve(data.body);
                 }
             }
         } catch (error) {
@@ -68,11 +64,9 @@ function uploadFileToCloud(filePath, uploadPath,bucketName,token,endpoint) {
  * @param {*} req 
  *  api is to get downloadable Urls of files
  */
-function getDownloadableUrls(inputData,token) {
+function getDownloadableUrls(inputData, token) {
     return new Promise(async function (resolve, reject) {
         try {
-
-            
 
             let requestBody = {
                 filePaths: inputData.sourcePath,
@@ -87,15 +81,15 @@ function getDownloadableUrls(inputData,token) {
             } else if (inputData.cloudStorage == constants.common.AZURE_SERVICE) {
                 endpoint = constants.endpoints.DOWNLOAD_AZURE_URL;
             }
-            const apiUrl = 
-            urlPrefix + endpoint;
-            
+            const apiUrl =
+                urlPrefix + endpoint;
+
             let options = {
                 "headers": {
                     'Content-Type': "application/json",
                     "X-authenticated-user-token": token
                 },
-                json:requestBody
+                json: requestBody
             };
 
             request.post(apiUrl, options, callback);
@@ -105,8 +99,7 @@ function getDownloadableUrls(inputData,token) {
                         message: constants.apiResponses.KENDRA_SERVICE_DOWN
                     });
                 } else {
-
-                        return resolve(data.body);
+                    return resolve(data.body);
                 }
             }
         } catch (ex) {
@@ -119,5 +112,5 @@ function getDownloadableUrls(inputData,token) {
 
 module.exports = {
     uploadFileToCloud: uploadFileToCloud,
-    getDownloadableUrls:getDownloadableUrls
+    getDownloadableUrls: getDownloadableUrls
 };

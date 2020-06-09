@@ -26,8 +26,6 @@ const fs = require('fs');
 function bulkUploadEntities(filePath, token, type) {
     return new Promise(async (resolve, reject) => {
         try {
-
-
             let formData = {
                 entities: fs.createReadStream(filePath)
             }
@@ -52,7 +50,6 @@ function bulkUploadEntities(filePath, token, type) {
  * @param {*} solutionId Solution External ID.
  */
 function entityMapping(filePath,token,programId,solutionId) {
-
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -61,12 +58,12 @@ function entityMapping(filePath,token,programId,solutionId) {
             }
             let apiUrl =
                 urlPrefix + constants.endpoints.BULK_ENTITY_MAPPING+"?programId=" + programId + "&solutionId="+solutionId;
-
             let response = await httpCall(apiUrl, token, formData);
 
-            resolve(response);
+           return resolve(response);
 
         } catch (error) {
+            console.log("error",error);
             return reject(error);
         }
     })

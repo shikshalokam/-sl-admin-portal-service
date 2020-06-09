@@ -294,8 +294,8 @@ module.exports = class Entities extends Abstract {
 
   /**
 * @api {get} /admin-service/api/v1/entities/relatedEntities/:entityId Get Related Entities
+* Get Related Entities
 * @apiVersion 1.0.0
-* @apiName Get Related Entities
 * @apiGroup Entities
 * @apiSampleRequest /admin-service/api/v1/entities/relatedEntities/5dc9266ce153ef2dc4b8ca48
 * @apiUse successBody
@@ -393,8 +393,8 @@ module.exports = class Entities extends Abstract {
 
   /**
   * @api {get} /admin-service/api/v1/entities/stateCreateForm
+  * Get state create form
   * @apiVersion 1.0.0
-  * @apiName Get state create form
   * @apiGroup Entities
   * @apiSampleRequest /admin-service/api/v1/entities/stateCreateForm
   * @apiUse successBody
@@ -520,8 +520,8 @@ module.exports = class Entities extends Abstract {
 
   /**
  * @api {get} /admin-service/api/v1/entities/createStateEntity
+ * To create state entity
  * @apiVersion 1.0.0
- * @apiName To create state entity
  * @apiGroup Entities
  * @apiSampleRequest /admin-service/api/v1/entities/createStateEntity
  * @apiUse successBody
@@ -614,7 +614,7 @@ module.exports = class Entities extends Abstract {
 
    /**
    * @api {get} /admin-service/api/v1/entities/bulkEntityMappingSampleCsvDwonload 
-   * Sample csv for bulk entities  
+   * Sample csv for entity mapping  
    * @apiVersion 1.0.0
    * @apiGroup Entities
    * @apiHeader {String} X-authenticated-user-token Authenticity token
@@ -664,8 +664,8 @@ module.exports = class Entities extends Abstract {
 
   /**
   * @api {get} /admin-service/api/v1/entities/stateList
+  * To get state list
   * @apiVersion 1.0.0
-  * @apiName To get state list
   * @apiGroup Entities
   * @apiSampleRequest /admin-service/api/v1/entities/stateList
   * @apiUse successBody

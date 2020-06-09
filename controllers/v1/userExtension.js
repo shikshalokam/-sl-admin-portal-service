@@ -48,7 +48,7 @@ module.exports = class userExtension extends Abstract {
 
   /**
     * @api {get} /admin-service/api/v1/userExtension/getForm/:userId 
-    * User Creation Form.
+    * Get user creation form.
     * @apiVersion 1.0.0
     * @apiGroup User Creation
     * @apiHeader {String} X-authenticated-user-token Authenticity token
@@ -158,7 +158,7 @@ module.exports = class userExtension extends Abstract {
 
   /**
    * @api {get} /admin-service/api/v1/userExtension/create 
-   * to create user 
+   * To create the user 
    * @apiVersion 1.0.0
    * @apiGroup User Creation
    * @apiHeader {String} X-authenticated-user-token Authenticity token
@@ -284,14 +284,13 @@ module.exports = class userExtension extends Abstract {
     });
   }
 
-
   /**
-  * @api {get} /admin-service/api/v1/userExtension/statusUpdate/:userid?status=
-  * To update status of the user 
+  * @api {get} /admin-service/api/v1/userExtension/activateUser/:userid
+  * To activate the user 
   * @apiVersion 1.0.0
   * @apiGroup User Creation
   * @apiHeader {String} X-authenticated-user-token Authenticity token
-  * @apiSampleRequest /admin-service/api/v1/userExtension/statusUpdate/a082787f-8f8f-42f2-a706-35457ca6f1fd?status=Active
+  * @apiSampleRequest /admin-service/api/v1/userExtension/activateUser/a082787f-8f8f-42f2-a706-35457ca6f1fd
   * @apiUse successBody
   * @apiUse errorBodyuser
   * @apiParamExample {json} Response:
@@ -307,29 +306,23 @@ module.exports = class userExtension extends Abstract {
  */
 
   /**
-   * To update status of the user 
+   * To activate the user 
    * @method
-   * @name statusUpdate
+   * @name activateUser
    * @param  {req}  - requested data.
-   * @returns {json} Response consists updated user details
+   * @returns {json} Response consists activate details
   */
-
-  statusUpdate(req) {
+  activateUser(req) {
     return new Promise(async (resolve, reject) => {
 
       try {
-
-
         let updateUserData =
-          await userExtensionHelper.statusUpdate(req.params._id,
-            req.userDetails.userToken,
-            req.query.status
+          await userExtensionHelper.activateUser(req.params._id,
+            req.userDetails.userToken
           );
-
         return resolve(updateUserData);
 
       } catch (error) {
-
         return reject({
           status:
             error.status ||
@@ -344,9 +337,62 @@ module.exports = class userExtension extends Abstract {
   }
 
 
+    /**
+  * @api {get} /admin-service/api/v1/userExtension/inActivateUser/:userid
+  * To inActivate the user 
+  * @apiVersion 1.0.0
+  * @apiGroup User Creation
+  * @apiHeader {String} X-authenticated-user-token Authenticity token
+  * @apiSampleRequest /admin-service/api/v1/userExtension/inActivateUser/a082787f-8f8f-42f2-a706-35457ca6f1fd
+  * @apiUse successBody
+  * @apiUse errorBodyuser
+  * @apiParamExample {json} Response:
+  * 
+  * {
+  *  "message": "User activated successfully",
+  *  "status": 200,
+  *  "result": {
+  *     "response": "SUCCESS"
+  *  }
+  * }
+  * 
+ */
+
+  /**
+   * To inActivate the user 
+   * @method
+   * @name inActivateUser
+   * @param  {req}  - requested data.
+   * @returns {json} Response consists in-activate details
+  */
+ inActivateUser(req) {
+  return new Promise(async (resolve, reject) => {
+
+    try {
+      let updateUserData =
+        await userExtensionHelper.inActivateUser(req.params._id,
+          req.userDetails.userToken
+        );
+      return resolve(updateUserData);
+
+    } catch (error) {
+      return reject({
+        status:
+          error.status ||
+          httpStatusCode["internal_server_error"].status,
+
+        message:
+          error.message ||
+          httpStatusCode["internal_server_error"].message
+      });
+    }
+  });
+}
+
+
   /**
      * @api {get} /admin-service/api/v1/userExtension/details 
-     * to get the user details
+     * To get the user details
      * @apiVersion 1.0.0
      * @apiGroup User Creation
      * @apiHeader {String} X-authenticated-user-token Authenticity token
@@ -443,7 +489,7 @@ module.exports = class userExtension extends Abstract {
 
   /**
      * @api {get} /admin-service/api/v1/userExtension/bulkUserSampleCsvDwonload 
-     * To download sample csv 
+     * To download bulk user sample csv
      * @apiVersion 1.0.0
      * @apiGroup User Creation
      * @apiHeader {String} X-authenticated-user-token Authenticity token

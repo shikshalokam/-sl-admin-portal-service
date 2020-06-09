@@ -20,30 +20,41 @@ var uniqid = require('uniqid');
 const ObjectsToCsv = require('objects-to-csv');
 const fs = require('fs');
 const moment = require("moment");
+var ObjectId = require('mongoose').Types.ObjectId;
+
 
 module.exports = class UserCreationHelper {
 
 
     /**
-     * to get bulkUserUpload.
+     * bulk Upload request
      * @method
-     * @name  bulkUserUpload
-     * @returns {json} Response consists sample csv data
+     * @name  bulkUpload
+     * @returns {json} Response consists sample request details
      */
 
-    static bulkUserUpload(req, userId) {
+    static bulkUpload(req, userId) {
         return new Promise(async (resolve, reject) => {
             try {
 
                 let profileData = await _checkAccess(req.userDetails.userToken, userId);
                 if (profileData && profileData['allowed']) {
 
-                    let userCreateData = await csv().fromString(req.files.uploadFile.data.toString());
+                    let uploadFileData = await csv().fromString(req.files.uploadFile.data.toString());
 
                     let status = "";
                     if (req.query.requestType == "entityMapping") {
 
                         status = "Entity Mapping";
+
+                        let validateMapping = await _validateEntityMapping(uploadFileData);
+                        if (validateMapping == false) {
+                            reject({
+                                status: httpStatusCode["bad_request"].status,
+                                message: "Validation failed"
+                            })
+                        }
+                        
 
                     }
                     else if (req.query.requestType == "entityCreation") {
@@ -56,11 +67,21 @@ module.exports = class UserCreationHelper {
                                 message: "Validation failed"
                             })
                         }
+
+                        let validateEntityRequest = await _validateEntityUploadRequest(uploadFileData);
+                        if (validateEntityRequest == false) {
+                            reject({
+                                status: httpStatusCode["bad_request"].status,
+                                message: "Validation failed"
+                            })
+                        }
+                        
+
                     } else if (req.query.requestType == "userCreation") {
 
                         status = "User Creation";
 
-                        let validateUser = await _validateUsers(userCreateData);
+                        let validateUser = await _validateUsers(uploadFileData);
                         if (validateUser == false) {
                             reject({
                                 status: httpStatusCode["bad_request"].status,
@@ -74,8 +95,6 @@ module.exports = class UserCreationHelper {
                             message: httpStatusCode["bad_request"].message
                         })
                     }
-
-
 
                     let fileName = gen.utils.generateUniqueId() + ".csv";
                     var dir = ROOT_PATH + process.env.BATCH_FOLDER_PATH;
@@ -95,6 +114,7 @@ module.exports = class UserCreationHelper {
                     // // await cv.toDisk(ROOT_PATH + process.env.BATCH_FOLDER_PATH + successFile);
                     // // files.push(userId + "/" + successFile);
 
+                    
                     // let failureCsv = new ObjectsToCsv(userCreateData);
                     // let failureFile = timestamp + "_" + randomNuumber + "_failure.csv";
                     // await failureCsv.toDisk(ROOT_PATH + process.env.BATCH_FOLDER_PATH + successFile);
@@ -121,13 +141,6 @@ module.exports = class UserCreationHelper {
                             reject(uploadResp);
                         }
                         if (uploadResp.result) {
-                            // if (uploadResp.result.name == userId + "/" + successFile) {
-                            //     successFileData = {
-                            //         sourcePath: uploadResp.result.name,
-                            //         cloudStorage: storage,
-                            //         bucket: bucketName
-                            //     }
-                            // } else 
                             if (uploadResp.result.name == userId + "/" + fileName) {
 
                                 fileInfo = {
@@ -137,22 +150,10 @@ module.exports = class UserCreationHelper {
                                 }
 
                             }
-                            // else if (uploadResp.result.name == userId + "/" + failureFile) {
-                            //     errorFileData = {
-                            //         sourcePath: uploadResp.result.name,
-                            //         cloudStorage: storage,
-                            //         bucket: bucketName
-                            //     }
-                            // }
                         }
                     }));
 
-                    // let type = "";
-                    // if (req.query.requestType) {
-                    //     type = req.query.requestType;
-                    // }
                     let requestId = uniqid();
-
                     let doc = {
                         requestId: requestId,
                         requestType: status,
@@ -164,7 +165,7 @@ module.exports = class UserCreationHelper {
                             state: req.query.state,
                             entityType: req.query.entityType
                         },
-                        remarks: ""
+                        // remarks: ""
                     }
                     let request = await database.models.bulkUploadRequest.create(doc);
 
@@ -176,6 +177,7 @@ module.exports = class UserCreationHelper {
                             req.query.entityType,
                             req.userDetails.userId);
                     } else if (req.query.requestType == "entityMapping") {
+
                         _entityMapping(request.requestId,
                             fileCompletePath,
                             req.userDetails.userToken,
@@ -199,12 +201,12 @@ module.exports = class UserCreationHelper {
 
 
     /**
-    * to get request List.
+    * to get bulk request List.
     * @method
     * @name  list
     * @returns {json} Response consists sample csv data
     */
-    static list(userId, searchText, pageSize, pageNo, token, status,requestType="") {
+    static list(userId, searchText, pageSize, pageNo, token, status, requestType = "") {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -218,11 +220,15 @@ module.exports = class UserCreationHelper {
                         query = { deleted: false, requestId: { $regex: searchText } }
                     }
                     if (status) {
-                        query['status'] = status;
+                        if(status!="all"){
+                            query['status'] = status;
+                        }
                     }
 
                     if (requestType) {
-                        query['requestType'] = requestType;
+                        if(requestType!="all"){
+                            query['requestType'] = requestType;
+                        }
                     }
 
                     let count = await database.models.bulkUploadRequest.countDocuments(query);
@@ -277,7 +283,7 @@ module.exports = class UserCreationHelper {
         })
     }
 
-    /**
+   /**
    * to get request details.
    * @method
    * @name  list
@@ -349,79 +355,81 @@ module.exports = class UserCreationHelper {
         });
     }
 
-    /**
+   /**
    * to get all request status.
    * @method
    * @name  getStatus
    * @returns {json} Response consists status list
    */
-  static getStatus() {
-    return new Promise(async (resolve, reject) => {
-        try {
+    static getStatus() {
+        return new Promise(async (resolve, reject) => {
+            try {
 
-            let bulkRequestDocument = await database.models.bulkUploadRequest.distinct("status");
-        
-            let status = [];
-            if(bulkRequestDocument && bulkRequestDocument.length == 0){
-                reject({
-                    message: constants.apiResponses.STATUS_LIST_NOT_FOUND,
+                let bulkRequestDocument = await database.models.bulkUploadRequest.distinct("status");
+
+                let status = [];
+                if (bulkRequestDocument && bulkRequestDocument.length == 0) {
+                    reject({
+                        message: constants.apiResponses.STATUS_LIST_NOT_FOUND,
+                    });
+                }
+                bulkRequestDocument.map(item => {
+                    status.push({ label: gen.utils.camelCaseToCapitalizeCase(item), value: item });
                 });
+
+                let allField = _getAllField();
+                status.push(allField);
+
+                status = status.sort(gen.utils.sortArrayOfObjects('label'));
+
+                resolve({
+                    message: constants.apiResponses.STATUS_LIST,
+                    result: status
+                });
+
+            } catch (error) {
+                return reject(error);
             }
-            bulkRequestDocument.map(item=>{
-                status.push({ label:gen.utils.camelCaseToCapitalizeCase(item),value:item });
-            });
-            status.push({ label:"All",value:"all" });
+        });
+    }
 
-            status = status.sort(gen.utils.sortArrayOfObjects('label'));
-
-            resolve({
-                message: constants.apiResponses.STATUS_LIST,
-                result: status
-            });
-
-        } catch (error) {
-            return reject(error);
-        }
-    });
-}
-
-    /**
+   /**
    * to get request types.
    * @method
    * @name  getTypes
    * @returns {json} Response consists of request types
    */
-  static getTypes() {
-    return new Promise(async (resolve, reject) => {
-        try {
+    static getTypes() {
+        return new Promise(async (resolve, reject) => {
+            try {
 
-            let bulkRequestDocument = await database.models.bulkUploadRequest.distinct("requestType");
-            
-            let requestTypes = [];
+                let bulkRequestDocument = await database.models.bulkUploadRequest.distinct("requestType");
 
-            if(bulkRequestDocument && bulkRequestDocument.length == 0){
-                reject({
-                    message:constants.apiResponses.BULK_REQUEST_TYPE_NOT_FOUND,
+                let requestTypes = [];
+                if (bulkRequestDocument && bulkRequestDocument.length == 0) {
+                    reject({
+                        message: constants.apiResponses.BULK_REQUEST_TYPE_NOT_FOUND,
+                    });
+                }
+
+                bulkRequestDocument.map(item => {
+                    requestTypes.push({ label: gen.utils.camelCaseToCapitalizeCase(item), value: item });
                 });
+
+                let allField = _getAllField();
+                requestTypes.push(allField);
+                requestTypes = requestTypes.sort(gen.utils.sortArrayOfObjects('label'));
+
+                resolve({
+                    message: constants.apiResponses.BULK_REQUEST_TYPE,
+                    result: requestTypes
+                });
+
+            } catch (error) {
+                return reject(error);
             }
-
-            bulkRequestDocument.map(item=>{
-                requestTypes.push({ label:gen.utils.camelCaseToCapitalizeCase(item),value:item });
-            });
-            requestTypes.push({ label:"All",value:"all" });
-
-            requestTypes = requestTypes.sort(gen.utils.sortArrayOfObjects('label'));
-
-            resolve({
-                message:constants.apiResponses.BULK_REQUEST_TYPE,
-                result: requestTypes
-            });
-
-        } catch (error) {
-            return reject(error);
-        }
-    });
-}
+        });
+    }
 
 }
 
@@ -627,6 +635,12 @@ function _validateUsers(inputArray) {
 
 }
 
+/**
+* Bulk upload entities 
+* @method
+* @name  _bulkUploadEntities
+* @returns {json} Response consist request details
+**/
 function _bulkUploadEntities(bulkRequestId, fileCompletePath, token, entityType, userId) {
     return new Promise(async (resolve, reject) => {
 
@@ -647,8 +661,6 @@ function _bulkUploadEntities(bulkRequestId, fileCompletePath, token, entityType,
 
             if (uploadResponse.status == httpStatusCode["ok"].status) {
 
-                console.log("entites created succefully");
-
                 let successFileData = {
                     sourcePath: uploadResponse.result.name,
                     cloudStorage: config.storage,
@@ -658,7 +670,7 @@ function _bulkUploadEntities(bulkRequestId, fileCompletePath, token, entityType,
                     { requestId: bulkRequestId },
                     { $set: { "successFile": successFileData, status: "completed" } }
                 )
-                resolve();
+                resolve(update);
 
             } else {
 
@@ -666,7 +678,7 @@ function _bulkUploadEntities(bulkRequestId, fileCompletePath, token, entityType,
                     { requestId: bulkRequestId },
                     { $set: { status: "failed" } }
                 )
-                resolve();
+                resolve(update);
 
             }
         }
@@ -712,11 +724,11 @@ function _getCloudUploadConfig() {
 
 
 /**
-   * User columns action data.
-   * @method
-   * @name _actions 
-   * @returns {json}
-*/
+* Bulk upload entity mapping  
+* @method
+* @name  _entityMapping
+* @returns {json} Response consist request details
+**/
 function _entityMapping(bulkRequestId,
     filePath,
     userToken,
@@ -725,24 +737,124 @@ function _entityMapping(bulkRequestId,
     solutionId = "") {
     return new Promise(async (resolve, reject) => {
 
+        try {
+        console.log("entity mapp");
         let samikshaResponse = await samikshaService.entityMapping(filePath, userToken, programId, solutionId);
+        console.log("entity mapp");
+        
         if (samikshaResponse && samikshaResponse.statusCode == httpStatusCode["ok"].status) {
 
+
+            let successFile = gen.utils.generateUniqueId() + "_success.csv";
+            let config = _getCloudUploadConfig();
+            let uploadResponse = await kendrService.uploadFileToCloud(filePath,
+                userId + "/" + successFile, config.bucketName, userToken, config.uploadFileEndPoint);
+
+            uploadResponse = JSON.parse(uploadResponse);
+
+            if (uploadResponse.status == httpStatusCode["ok"].status) {
+
+            let successFileData = {
+                sourcePath: uploadResponse.result.name,
+                cloudStorage: config.storage,
+                bucket: config.bucketName
+            }
+            
             let update = await database.models.bulkUploadRequest.findOneAndUpdate(
                 { requestId: bulkRequestId },
-                { $set: { status: "completed" } }
+                { $set: { status: "completed","successFile": successFileData } }
             );
-            resolve();
-
+            resolve(update);
+            }
         } else {
-
             let update = await database.models.bulkUploadRequest.findOneAndUpdate(
                 { requestId: bulkRequestId },
                 { $set: { status: "failed" } }
             )
-            resolve();
-
+            resolve(update);
         }
-
+    } catch (error) {
+        return reject(error);
+    }
     });
+}
+
+/**
+ * to check weather entity mapping csv is valid or not
+ * @name _validateEntityMapping
+ * @param {*} inputArray entity mapping csv json
+ */
+function _validateEntityMapping(inputArray) {
+    return new Promise(async (resolve, reject) => {
+
+        let valid = true;
+        await Promise.all(inputArray.map(async function (element) {
+            if (element) {
+
+                let keys = Object.keys(element);
+                if (element.parentEntiyId) {
+
+                    if (ObjectId.isValid(element.parentEntiyId) == false) {
+                        valid = false;
+                    }
+                }
+                else if (element.childEntityId) {
+
+                    if (ObjectId.isValid(element.childEntityId) == false) {
+                        valid = false;
+                    }
+
+                } else {
+                    valid = false;
+                }
+            }
+        }));
+        
+        resolve(valid);
+    });
+
+
+}
+
+
+/**
+ * to check weather entity mapping csv is valid or not
+ * @name _validateEntityUploadRequest
+ * @param {*} inputArray entity mapping csv json
+ */
+function _validateEntityUploadRequest(inputArray) {
+    return new Promise(async (resolve, reject) => {
+
+        let valid = true;
+        await Promise.all(inputArray.map(async function (element) {
+            if (element) {
+
+                let keys = Object.keys(element);
+                if (element.externalId && element.state && element.name && element.types && element._existingKeyField) {
+
+                }
+                else {
+                    valid = false;
+                }
+            }
+        }));
+        resolve(valid);
+    });
+
+
+}
+
+/**
+ * to get all field object for dropdown
+ * @name _getAllField
+ * @returns {json} response consist of all field object
+ **/
+function _getAllField() {
+
+    let field= {
+        label:"All",
+        value:"all",
+    }
+
+    return field;
 }

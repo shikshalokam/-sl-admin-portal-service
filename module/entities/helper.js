@@ -575,35 +575,11 @@ module.exports = class entitiesHelper {
                 }
 
                 let relatedEntitiesDocs = await this.relatedEntitiesDetails(entityDocument[0]._id, entityDocument[0].entityTypeId, entityDocument[0].entityType, projection);
-
                 let relatedEntities = relatedEntitiesDocs.data;
 
-                let order = []
-                relatedEntities.map(relatedEnt =>{
-
-                });
-
-
-                let entityTypes = await database.models.entityTypes.find(
-                    {  immediateChildrenEntityType:{ $ne:null } },
-                    { name:1,immediateChildrenEntityType:1 }
-                );
                
-                let entityOrders = ["state","district","block","taluk","cluster","zone","school"];
-
-                let relatedEntityDocument = [];
-                if(relatedEntities.length > 0){
-                    entityOrders.map(entityOrder =>{
-                    relatedEntities.filter(item =>{
-                        if(item.entityType==entityOrder){
-                            relatedEntityDocument.push(item);
-                        }
-                    })
-                })
-            }
-
                 _.merge(result, entityDocument[0])
-                result["relatedEntities"] = relatedEntityDocument;
+                result["relatedEntities"] = relatedEntities;
                 resolve({ message: constants.apiResponses.ENTITY_INFORMATION_FETCHED, result: result });
 
             } catch (error) {

@@ -9,7 +9,7 @@ const organisationsHelper = require(MODULES_BASE_PATH + "/organisations/helper.j
 const csvFileStream = require(ROOT_PATH + "/generics/file-stream");
 
 /**
-    * organisations
+    * Organisations
     * @class
 */
 
@@ -67,8 +67,6 @@ module.exports = class Organisations extends Abstract {
   list(req) {
     return new Promise(async (resolve, reject) => {
       try {
-
-
 
         let organisationList = await organisationsHelper.list(
           req.userDetails.userToken,
@@ -249,7 +247,7 @@ module.exports = class Organisations extends Abstract {
 */
 
   /**
-  * to add user to organisation
+  * To add user to organisation
   * @method
   * @name addUser
   * @param  {req}  - requested data.
@@ -527,7 +525,7 @@ module.exports = class Organisations extends Abstract {
    * 
  */
  /**
-  * to get organisation create form
+  * To get organisation create form
   * @method
   * @name getForm
   * @param  {req}  - requested data.

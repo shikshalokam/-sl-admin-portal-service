@@ -7,7 +7,7 @@
 
  
   /**
-     * Forms
+     * PlatformRolesExt
      * @class
  */
 module.exports = class PlatformRolesExt extends Abstract {

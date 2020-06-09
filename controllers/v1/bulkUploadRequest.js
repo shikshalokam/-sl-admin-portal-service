@@ -8,7 +8,7 @@
 const bulkUploadHelper = require(MODULES_BASE_PATH + "/bulk-upload-request/helper.js");
 
 /**
-   * Forms
+   * BulkUploadRequest
    * @class
 */
 module.exports = class BulkUploadRequest extends Abstract {
@@ -21,12 +21,12 @@ module.exports = class BulkUploadRequest extends Abstract {
   }
 
   /**
-  * @api {get} /admin-service/api/v1/bulkUploadRequest/bulkUserUpload 
-  * Bulk user upload
+  * @api {get} /admin-service/api/v1/bulkUploadRequest/bulkUpload 
+  * For bulk upload
   * @apiVersion 1.0.0
   * @apiGroup Bulk Upload
   * @apiHeader {String} X-authenticated-user-token Authenticity token
-  * @apiSampleRequest /admin-service/api/v1/bulkUploadRequest/bulkUserUpload
+  * @apiSampleRequest /admin-service/api/v1/bulkUploadRequest/bulkUpload
   * @apiParam {File} users list file of type CSV. 
   * @apiUse successBody
   * @apiUse errorBody
@@ -38,14 +38,14 @@ module.exports = class BulkUploadRequest extends Abstract {
   **/
 
   /**
-   * Bulk user upload
+   * For bulk upload
    * @method
-   * @name bulkUserUpload
+   * @name bulkUpload
    * @param  {req}  - requested data.
    * @returns {json} Response consists of request details
   */
 
-  bulkUserUpload(req) {
+  bulkUpload(req) {
     return new Promise(async (resolve, reject) => {
       try {
         if (!req.files || !req.files.uploadFile ) {
@@ -54,7 +54,7 @@ module.exports = class BulkUploadRequest extends Abstract {
             message: httpStatusCode["bad_request"].message
           };
         }
-        let uploadRequest = await bulkUploadHelper.bulkUserUpload(req, req.userDetails.userId);
+        let uploadRequest = await bulkUploadHelper.bulkUpload(req, req.userDetails.userId);
         return resolve(uploadRequest);
 
       } catch (error) {
@@ -155,7 +155,7 @@ module.exports = class BulkUploadRequest extends Abstract {
    * }
    * }
    * 
-  */
+  **/
 
   /**
    * Bulk upload request list
@@ -196,7 +196,7 @@ module.exports = class BulkUploadRequest extends Abstract {
 
   /**
    * @api {get} /admin-service/api/v1/bulkUploadRequest/getDownloadableUrls 
-   * Upload bulk user Upload
+   * Get downloadable url of bulk csv files
    * @apiVersion 1.0.0
    * @apiGroup Bulk Upload
    * @apiHeader {String} X-authenticated-user-token Authenticity token
@@ -249,7 +249,7 @@ module.exports = class BulkUploadRequest extends Abstract {
 
    /**
    * @api {get} /admin-service/api/v1/bulkUploadRequest/getStatus 
-   * Upload bulk user Upload
+   * Get all status of bulk upload
    * @apiVersion 1.0.0
    * @apiGroup Bulk Upload
    * @apiHeader {String} X-authenticated-user-token Authenticity token
@@ -257,18 +257,28 @@ module.exports = class BulkUploadRequest extends Abstract {
    * @apiUse successBody
    * @apiUse errorBodyuser
    * @apiParamExample {json} Response:
-   * {
-   * "message": "Url's generated successfully",
-   * "status": 200,
-   * "result": {
-   *     "filePath": "d04c5432-cb7e-4bbe-ace9-1df412117ae5/1590414313_52082.csv",
-   *     "url": "https://storage.googleapis.com/download/storage/v1/b/sl-dev-storage/o/d04c5432-cb7e-4bbe-ace9-1df412117ae5%2F1590414313_52082.csv?generation=1590414313701670&alt=media"
-   *  }
-   * }
-  */
+   {
+    "message": "Status list featched successfully",
+    "status": 200,
+    "result": [
+        {
+            "label": "All",
+            "value": "all"
+        },
+        {
+            "label": "Completed",
+            "value": "completed"
+        },
+        {
+            "label": "Proccessing",
+            "value": "proccessing"
+        }
+    ]
+}
+**/
 
   /**
-   * to get all status
+   * To get all status
    * @method
    * @name getStatus
    * @param  {req}  - requested data.
@@ -297,6 +307,41 @@ module.exports = class BulkUploadRequest extends Abstract {
   });
 }
 
+
+  /**
+   * @api {get} /admin-service/api/v1/bulkUploadRequest/getTypes 
+   * Get all request type of bulk upload
+   * @apiVersion 1.0.0
+   * @apiGroup Bulk Upload
+   * @apiHeader {String} X-authenticated-user-token Authenticity token
+   * @apiSampleRequest /admin-service/api/v1/bulkUploadRequest/getTypes
+   * @apiUse successBody
+   * @apiUse errorBodyuser
+   * @apiParamExample {json} Response:
+   {
+    "message": "Request types featched successfully",
+    "status": 200,
+    "result": [
+        {
+            "label": "All",
+            "value": "all"
+        },
+        {
+            "label": "Entity Mapping",
+            "value": "entityMapping"
+        },
+        {
+            "label": "Entity-creation",
+            "value": "entity-creation"
+        },
+        {
+            "label": "User Creation",
+            "value": "userCreation"
+        }
+       
+    ]
+}
+  */
   /**
    * to get all request types
    * @method
@@ -326,7 +371,5 @@ module.exports = class BulkUploadRequest extends Abstract {
     }
   });
 }
-
-
 
 };

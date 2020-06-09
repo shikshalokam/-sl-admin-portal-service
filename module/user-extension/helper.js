@@ -266,34 +266,52 @@ module.exports = class UserCreationHelper {
     }
 
     /**
-   * statusUpdate.
+   * To activate the user.
    * @method
-   * @name  statusUpdate
+   * @name  activateUser
    * @param  {userId}  - userId
    * @param  {userToken}  - user token
    * @returns {json} Response consists of updated user details.
    */
 
-    static statusUpdate(userId, userToken, status) {
-        return new Promise(async (resolve, reject) => {
-            try {
+  static activateUser(userId, userToken) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let statusUpdateUserInfo =
+                await userManagementService.activateUser(
+                    userId,
+                    userToken
+                );
+            return resolve(statusUpdateUserInfo);
+        } catch (error) {
+            return reject(error);
+        }
+    })
+}
 
+    /**
+   * To in-activate the user.
+   * @method
+   * @name  inActivateUser
+   * @param  {userId}  - userId
+   * @param  {userToken}  - user token
+   * @returns {json} Response consists of updated user details.
+   */
 
-                let statusUpdateUserInfo =
-                    await userManagementService.statusUpdate(
-                        userId,
-                        userToken,
-                        status
-                    );
-
-
-                return resolve(statusUpdateUserInfo);
-            } catch (error) {
-                return reject(error);
-            }
-        })
-    }
-
+  static inActivateUser(userId, userToken) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let statusUpdateUserInfo =
+                await userManagementService.inActivateUser(
+                    userId,
+                    userToken
+                );
+            return resolve(statusUpdateUserInfo);
+        } catch (error) {
+            return reject(error);
+        }
+    })
+}
 
     /**
     * to get userDetails.
@@ -311,17 +329,13 @@ module.exports = class UserCreationHelper {
                 let profileData =
                     await sunBirdService.getUserProfileInfo(userToken, userId);
                 profileData = JSON.parse(profileData);
-
                 let userCustomeRole = await database.models.userExtension.findOne({ userId: orgAdminUserId }, { roles: 1 });
-
                 if (profileData.responseCode == constants.common.RESPONSE_OK) {
 
                     let orgInfo = [];
                     let organisationsList = await _getOrganisationlist(profileData, orgAdminUserId, userToken);
-
                     let apiAccessUserData =
                         await sunBirdService.getUserProfileInfo(userToken, orgAdminUserId);
-
                     apiAccessUserData = JSON.parse(apiAccessUserData);
                     if (apiAccessUserData.responseCode != constants.common.RESPONSE_OK) {
                         reject({
@@ -330,7 +344,6 @@ module.exports = class UserCreationHelper {
                         });
                     }
                     let orgFound = false;
-
                     if (userCustomeRole && userCustomeRole.roles) {
                         userCustomeRole.roles.map(custRole => {
                             if (custRole.code == constants.common.PLATFROM_ADMIN_ROLE) {
@@ -370,7 +383,6 @@ module.exports = class UserCreationHelper {
                         });
 
                     } else {
-
                         let userDetails = {};
                         if (profileData.result) {
                             let platformRoles =
@@ -403,7 +415,6 @@ module.exports = class UserCreationHelper {
                             }
 
                             if (platformRoles.length > 0) {
-
                                 await Promise.all(platformRoles.map(platformRole => {
 
                                     if (!platformRole.isHidden || platformRole.isHidden != true) {
@@ -420,7 +431,6 @@ module.exports = class UserCreationHelper {
                             }
 
                             let userDoc = await database.models.userExtension.findOne({ userId: userId }, { organisationRoles: 1 });
-
                             if (profileData.result.response &&
                                 profileData.result.response.organisations &&
                                 profileData.result.response.organisations.length > 0) {
