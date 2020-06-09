@@ -377,10 +377,9 @@ module.exports = class UserCreationHelper {
                     status.push({ label: gen.utils.camelCaseToCapitalizeCase(item), value: item });
                 });
 
+                status = status.sort(gen.utils.sortArrayOfObjects('label'));
                 let allField = _getAllField();
                 status.push(allField);
-
-                status = status.sort(gen.utils.sortArrayOfObjects('label'));
 
                 resolve({
                     message: constants.apiResponses.STATUS_LIST,
@@ -416,9 +415,11 @@ module.exports = class UserCreationHelper {
                     requestTypes.push({ label: gen.utils.camelCaseToCapitalizeCase(item), value: item });
                 });
 
+                
+                requestTypes = requestTypes.sort(gen.utils.sortArrayOfObjects('label'));
+               
                 let allField = _getAllField();
                 requestTypes.push(allField);
-                requestTypes = requestTypes.sort(gen.utils.sortArrayOfObjects('label'));
 
                 resolve({
                     message: constants.apiResponses.BULK_REQUEST_TYPE,
