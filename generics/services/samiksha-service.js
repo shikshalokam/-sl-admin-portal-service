@@ -17,11 +17,12 @@ const fs = require('fs');
 
 
 /**
- * entiies bulk upload 
+ * Entiies bulk upload 
  * @name uploadFileToCloud
- * @param {*} filePath filePath of the file to upload
- * @param {*} token user access token
- * @param {*} type type of entity
+ * @param {String} filePath - filePath of the file to upload
+ * @param {String} token - user access token
+ * @param {String} type - type of entity
+ * @returns {Json} -  entity data
  */
 function bulkUploadEntities(filePath, token, type) {
     return new Promise(async (resolve, reject) => {
@@ -30,7 +31,7 @@ function bulkUploadEntities(filePath, token, type) {
                 entities: fs.createReadStream(filePath)
             }
             let apiUrl =
-                urlPrefix + constants.endpoints.BULK_ENTITY+"?type=" + type;
+                urlPrefix + constants.endpoints.BULK_ENTITY + "?type=" + type;
 
             let response = await httpCall(apiUrl, token, formData);
             resolve(response);
@@ -44,12 +45,13 @@ function bulkUploadEntities(filePath, token, type) {
 /**
  * entiies bulk mapping upload 
  * @name entityMapping
- * @param {*} filePath filePath of the file to upload
- * @param {*} token user access token
- * @param {*} programId Program External ID.
- * @param {*} solutionId Solution External ID.
+ * @param {String} filePath filePath of the file to upload
+ * @param {String} token user access token
+ * @param {String} programId Program External ID.
+ * @param {String} solutionId Solution External ID.
+ * @returns {Json} - entity mapping information 
  */
-function entityMapping(filePath,token,programId,solutionId) {
+function entityMapping(filePath, token, programId, solutionId) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -61,29 +63,30 @@ function entityMapping(filePath,token,programId,solutionId) {
 
             let response = await httpCall(apiUrl, token, formData);
 
-           return resolve(response);
+            return resolve(response);
 
         } catch (error) {
             return reject(error);
         }
     })
- }
+}
 
 
- /**
- * Common http request call 
- * @name httpCall
- * @param {*} url filePath of the file to upload
- * @param {*} token user access token
- * @param {*} formData form data of the request
- */
+/**
+* Common http request call 
+* @name httpCall
+* @param {String} url filePath of the file to upload
+* @param {String} token user access token
+* @param {String} formData form data of the request
+* @returns {Json} - consists of api response body
+*/
 function httpCall(url, token, formData) {
     return new Promise(async (resolve, reject) => {
         try {
 
             let options = {
                 "headers": {
-                     'Content-Type': "application/json",
+                    'Content-Type': "application/json",
                     "X-authenticated-user-token": token,
                     "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN
                 },
@@ -110,5 +113,4 @@ function httpCall(url, token, formData) {
 module.exports = {
     bulkUploadEntities: bulkUploadEntities,
     entityMapping: entityMapping
-
 };

@@ -14,7 +14,8 @@ module.exports = class platFormUserProfileHelper {
    * Get platform user profile.
    * @method
    * @name getProfile
-   * @param  {requestedData}  - requested body.
+   * @param {String} userId - user id 
+   * @param {String} token - user access token
    * @returns {json} Response consists of requested user user profile data.
    */
 

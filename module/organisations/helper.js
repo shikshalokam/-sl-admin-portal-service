@@ -13,20 +13,21 @@ let formsHelper = require(MODULES_BASE_PATH + "/forms/helper");
 module.exports = class OrganisationsHelper {
 
     /**
-   * Get platform organisations list.
-   * @method
-   * @name list
-    * @returns {json} Response consists of organisations.
-   */
+       * Get platform organisations list.
+       * @method
+       * @name list
+       * @param {String} token - user access token
+       * @param {String} userId - user id
+       * @param {String} pageSize - maximum limit 
+       * @param {String} pageNo - page number
+       * @returns {json} Response consists of organisations.
+      */
 
     static list(token, userId, pageSize, pageNo) {
         return new Promise(async (resolve, reject) => {
             try {
-
-
                 let profileData = await _getProfileData(token, userId);
                 if (profileData) {
-
                     let organisationsList = [];
 
                     let roles = profileData.result.response.roles;
@@ -40,22 +41,6 @@ module.exports = class OrganisationsHelper {
                         })
                     }
                     if (roles.includes(constants.common.PLATFROM_ADMIN_ROLE)) {
-
-                        // let organisationsDoc = await cassandraDatabase.models.organisation.findAsync({},
-                        //     { raw: true, select: ["orgname", "id"] });
-
-
-
-                        // if (organisationsDoc) {
-                        //     await Promise.all(organisationsDoc.map(function (orgInfo) {
-
-                        //         let orgDetails = {
-                        //             label: orgInfo.orgname,
-                        //             value: orgInfo.id
-                        //         }
-                        //         organisationsList.push(orgDetails);
-                        //     }));
-                        // }
 
                         let request = {
                             "filters": {
@@ -114,10 +99,18 @@ module.exports = class OrganisationsHelper {
     }
 
     /**
-   * Get platform organisations list.
+   * Get platform organisations users.
    * @method
-   * @name list
-    * @returns {json} Response consists of organisations.
+   * @name users
+   * @param {String} token - user access token
+   * @param {String} userId - user id
+   * @param {String} organisationId - organisation id
+   * @param {String} pageSize - maximum limit 
+   * @param {String} pageNo - page number
+   * @param {String} searchText - search text of users
+   * @param {String} status - status of the users
+   * @param {Array} requestedUsers - array of selected user id
+   * @returns {json} Response consists of users of organisation.
    */
 
     static users(token, userId, organisationId, pageSize, pageNo, searchText, status = "", requestedUsers = []) {
@@ -291,14 +284,19 @@ module.exports = class OrganisationsHelper {
   * Get download userList
   * @method
   * @name list
-   * @returns {json} Response consists of users list.
+  * @param {Json} downloadDetails -download users details
+  * @param {String} token - user access token
+  * @param {String} userId - user id
+  * @returns {json} Response consists of users list.
   */
 
-    static downloadUsers(requestBody, token, userId) {
+    static downloadUsers(downloadDetails, token, userId) {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let csvData = await this.users(token, userId, requestBody.organisationId, requestBody.limit, requestBody.page, requestBody.searchText, requestBody.status, requestBody.usersList);
+                let csvData = await this.users(token, userId, downloadDetails.organisationId,
+                    downloadDetails.limit, downloadDetails.page, downloadDetails.searchText,
+                    downloadDetails.status, downloadDetails.usersList);
                 let responseData = [];
                 if (csvData.result && csvData.result.data) {
                     await Promise.all(csvData.result.data.map(fields => {
@@ -306,20 +304,11 @@ module.exports = class OrganisationsHelper {
                             delete fields.id;
                         }
 
-                        // let status = "";
-                        // if (fields.status == 1) {
-                        //     status = "Active"
-                        // } else {
-                        //     status = "Inactive";
-                        // }
-                        // fields.status = status;
                         let userInfo = Object.keys(fields).reduce((c, k) => (c[gen.utils.camelCaseToCapitalizeCase(k)] = fields[k], c), {})
                         responseData.push(userInfo);
                     }))
                 }
-
                 resolve(responseData);
-
             }
             catch (error) {
                 return reject(error);
@@ -329,8 +318,8 @@ module.exports = class OrganisationsHelper {
 
 
 
-    /*
-    * addUser.
+    /**
+    * To add user to organisation
     * @method
     * @name  addUser
     * @param  {orgnisationInfo,token}  - organisation object and token
@@ -349,14 +338,9 @@ module.exports = class OrganisationsHelper {
                 let rolesDocuments = await database.models.platformRolesExt.find({}, {
                     _id: 1, code: 1, title: 1
                 }).lean();
-
-
-
                 plaformRoles.push("PUBLIC");
                 await Promise.all(orgnaisationInfo.roles.map(async function (roleInfo) {
-
                     let found = false;
-
                     if (rolesDocuments) {
                         await Promise.all(rolesDocuments.map(roleDoc => {
                             if (roleDoc.code === roleInfo) {
@@ -420,19 +404,16 @@ module.exports = class OrganisationsHelper {
 
 
 
-    /*
-     * assignRoles.
+    /**
+     * To assign roles to organisation for a user
      * @method
-     * @name  addUser
+     * @name  assignRoles
      * @param  {orgnisationInfo,token}  - organisation object and token
-     * @returns {json} Response consists of success or failure of the api.
+     * @returns {json} Response consists of assign role information.
      */
     static assignRoles(orgnisationInfo, token) {
-
         return new Promise(async (resolve, reject) => {
             try {
-
-
                 let plaformRoles = [];
                 let rolesId = [];
 
@@ -480,24 +461,20 @@ module.exports = class OrganisationsHelper {
 
                     let message = constants.apiResponses.ASSIGNED_ROLE_SUCCESSFULLY;
                     if (orgnisationInfo && orgnisationInfo.removeRoles) {
-
-
                         message = constants.apiResponses.ROLES_REMOVED;
                     }
                     resolve({ result: response.result, message: message });
                 } else {
                     reject({ message: response.params.errmsg });
                 }
-
             } catch (error) {
                 return reject(error)
             }
-
         });
     }
 
     /**
-     * get organisation list.
+     * To get organisation detail list.
      * @method
      * @name  detailList
      * @param  {inputData}  - hold query object
@@ -506,7 +483,6 @@ module.exports = class OrganisationsHelper {
     static detailList(inputData) {
         return new Promise(async (resolve, reject) => {
             try {
-
                 let profileData = await _getProfileData(inputData.userToken, inputData.userId);
                 if (profileData) {
 
@@ -614,10 +590,11 @@ module.exports = class OrganisationsHelper {
 
 
     /** 
-    * to create organisation.
+    * To create organisation.
     * @method
     * @name  create
-    * @param  {inputData}  - hold query object
+    * @param  {Json} inputData - hold query object
+    * @param  {String} token - user access token
     * @returns {json} Response consists of success or failure of the api.
     */
     static create(inputData, token) {
@@ -667,7 +644,6 @@ module.exports = class OrganisationsHelper {
     static getForm() {
         return new Promise(async (resolve, reject) => {
             try {
-
                 let formData =
                     await formsHelper.list({
                         name: "organisationCreateForm"
@@ -676,15 +652,12 @@ module.exports = class OrganisationsHelper {
                     });
 
                 if (!formData[0]) {
-
                     return resolve({
                         status: httpStatusCode["bad_request"].status,
                         message:
                             constants.apiResponses.ORG_FORM_NOT_FOUND
                     });
-
                 } else {
-
                     resolve({ result: formData[0].value, message: constants.apiResponses.ORG_FORM_FETCHED })
                 }
 
@@ -714,7 +687,6 @@ module.exports = class OrganisationsHelper {
                         addressLine1: inputData.address
                     }
                 }
-
                 if (inputData.externalId) {
                     requestBody['externalId'] = inputData.externalId;
                     requestBody['provider'] = process.env.SUNBIRD_PROVIDER;
@@ -747,13 +719,7 @@ module.exports = class OrganisationsHelper {
 
                 let orgDetails = await sunBirdService.getOrganisationDetails({ organisationId: organisationId }, token);
                 if (orgDetails && orgDetails.responseCode == constants.common.RESPONSE_OK) {
-
-                    // if(orgDetails.result.response)
-
-
-
                     let response = orgDetails.result.response;
-
                     let address = "";
                     if (response.address && response.address.addressLine1) {
                         address = response.address.addressLine1
@@ -772,9 +738,8 @@ module.exports = class OrganisationsHelper {
                         updatedDate: response.updatedDate,
                         createdDate: response.createdDate,
                         address: address
-
-
                     }
+
                     resolve({ result: responseObj, message: constants.apiResponses.ORG_DETAILS_FOUND });
                 } else {
                     reject({ message: orgDetails.params.errmsg });
@@ -788,9 +753,11 @@ module.exports = class OrganisationsHelper {
 
 
     /**
-    * To get the organisational details
+    * To\update organisation status
     * @method
-    * @name  details
+    * @name  updateStatus
+    * @param {Json} inputData -  organisation details
+    * @param  {token} token  - user access token
     * @returns {json} Response consists of organisation creation form.
     */
 
@@ -820,6 +787,8 @@ module.exports = class OrganisationsHelper {
     * remove user from the organisation
     * @method
     * @name  removeUser
+    * @param {Json} inputData -  organisation user details
+    * @param  {token} token  - user access token
     * @returns {json} Response consists of organisation creation form.
     */
 
@@ -866,9 +835,11 @@ module.exports = class OrganisationsHelper {
    * check the user has permission for Org odmin or user admin
    * @method
    * @name _checkUserAdminAccess
-    * @returns {json} Response consists of profile data and user permission as boolean.
+   * @param {String} userId -  user id
+   * @param  {String} token  - user access token
+   * @param  {String} organisationId  - organisation id 
+   * @returns {json} Response consists of profile data and user permission as boolean.
 */
-
 function _checkUserAdminAccess(token, userId, organisationId) {
 
     return new Promise(async (resolve, reject) => {
@@ -888,7 +859,6 @@ function _checkUserAdminAccess(token, userId, organisationId) {
             }
 
             let userCustomeRole = await database.models.userExtension.findOne({ userId: userId }, { roles: 1 });
-
             if (userCustomeRole && userCustomeRole.roles && userCustomeRole.roles.length > 0) {
                 userCustomeRole.roles.map(customRole => {
                     if (!roles.includes(customRole.code)) {
@@ -1022,17 +992,14 @@ function _actions() {
    * To get Organisation Details By Id.
    * @method
    * @name _getOrganisationDetailsById 
-   * @returns {json}
+   * @param {String} orgId - organisation id 
+   * @param {String} token - user access token
+   * @returns {json} - returns organisational details
 */
 
 function _getOrganisationDetailsById(orgId, token) {
 
     return new Promise(async (resolve, reject) => {
-
-        // cassandraDatabase.models.organisation.findOne({ id: orgId },
-        //     { raw: true }, async function (err, result) {
-        //         return resolve(result);
-        //     });
 
         let request = {
             "filters": {
@@ -1045,11 +1012,6 @@ function _getOrganisationDetailsById(orgId, token) {
         if (organisationList.responseCode == constants.common.RESPONSE_OK) {
             if (organisationList.result && organisationList.result.response &&
                 organisationList.result.response && organisationList.result.response.content) {
-                // await Promise.all(organisationList.result.response.content.map(async function (orgInfo) {
-                //         organisationsList.push(org);
-
-                // }))
-
                 resolve(organisationList.result.response.content[0]);
             }
         }
@@ -1062,7 +1024,9 @@ function _getOrganisationDetailsById(orgId, token) {
  * to get _getProfileData of user
  * @method
  * @name _getProfileData
-  * @returns {json} Response consists of profile data a
+ * @param {String} userId - user id 
+ * @param {String} token - user access token
+ * @returns {json} Response consists of profile data a
 */
 
 function _getProfileData(token, userId) {

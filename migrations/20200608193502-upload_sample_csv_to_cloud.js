@@ -11,8 +11,9 @@ module.exports = {
     global.migrationMsg = "upload sample csv to cloud"
    
     let files = [
-      { name: "user.csv", path: "sample-bulk-user.csv" },
-      { name: "entity.csv", path: "sample-bulk-entities.csv" }
+      { name: "users.csv", path: process.env.BULK_USER_SAMPLE_CSV_PATH },
+      { name: "entities.csv", path: process.env.BULK_ENTITIES_SAMPLE_CSV_PATH },
+      { name: "entityMapping.csv", path: process.env.BULK_ENTITY_MAPPING_SAMPLE_CSV_PATH }
     ];
 
     let uploadFoilderPath = "bulkUpload/";

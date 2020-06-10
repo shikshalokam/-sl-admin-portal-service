@@ -208,7 +208,8 @@ module.exports = class UserCreationHelper {
    * create create.
    * @method
    * @name  create
-   * @param  {requestedData}  - requested body.
+   * @param  {json} requestedData  - requested body.
+   * @param  {String} userToken  - user access token
    * @returns {json} Response consists of created user.
    */
 
@@ -230,10 +231,11 @@ module.exports = class UserCreationHelper {
     }
 
     /**
- * update.
+ * To update user infromation.
  * @method
  * @name  update
- * @param  {requestedData}  - requested body.
+ * @param  {String} updateInfo  - requested body.
+ * @param  {String} userToken  - user access token
  * @returns {json} Response consists of updated user details.
  */
 
@@ -270,55 +272,56 @@ module.exports = class UserCreationHelper {
    * @method
    * @name  activateUser
    * @param  {userId}  - userId
-   * @param  {userToken}  - user token
+   * @param  {userToken}  - user access token
    * @returns {json} Response consists of updated user details.
    */
 
-  static activateUser(userId, userToken) {
-    return new Promise(async (resolve, reject) => {
-        try {
-            let statusUpdateUserInfo =
-                await userManagementService.activateUser(
-                    userId,
-                    userToken
-                );
-            return resolve(statusUpdateUserInfo);
-        } catch (error) {
-            return reject(error);
-        }
-    })
-}
+    static activateUser(userId, userToken) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let statusUpdateUserInfo =
+                    await userManagementService.activateUser(
+                        userId,
+                        userToken
+                    );
+                return resolve(statusUpdateUserInfo);
+            } catch (error) {
+                return reject(error);
+            }
+        })
+    }
 
     /**
    * To in-activate the user.
    * @method
    * @name  inActivateUser
    * @param  {userId}  - userId
-   * @param  {userToken}  - user token
+   * @param  {userToken}  - user access token
    * @returns {json} Response consists of updated user details.
    */
 
-  static inActivateUser(userId, userToken) {
-    return new Promise(async (resolve, reject) => {
-        try {
-            let statusUpdateUserInfo =
-                await userManagementService.inActivateUser(
-                    userId,
-                    userToken
-                );
-            return resolve(statusUpdateUserInfo);
-        } catch (error) {
-            return reject(error);
-        }
-    })
-}
+    static inActivateUser(userId, userToken) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let statusUpdateUserInfo =
+                    await userManagementService.inActivateUser(
+                        userId,
+                        userToken
+                    );
+                return resolve(statusUpdateUserInfo);
+            } catch (error) {
+                return reject(error);
+            }
+        })
+    }
 
     /**
-    * to get userDetails.
+    * To get user details.
     * @method
-    * @name  userDetails
-    * @param  {userId}  - userId
-    * @param  {userToken}  - user token
+    * @name  details
+    * @param  {String} userId  - userId
+    * @param  {String} userToken  - user access token
+    * @param {String} orgAdminUserId - admin user id
     * @returns {json} Response consists of user details.
     */
 
@@ -531,6 +534,7 @@ module.exports = class UserCreationHelper {
     * to get bulkUserSampleCsvDwonload.
     * @method
     * @name  bulkUserSampleCsvDwonload
+    * @param  {String} userToken  - user access token
     * @returns {json} Response consists sample csv data
     */
 
@@ -559,7 +563,8 @@ module.exports = class UserCreationHelper {
   * check state has subEntities
   * @method
   * @name _checkStateWithSubEntities
-  * @param { string } stateId - Array of entities.
+  * @param { Arrya } groups - Array of groups.
+  * @param {String} entityTypeId - entity type mongo object id
   * @returns {boolean}
   * */
 
@@ -593,11 +598,13 @@ function _checkStateWithSubEntities(groups, entityTypeId) {
 
 
 /**
-  * get organisations list
+  * To get organisations list
   * @method
   * @name _getOrganisationlist
-  * @param { object }  - organisationInfo Array of entities.
-  * @returns {boolean}
+  * @param { object } userProfileInfo - user profile information
+  * @param  {String} userId  - userId
+  * @param  {String} userToken  - user access token
+  * @returns {boolean} return boolen value
   * */
 
 function _getOrganisationlist(userProfileInfo, userId, token) {
@@ -736,7 +743,8 @@ function _getOrganisationlist(userProfileInfo, userId, token) {
  * check user deactive access
  * @method
  * @name _checkDeactiveAccess
- * @param { object }  - userprofile infomration.
+ * @param { object } userProfileInfo - userprofile infomration.
+ * @param { object } userId - user keyclock id
  * @returns {Object}
  * */
 function _checkDeactiveAccess(userProfileInfo, userId) {

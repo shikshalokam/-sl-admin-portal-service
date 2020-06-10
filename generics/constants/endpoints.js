@@ -10,7 +10,7 @@ module.exports = {
     // usermanagement API's
     // PLATFORM_USER_PROFILE : "/platformUserRoles/getProfile",
     PLATFORM_USER_PROFILE: "/userExtension/getProfile",
-    PLATFORM_USER_CREATE: "/userExtension/Create",
+    PLATFORM_USER_CREATE: "/userExtension/create",
     PLATFORM_USER_UPDATE: "/platformUserRoles/update",
     STATUS_UPDATE: "/userExtension/statusUpdate",
     USER_DETAILS: "/userExtension/userDetails",

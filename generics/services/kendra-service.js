@@ -18,8 +18,12 @@ const fs = require('fs');
 /**
  * to upload file to uploadFileToCloud
  * @name uploadFileToCloud
- * @param {*} filePath filePath of the file to upload
- * @param {*} gcp url
+ * @param {String} filePath filePath of the file to upload
+ * @param {String} uploadPath - location of bucket where to upload
+ * @param {String} bucketName - name of the bucket
+ * @param {String} token - logged in user token
+ * @param {String} endpoint - endpoint of the api 
+ * @returns {json} - upload file details
  */
 function uploadFileToCloud(filePath, uploadPath, bucketName, token, endpoint) {
     return new Promise(async (resolve, reject) => {
@@ -58,20 +62,20 @@ function uploadFileToCloud(filePath, uploadPath, bucketName, token, endpoint) {
     })
 }
 
-/**to downloadable Urls
+/**
+ * to downloadable Urls
  * @name getDownloadableUrls
- * @param {*} req 
- *  api is to get downloadable Urls of files
+ * @param {Json} inputData - cloud storage details
+ * @param {String} token - logged in user token
+ * @returns {Json} -  api is to get downloadable Urls of files
  */
 function getDownloadableUrls(inputData, token) {
     return new Promise(async function (resolve, reject) {
         try {
-
             let requestBody = {
                 filePaths: inputData.sourcePath,
                 bucketName: inputData.bucket
             }
-
             let endpoint = "";
             if (inputData.cloudStorage == constants.common.AWS_SERVICE) {
                 endpoint = constants.endpoints.DOWNLOAD_AWS_URL;
@@ -105,7 +109,6 @@ function getDownloadableUrls(inputData, token) {
             reject({ status: "failed", mesage: ex });
         }
     });
-
 }
 
 

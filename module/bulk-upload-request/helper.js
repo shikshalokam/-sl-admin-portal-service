@@ -27,9 +27,11 @@ module.exports = class UserCreationHelper {
 
 
     /**
-     * bulk Upload request
+     * Bulk Upload request
      * @method
      * @name  bulkUpload
+     * @param {Request} req - contains upload file
+     * @param {String} userId - user id of the uploader
      * @returns {json} Response consists sample request details
      */
 
@@ -45,26 +47,25 @@ module.exports = class UserCreationHelper {
                     let status = "";
                     if (req.query.requestType == "entityMapping") {
 
-                        status = "Entity Mapping";
+                        status = constants.common.BULK_ENTITY_MAPPING_TYPE;
 
                         let validateMapping = await _validateEntityMapping(uploadFileData);
                         if (validateMapping == false) {
                             reject({
                                 status: httpStatusCode["bad_request"].status,
-                                message: "Validation failed"
+                                message: constants.apiResponses.VALIDATION_FAILED
                             })
                         }
-                        
+
 
                     }
                     else if (req.query.requestType == "entityCreation") {
 
-                        status = "Entity Creation";
-
+                        status = constants.common.BULK_ENTITY_CREATION_TYPE;
                         if (!req.query.entityType) {
                             reject({
                                 status: httpStatusCode["bad_request"].status,
-                                message: "Validation failed"
+                                message: constants.apiResponses.VALIDATION_FAILED
                             })
                         }
 
@@ -72,15 +73,14 @@ module.exports = class UserCreationHelper {
                         if (validateEntityRequest == false) {
                             reject({
                                 status: httpStatusCode["bad_request"].status,
-                                message: "Validation failed"
+                                message: constants.apiResponses.VALIDATION_FAILED
                             })
                         }
-                        
+
 
                     } else if (req.query.requestType == "userCreation") {
 
-                        status = "User Creation";
-
+                        status = constants.common.BULK_USER_CREATION_TYPE;
                         let validateUser = await _validateUsers(uploadFileData);
                         if (validateUser == false) {
                             reject({
@@ -95,7 +95,6 @@ module.exports = class UserCreationHelper {
                             message: httpStatusCode["bad_request"].message
                         })
                     }
-
                     let fileName = gen.utils.generateUniqueId() + ".csv";
                     var dir = ROOT_PATH + process.env.BATCH_FOLDER_PATH;
                     if (!fs.existsSync(dir)) {
@@ -108,28 +107,13 @@ module.exports = class UserCreationHelper {
 
                     let fileCompletePath = ROOT_PATH + process.env.BATCH_FOLDER_PATH + fileName;
                     let data = fs.writeFileSync(fileCompletePath, req.files.uploadFile.data);
-
-                    // // let cv = new ObjectsToCsv(userCreateData);
-                    // // let successFile = timestamp + "_" + randomNuumber + "_success.csv";
-                    // // await cv.toDisk(ROOT_PATH + process.env.BATCH_FOLDER_PATH + successFile);
-                    // // files.push(userId + "/" + successFile);
-
-                    
-                    // let failureCsv = new ObjectsToCsv(userCreateData);
-                    // let failureFile = timestamp + "_" + randomNuumber + "_failure.csv";
-                    // await failureCsv.toDisk(ROOT_PATH + process.env.BATCH_FOLDER_PATH + successFile);
-                    // files.push(userId + "/" + failureFile);
-
                     let requestBody = {
                         fileNames: files,
                     }
-
                     let config = _getCloudUploadConfig();
-
                     let uploadFileEndPoint = config.uploadFileEndPoint;
                     let storage = config.storage;
                     let bucketName = config.bucketName;
-
                     let errorFileData = {};
                     let successFileData = {};
 
@@ -204,7 +188,13 @@ module.exports = class UserCreationHelper {
     * to get bulk request List.
     * @method
     * @name  list
-    * @returns {json} Response consists sample csv data
+    * @param {String} userId - user id
+    * @param {String} searchText - search query text
+    * @param {String} pageNo - page number
+    * @param {String} token - logged in user token
+    * @param {String} status - status of the bulk upload
+    * @param {String} requestType - type of bulk upload request
+    * @returns {json} Response consists bulk upload requests
     */
     static list(userId, searchText, pageSize, pageNo, token, status, requestType = "") {
         return new Promise(async (resolve, reject) => {
@@ -220,13 +210,13 @@ module.exports = class UserCreationHelper {
                         query = { deleted: false, requestId: { $regex: searchText } }
                     }
                     if (status) {
-                        if(status!="all"){
+                        if (status != "all") {
                             query['status'] = status;
                         }
                     }
 
                     if (requestType) {
-                        if(requestType!="all"){
+                        if (requestType != "all") {
                             query['requestType'] = requestType;
                         }
                     }
@@ -283,12 +273,15 @@ module.exports = class UserCreationHelper {
         })
     }
 
-   /**
-   * to get request details.
-   * @method
-   * @name  list
-   * @returns {json} Response consists sample csv data
-   */
+    /**
+    * To get request details.
+    * @method
+    * @name  details
+    * @param {String} token - user access token
+    * @param {String} userId - loggedin user id.
+    * @param {String} requestId - bulk upload request id.
+    * @returns {json} Response consists bulk request details
+    */
 
     static details(token, userId, requestId) {
         return new Promise(async (resolve, reject) => {
@@ -320,6 +313,9 @@ module.exports = class UserCreationHelper {
     * to get request details.
     * @method
     * @name  getDownloadableUrls
+    * @param {String} token - user access token
+    * @param {String} requestId - bulk upload request id.
+    * @param {String} fileType - success,input or failure csv type
     * @returns {json} Response consists downloadable url
     */
 
@@ -355,12 +351,12 @@ module.exports = class UserCreationHelper {
         });
     }
 
-   /**
-   * to get all request status.
-   * @method
-   * @name  getStatus
-   * @returns {json} Response consists status list
-   */
+    /**
+    * To get all request status.
+    * @method
+    * @name  getStatus
+    * @returns {json} Response consists status list
+    */
     static getStatus() {
         return new Promise(async (resolve, reject) => {
             try {
@@ -380,9 +376,6 @@ module.exports = class UserCreationHelper {
                 status = status.sort(gen.utils.sortArrayOfObjects('label'));
                 let allField = _getAllField();
                 status.unshift(allField);
-
-
-
                 resolve({
                     message: constants.apiResponses.STATUS_LIST,
                     result: status
@@ -394,12 +387,12 @@ module.exports = class UserCreationHelper {
         });
     }
 
-   /**
-   * to get request types.
-   * @method
-   * @name  getTypes
-   * @returns {json} Response consists of request types
-   */
+    /**
+    * To get request types.
+    * @method
+    * @name  getTypes
+    * @returns {json} Response consists of request types
+    */
     static getTypes() {
         return new Promise(async (resolve, reject) => {
             try {
@@ -417,9 +410,9 @@ module.exports = class UserCreationHelper {
                     requestTypes.push({ label: gen.utils.camelCaseToCapitalizeCase(item), value: item });
                 });
 
-                
+
                 requestTypes = requestTypes.sort(gen.utils.sortArrayOfObjects('label'));
-               
+
                 let allField = _getAllField();
                 requestTypes.unshift(allField);
 
@@ -642,7 +635,12 @@ function _validateUsers(inputArray) {
 * Bulk upload entities 
 * @method
 * @name  _bulkUploadEntities
-* @returns {json} Response consist request details
+* @param {String} token - user access token
+* @param {String} bulkRequestId - bulk upload request id.
+* @param {String} fileCompletePath - complete file path
+* @param {String} entityType - type of entity
+* @param {String} userid - user id 
+* @returns {json} Response consist upload request
 **/
 function _bulkUploadEntities(bulkRequestId, fileCompletePath, token, entityType, userId) {
     return new Promise(async (resolve, reject) => {
@@ -671,7 +669,7 @@ function _bulkUploadEntities(bulkRequestId, fileCompletePath, token, entityType,
                 }
                 let update = await database.models.bulkUploadRequest.findOneAndUpdate(
                     { requestId: bulkRequestId },
-                    { $set: { "successFile": successFileData, status: "completed" } }
+                    { $set: { "successFile": successFileData, status: constants.common.BULK_UPLOAD_COMPLETE } }
                 )
                 resolve(update);
 
@@ -679,7 +677,7 @@ function _bulkUploadEntities(bulkRequestId, fileCompletePath, token, entityType,
 
                 let update = await database.models.bulkUploadRequest.findOneAndUpdate(
                     { requestId: bulkRequestId },
-                    { $set: { status: "failed" } }
+                    { $set: { status: constants.common.BULK_UPLOAD_FAILURE } }
                 )
                 resolve(update);
 
@@ -730,7 +728,14 @@ function _getCloudUploadConfig() {
 * Bulk upload entity mapping  
 * @method
 * @name  _entityMapping
-* @returns {json} Response consist request details
+* @param {String} userToken - user access token
+* @param {String} bulkRequestId - bulk upload request id.
+* @param {String} filePath - complete file path
+* @param {String} entityType - type of entity
+* @param {String} userid - user id 
+* @param {String} programId - program id  
+* @param {String} solutionId - solution id
+* @returns {json} Response consist request entity mapping details
 **/
 function _entityMapping(bulkRequestId,
     filePath,
@@ -741,44 +746,44 @@ function _entityMapping(bulkRequestId,
     return new Promise(async (resolve, reject) => {
 
         try {
-        console.log("entity mapp");
-        let samikshaResponse = await samikshaService.entityMapping(filePath, userToken, programId, solutionId);
-        console.log("entity mapp");
-        
-        if (samikshaResponse && samikshaResponse.statusCode == httpStatusCode["ok"].status) {
+            console.log("entity mapp");
+            let samikshaResponse = await samikshaService.entityMapping(filePath, userToken, programId, solutionId);
+            console.log("entity mapp");
+
+            if (samikshaResponse && samikshaResponse.statusCode == httpStatusCode["ok"].status) {
 
 
-            let successFile = gen.utils.generateUniqueId() + "_success.csv";
-            let config = _getCloudUploadConfig();
-            let uploadResponse = await kendrService.uploadFileToCloud(filePath,
-                userId + "/" + successFile, config.bucketName, userToken, config.uploadFileEndPoint);
+                let successFile = gen.utils.generateUniqueId() + "_success.csv";
+                let config = _getCloudUploadConfig();
+                let uploadResponse = await kendrService.uploadFileToCloud(filePath,
+                    userId + "/" + successFile, config.bucketName, userToken, config.uploadFileEndPoint);
 
-            uploadResponse = JSON.parse(uploadResponse);
+                uploadResponse = JSON.parse(uploadResponse);
 
-            if (uploadResponse.status == httpStatusCode["ok"].status) {
+                if (uploadResponse.status == httpStatusCode["ok"].status) {
 
-            let successFileData = {
-                sourcePath: uploadResponse.result.name,
-                cloudStorage: config.storage,
-                bucket: config.bucketName
+                    let successFileData = {
+                        sourcePath: uploadResponse.result.name,
+                        cloudStorage: config.storage,
+                        bucket: config.bucketName
+                    }
+
+                    let update = await database.models.bulkUploadRequest.findOneAndUpdate(
+                        { requestId: bulkRequestId },
+                        { $set: { status: constants.common.BULK_UPLOAD_COMPLETE, "successFile": successFileData } }
+                    );
+                    resolve(update);
+                }
+            } else {
+                let update = await database.models.bulkUploadRequest.findOneAndUpdate(
+                    { requestId: bulkRequestId },
+                    { $set: { status: constants.common.BULK_UPLOAD_FAILURE } }
+                )
+                resolve(update);
             }
-            
-            let update = await database.models.bulkUploadRequest.findOneAndUpdate(
-                { requestId: bulkRequestId },
-                { $set: { status: "completed","successFile": successFileData } }
-            );
-            resolve(update);
-            }
-        } else {
-            let update = await database.models.bulkUploadRequest.findOneAndUpdate(
-                { requestId: bulkRequestId },
-                { $set: { status: "failed" } }
-            )
-            resolve(update);
+        } catch (error) {
+            return reject(error);
         }
-    } catch (error) {
-        return reject(error);
-    }
     });
 }
 
@@ -812,7 +817,7 @@ function _validateEntityMapping(inputArray) {
                 }
             }
         }));
-        
+
         resolve(valid);
     });
 
@@ -854,9 +859,9 @@ function _validateEntityUploadRequest(inputArray) {
  **/
 function _getAllField() {
 
-    let field= {
-        label:"All",
-        value:"all",
+    let field = {
+        label: "All",
+        value: "all",
     }
 
     return field;

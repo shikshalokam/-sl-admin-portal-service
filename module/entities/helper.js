@@ -213,7 +213,7 @@ module.exports = class entitiesHelper {
 
                 if (result.data && result.data.length > 0) {
                     result.data = result.data.map(data => {
-                       
+
                         let cloneData = { ...data };
                         // cloneData["label"] = cloneData.name;
                         // cloneData["_id"] = cloneData._id;
@@ -418,7 +418,10 @@ module.exports = class entitiesHelper {
   * Get immediate entities.
   * @method
   * @name listByEntityType
-  * @param {Object} entityId
+  * @param {ObjectId} entityId
+  * @param {String} searchText - search text,
+  * @param {String} pageSize - maximum limit
+  * @param {String} pageNo - page number
   * @returns {Array} - List of all immediateEntities based on entityId.
   */
 
@@ -513,8 +516,8 @@ module.exports = class entitiesHelper {
                     "metaInformation.administration", "metaInformation.city",
                     "metaInformation.country", "entityTypeId", "entityType"];
 
-                
-                if(entityDocument && entityDocument.data && entityDocument.data.length == 0){
+
+                if (entityDocument && entityDocument.data && entityDocument.data.length == 0) {
                     reject({
                         message: constants.apiResponses.ENTITY_NOT_FOUND,
                         result: result
@@ -577,7 +580,7 @@ module.exports = class entitiesHelper {
                 let relatedEntitiesDocs = await this.relatedEntitiesDetails(entityDocument[0]._id, entityDocument[0].entityTypeId, entityDocument[0].entityType, projection);
                 let relatedEntities = relatedEntitiesDocs.data;
 
-               
+
                 _.merge(result, entityDocument[0])
                 result["relatedEntities"] = relatedEntities;
                 resolve({ message: constants.apiResponses.ENTITY_INFORMATION_FETCHED, result: result });
@@ -724,9 +727,10 @@ module.exports = class entitiesHelper {
     }
 
     /**
-    * to get entities Sample Csv
+    * to download entities sample Csv
     * @method
     * @name  bulkEntitiesSampleCsvDwonload
+    * @param {String} token - user access token
     * @returns {json} Response consists of sample csv file information
     */
 
@@ -734,12 +738,12 @@ module.exports = class entitiesHelper {
         return new Promise(async (resolve, reject) => {
             try {
 
-              
-               let fileInfo = {
-                sourcePath: constants.common.SAMPLE_ENTITIES_CSV,
-                bucket:process.env.STORAGE_BUCKET,
-                cloudStorage:process.env.CLOUD_STORAGE,
-               }
+
+                let fileInfo = {
+                    sourcePath: constants.common.SAMPLE_ENTITIES_CSV,
+                    bucket: process.env.STORAGE_BUCKET,
+                    cloudStorage: process.env.CLOUD_STORAGE,
+                }
 
                 let response = await kendrService.getDownloadableUrls(fileInfo, token);
                 resolve(response);
@@ -751,35 +755,33 @@ module.exports = class entitiesHelper {
     }
 
     /**
-    * to get Entity Mapping Sample Csv
+    * To download Entity Mapping Sample Csv
     * @method
     * @name  bulkEntityMappingSampleCsvDwonload
+    * @param {String} token - user access token
     * @returns {json} Response consists of sample csv file information
     */
 
-   static bulkEntityMappingSampleCsvDwonload(token) {
-    return new Promise(async (resolve, reject) => {
-        try {
+    static bulkEntityMappingSampleCsvDwonload(token) {
+        return new Promise(async (resolve, reject) => {
+            try {
 
-          
-           let fileInfo = {
-            sourcePath: constants.common.SAMPLE_ENTITY_MAPPING_CSV,
-            bucket:process.env.STORAGE_BUCKET,
-            cloudStorage:process.env.CLOUD_STORAGE,
-           }
 
-            let response = await kendrService.getDownloadableUrls(fileInfo, token);
+                let fileInfo = {
+                    sourcePath: constants.common.SAMPLE_ENTITY_MAPPING_CSV,
+                    bucket: process.env.STORAGE_BUCKET,
+                    cloudStorage: process.env.CLOUD_STORAGE,
+                }
 
-            resolve(response);
-        } catch (error) {
-            console.log("error", error);
-            return reject(error);
-        }
-    })
-}
+                let response = await kendrService.getDownloadableUrls(fileInfo, token);
 
-    
-
+                resolve(response);
+            } catch (error) {
+                console.log("error", error);
+                return reject(error);
+            }
+        })
+    }
 
     /**
     * to get state list.
@@ -788,52 +790,49 @@ module.exports = class entitiesHelper {
     * @returns {json} Response consists state list
     */
 
-   static stateList() {
-    return new Promise(async (resolve, reject) => {
-        try {
+    static stateList() {
+        return new Promise(async (resolve, reject) => {
+            try {
 
-            let stateInfo = await database.models.entities.find(
-                {
-                    entityType: constants.common.STATE_ENTITY_TYPE
-                },
-                {
-                    entityTypeId: 1,
-                    _id: 1,
-                    metaInformation: 1,
-                    groups: 1,
-                    childHierarchyPath: 1
+                let stateInfo = await database.models.entities.find(
+                    {
+                        entityType: constants.common.STATE_ENTITY_TYPE
+                    },
+                    {
+                        entityTypeId: 1,
+                        _id: 1,
+                        metaInformation: 1,
+                        groups: 1,
+                        childHierarchyPath: 1
+                    }
+                ).lean();
+
+                if (!stateInfo) {
+                    reject({
+                        message: constants.apiResponses.STATES_NOT_FOUND,
+                        status: httpStatusCode.bad_request.status
+                    });
                 }
-            ).lean();
+                let states = [];
+                await Promise.all(stateInfo.map(async function (state) {
+                    states.push({
+                        label: state.metaInformation.name,
+                        value: state._id
+                    });
+                }));
 
-            if(!stateInfo){
-                reject({ 
-                    message:constants.apiResponses.STATES_NOT_FOUND, 
-                    status: httpStatusCode.bad_request.status
-                });
+                if (states) {
+                    states = states.sort(gen.utils.sortArrayOfObjects('label'));
+                }
+
+
+                resolve({ message: constants.apiResponses.STATE_LIST_FETCHED, result: states });
+
+            } catch (error) {
+                return reject(error);
             }
-            let states = [];
-            await Promise.all(stateInfo.map(async function (state) {
-                states.push({
-                    label: state.metaInformation.name,
-                    value: state._id
-                });
-            }));
-
-            if (states) {
-                states = states.sort(gen.utils.sortArrayOfObjects('label'));
-            }
-
-            
-            resolve({ message:constants.apiResponses.STATE_LIST_FETCHED,result:states });
-
-        } catch (error) {
-            return reject(error);
-        }
-    })
-}
-
-
-
+        })
+    }
 
 }
 

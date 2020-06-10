@@ -18,6 +18,8 @@ const request = require('request');
   * Get platform user roles
   * @function
   * @name platformUserProfile
+  * @param userId - user id of keyclock
+  * @param token - logged in user token
   * @returns {Json} returns a platform user profile info.
 */
 
@@ -25,7 +27,7 @@ const platformUserProfile = function (userId, token) {
     return new Promise(async (resolve, reject) => {
         try {
             let platformUserRolesUrl =
-            urlPrefix + constants.endpoints.PLATFORM_USER_PROFILE + "/" + userId;
+                urlPrefix + constants.endpoints.PLATFORM_USER_PROFILE + "/" + userId;
 
             const _userManagementCallBack = function (err, response) {
                 if (err) {
@@ -53,25 +55,27 @@ const platformUserProfile = function (userId, token) {
 }
 
 /**
-  * post create PlatForm User 
+  * To create platForm User 
   * @function
   * @name createPlatFormUser
+  * @param userDetails - user details 
+  * @param token - logged in user token  
   * @returns {json} returns created user details
 */
 
-const createPlatFormUser = function (requestBody, token) {
+const createPlatFormUser = function (userDetails, token) {
     return new Promise(async (resolve, reject) => {
         try {
 
             let platformUserRolesUrl =
-        urlPrefix + constants.endpoints.PLATFORM_USER_CREATE;
+                urlPrefix + constants.endpoints.PLATFORM_USER_CREATE;
             let options = {
                 "headers": {
                     "content-type": "application/json",
                     "authorization": process.env.AUTHORIZATION,
                     "x-authenticated-user-token": token,
                 },
-                json: requestBody
+                json: userDetails
             };
 
             request.post(platformUserRolesUrl, options, callback);
@@ -96,22 +100,24 @@ const createPlatFormUser = function (requestBody, token) {
   * to update PlatForm User data
   * @function
   * @name updatePlatFormUser
+  * @param userInfo - user details
+  * @param token - logged in user token
   * @returns {Json} returns user details
 */
 
-const updatePlatFormUser = function (requestBody, token) {
+const updatePlatFormUser = function (userInfo, token) {
     return new Promise(async (resolve, reject) => {
         try {
 
             let platformUserUpdateUrl =
-        urlPrefix + constants.endpoints.PLATFORM_USER_UPDATE;
+                urlPrefix + constants.endpoints.PLATFORM_USER_UPDATE;
             let options = {
                 "headers": {
                     "content-type": "application/json",
                     "authorization": process.env.AUTHORIZATION,
                     "x-authenticated-user-token": token,
                 },
-                json: requestBody
+                json: userInfo
             };
 
             request.post(platformUserUpdateUrl, options, callback);
@@ -136,6 +142,8 @@ const updatePlatFormUser = function (requestBody, token) {
   * To activate the user
   * @function
   * @name activateUser
+  * @param userId - keyclock user id
+  * @param token - logged in user token
   * @returns {json} consists of response from the actiavte api
 */
 
@@ -144,7 +152,7 @@ const activateUser = function (userId, token) {
         try {
 
             let platformUserStatusUpdateUrl =
-        urlPrefix + constants.endpoints.ACTIVE_USER;
+                urlPrefix + constants.endpoints.ACTIVE_USER;
 
             let options = {
                 "headers": {
@@ -177,6 +185,8 @@ const activateUser = function (userId, token) {
   * To deactivate the user
   * @function
   * @name inActivateUser
+  * @param userId - keyclock user id
+  * @param token - logged in user token
   * @returns consists of response from the deactiavte api
 */
 
@@ -185,7 +195,7 @@ const inActivateUser = function (userId, token) {
         try {
 
             let platformUserStatusUpdateUrl =
-        urlPrefix + constants.endpoints.INACTIVE_USER;
+                urlPrefix + constants.endpoints.INACTIVE_USER;
 
             let options = {
                 "headers": {
@@ -216,10 +226,12 @@ const inActivateUser = function (userId, token) {
 
 
 /**
-  * to get user details from user-management service
+  * To get user details for user
   * @function
   * @name userDetails
-  * @returns {Promise} returns a promise.
+  * @param userId - user id.
+  * @param token - Logged in user token.
+  * @returns {Json} returns a user details.
 */
 
 const userDetails = function (userId, token) {
@@ -262,5 +274,5 @@ module.exports = {
     updatePlatFormUser: updatePlatFormUser,
     userDetails: userDetails,
     activateUser: activateUser,
-    inActivateUser:inActivateUser
+    inActivateUser: inActivateUser
 };
