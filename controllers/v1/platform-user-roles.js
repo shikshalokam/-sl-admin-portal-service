@@ -68,14 +68,12 @@ module.exports = class PlatformUserRoles extends Abstract {
 
   getProfile(req) {
     return new Promise(async (resolve, reject) => {
-
       try {
 
         let getUserProfile = await platformUserRolesHelper.getProfile(
           (req.params._id && req.params._id != "") ? req.params._id : req.userDetails.userId,
           req.userDetails.userToken
         );
-
         return resolve(getUserProfile);
 
       } catch(error) {

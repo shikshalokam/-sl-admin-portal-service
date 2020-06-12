@@ -9,11 +9,11 @@ const userExtensionHelper = require(MODULES_BASE_PATH + "/user-extension/helper.
 const csvFileStream = require(ROOT_PATH + "/generics/file-stream");
 
 /**
-    * userExtension
+    * UserExtension
     * @class
 */
 
-module.exports = class userExtension extends Abstract {
+module.exports = class UserExtension extends Abstract {
 
   /**
     * @apiDefine errorBody
@@ -129,7 +129,6 @@ module.exports = class userExtension extends Abstract {
 
   getForm(req) {
     return new Promise(async (resolve, reject) => {
-
       try {
 
         let getUserForm =
@@ -138,7 +137,6 @@ module.exports = class userExtension extends Abstract {
             req.userDetails.userToken,
 
           );
-
         return resolve(getUserForm);
 
       } catch (error) {
@@ -208,7 +206,6 @@ module.exports = class userExtension extends Abstract {
 
   create(req) {
     return new Promise(async (resolve, reject) => {
-
       try {
 
         let getUserForm =
@@ -216,7 +213,6 @@ module.exports = class userExtension extends Abstract {
             req.body,
             req.userDetails.userToken
           );
-
         return resolve(getUserForm);
 
       } catch (error) {
@@ -258,7 +254,6 @@ module.exports = class userExtension extends Abstract {
 
   update(req) {
     return new Promise(async (resolve, reject) => {
-
       try {
 
         let getUserForm =
@@ -266,7 +261,6 @@ module.exports = class userExtension extends Abstract {
             req.body,
             req.userDetails.userToken
           );
-
         return resolve(getUserForm);
 
       } catch (error) {
@@ -314,8 +308,8 @@ module.exports = class userExtension extends Abstract {
   */
   activateUser(req) {
     return new Promise(async (resolve, reject) => {
-
       try {
+
         let updateUserData =
           await userExtensionHelper.activateUser(req.params._id,
             req.userDetails.userToken
@@ -367,8 +361,8 @@ module.exports = class userExtension extends Abstract {
   */
  inActivateUser(req) {
   return new Promise(async (resolve, reject) => {
-
     try {
+
       let updateUserData =
         await userExtensionHelper.inActivateUser(req.params._id,
           req.userDetails.userToken
@@ -460,7 +454,6 @@ module.exports = class userExtension extends Abstract {
 
   details(req) {
     return new Promise(async (resolve, reject) => {
-
       try {
 
         let userDetails =

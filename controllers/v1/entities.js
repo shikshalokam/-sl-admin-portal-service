@@ -124,9 +124,7 @@ module.exports = class Entities extends Abstract {
    */
 
   listByEntityType(req) {
-
     return new Promise(async (resolve, reject) => {
-
       try {
 
         let requestedData = {
@@ -138,7 +136,6 @@ module.exports = class Entities extends Abstract {
         let entityDocuments = await entitiesHelper.listByEntityType(
           requestedData
         );
-
         return resolve(entityDocuments);
 
       } catch (error) {
@@ -150,8 +147,6 @@ module.exports = class Entities extends Abstract {
         })
 
       }
-
-
     })
   }
 
@@ -194,7 +189,6 @@ module.exports = class Entities extends Abstract {
    */
 
   subEntityList(req) {
-
     return new Promise(async (resolve, reject) => {
 
       if (!(req.params._id || req.body.entities)) {
@@ -205,7 +199,6 @@ module.exports = class Entities extends Abstract {
       }
 
       try {
-
         let entityDocuments = await entitiesHelper.subEntityList(
           req.body.entities ? req.body.entities : "",
           req.params._id ? req.params._id : "",
@@ -214,7 +207,6 @@ module.exports = class Entities extends Abstract {
           req.pageSize,
           req.pageNo
         );
-
         return resolve(entityDocuments);
 
       } catch (error) {
@@ -369,11 +361,9 @@ module.exports = class Entities extends Abstract {
 
   relatedEntities(req) {
     return new Promise(async (resolve, reject) => {
-
       try {
 
         let result = await entitiesHelper.relatedEntities(req.params._id);
-
         return resolve(result);
 
       } catch (error) {
@@ -499,11 +489,9 @@ module.exports = class Entities extends Abstract {
 
   stateCreateForm(req) {
     return new Promise(async (resolve, reject) => {
-
       try {
 
         let result = await entitiesHelper.stateCreateForm();
-
         return resolve(result);
 
       } catch (error) {
@@ -543,9 +531,7 @@ module.exports = class Entities extends Abstract {
 
   createStateEntity(req) {
     return new Promise(async (resolve, reject) => {
-
       try {
-
 
         let result = await entitiesHelper.createStateEntity(req.body);
         return resolve(result);
@@ -716,7 +702,7 @@ module.exports = class Entities extends Abstract {
           status:
             error.status ||
             httpStatusCode["internal_server_error"].status,
-
+            
           message:
             error.message ||
             httpStatusCode["internal_server_error"].message

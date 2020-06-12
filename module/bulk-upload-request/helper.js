@@ -85,7 +85,7 @@ module.exports = class UserCreationHelper {
                         if (validateUser == false) {
                             reject({
                                 status: httpStatusCode["bad_request"].status,
-                                message: "Validation failed"
+                                message: constants.apiResponses.VALIDATION_FAILED
                             })
                         }
 

@@ -178,6 +178,7 @@ module.exports = class Organisations extends Abstract {
   downloadUsers(req) {
     return new Promise(async (resolve, reject) => {
       try {
+        
         let csvData = await organisationsHelper.downloadUsers(
           req.body,
           req.userDetails.userToken,
@@ -264,7 +265,6 @@ module.exports = class Organisations extends Abstract {
           roles: req.body.roles,
           organisation:req.body.organisation
         }
-
         let response = await organisationsHelper.addUser(orgDetails, req.userDetails.userToken);
         return resolve(response);
 
@@ -330,8 +330,6 @@ module.exports = class Organisations extends Abstract {
           roles: req.body.roles,
           removeRoles:req.body.removeRoles ? req.body.removeRoles : false
         }
-
-        
         let response = await organisationsHelper.assignRoles(orgDetails, req.userDetails.userToken);
         return resolve(response);
 
@@ -403,7 +401,6 @@ module.exports = class Organisations extends Abstract {
         searchText:req.searchText,
         status:req.query.status ? req.query.status : "" 
       }
-    
         let response = await organisationsHelper.detailList(query);
         return resolve(response);
 
@@ -540,6 +537,7 @@ module.exports = class Organisations extends Abstract {
       return resolve(response);
 
     } catch (error) {
+
       return reject({
         status:
           error.status ||
@@ -548,6 +546,7 @@ module.exports = class Organisations extends Abstract {
           error.message ||
           httpStatusCode["internal_server_error"].message
       });
+
     }
   });
 }
