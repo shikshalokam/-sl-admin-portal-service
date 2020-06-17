@@ -5,19 +5,18 @@
  * Description : platform Roles information. 
  */
 
- 
-  /**
-     * PlatformRolesExt
-     * @class
- */
+
+/**
+   * PlatformRolesExt
+   * @class
+*/
 module.exports = class PlatformRolesExt extends Abstract {
-    constructor() {
-      super(schemas["platformRolesExt"]);
-    }
-  
-    static get name() {
-      return "platformRolesExt";
-    }
-  
-  };
-  
+  constructor() {
+    super(schemas["platformRolesExt"]);
+  }
+
+  static get name() {
+    return "platformRolesExt";
+  }
+
+};

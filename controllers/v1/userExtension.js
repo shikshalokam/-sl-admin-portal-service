@@ -5,7 +5,7 @@
  * Description : User creation and related information.
  */
 
-const userExtensionHelper = require(MODULES_BASE_PATH + "/user-extension/helper.js");
+const userExtensionHelper = require(MODULES_BASE_PATH + "/userExtension/helper.js");
 const csvFileStream = require(ROOT_PATH + "/generics/file-stream");
 
 /**
@@ -41,10 +41,10 @@ module.exports = class UserExtension extends Abstract {
 * @apiError {String} status 4XX,5XX
 * @apiError {String} message Error
 */ /**
-    * @apiDefine successBody
-    * @apiSuccess {String} status 200
-    * @apiSuccess {String} result Data
-    */
+      * @apiDefine successBody
+      * @apiSuccess {String} status 200
+      * @apiSuccess {String} result Data
+      */
 
   /**
     * @api {get} /admin-service/api/v1/userExtension/getForm/:userId 
@@ -279,12 +279,12 @@ module.exports = class UserExtension extends Abstract {
   }
 
   /**
-  * @api {get} /admin-service/api/v1/userExtension/activateUser/:userid
+  * @api {get} /admin-service/api/v1/userExtension/activate/:userid
   * To activate the user 
   * @apiVersion 1.0.0
   * @apiGroup User Creation
   * @apiHeader {String} X-authenticated-user-token Authenticity token
-  * @apiSampleRequest /admin-service/api/v1/userExtension/activateUser/a082787f-8f8f-42f2-a706-35457ca6f1fd
+  * @apiSampleRequest /admin-service/api/v1/userExtension/activate/a082787f-8f8f-42f2-a706-35457ca6f1fd
   * @apiUse successBody
   * @apiUse errorBodyuser
   * @apiParamExample {json} Response:
@@ -302,16 +302,16 @@ module.exports = class UserExtension extends Abstract {
   /**
    * To activate the user 
    * @method
-   * @name activateUser
+   * @name activate
    * @param  {req}  - requested data.
    * @returns {json} Response consists activate details
   */
-  activateUser(req) {
+  activate(req) {
     return new Promise(async (resolve, reject) => {
       try {
 
         let updateUserData =
-          await userExtensionHelper.activateUser(req.params._id,
+          await userExtensionHelper.activate(req.params._id,
             req.userDetails.userToken
           );
         return resolve(updateUserData);
@@ -331,57 +331,57 @@ module.exports = class UserExtension extends Abstract {
   }
 
 
-    /**
-  * @api {get} /admin-service/api/v1/userExtension/inActivateUser/:userid
-  * To inActivate the user 
-  * @apiVersion 1.0.0
-  * @apiGroup User Creation
-  * @apiHeader {String} X-authenticated-user-token Authenticity token
-  * @apiSampleRequest /admin-service/api/v1/userExtension/inActivateUser/a082787f-8f8f-42f2-a706-35457ca6f1fd
-  * @apiUse successBody
-  * @apiUse errorBodyuser
-  * @apiParamExample {json} Response:
-  * 
-  * {
-  *  "message": "User activated successfully",
-  *  "status": 200,
-  *  "result": {
-  *     "response": "SUCCESS"
-  *  }
-  * }
-  * 
- */
+  /**
+* @api {get} /admin-service/api/v1/userExtension/inactivate/:userid
+* To inActivate the user 
+* @apiVersion 1.0.0
+* @apiGroup User Creation
+* @apiHeader {String} X-authenticated-user-token Authenticity token
+* @apiSampleRequest /admin-service/api/v1/userExtension/inactivate/a082787f-8f8f-42f2-a706-35457ca6f1fd
+* @apiUse successBody
+* @apiUse errorBodyuser
+* @apiParamExample {json} Response:
+* 
+* {
+*  "message": "User activated successfully",
+*  "status": 200,
+*  "result": {
+*     "response": "SUCCESS"
+*  }
+* }
+* 
+*/
 
   /**
    * To inActivate the user 
    * @method
-   * @name inActivateUser
+   * @name inactivate
    * @param  {req}  - requested data.
    * @returns {json} Response consists in-activate details
   */
- inActivateUser(req) {
-  return new Promise(async (resolve, reject) => {
-    try {
+  inactivate(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
 
-      let updateUserData =
-        await userExtensionHelper.inActivateUser(req.params._id,
-          req.userDetails.userToken
-        );
-      return resolve(updateUserData);
+        let updateUserData =
+          await userExtensionHelper.inactivate(req.params._id,
+            req.userDetails.userToken
+          );
+        return resolve(updateUserData);
 
-    } catch (error) {
-      return reject({
-        status:
-          error.status ||
-          httpStatusCode["internal_server_error"].status,
+      } catch (error) {
+        return reject({
+          status:
+            error.status ||
+            httpStatusCode["internal_server_error"].status,
 
-        message:
-          error.message ||
-          httpStatusCode["internal_server_error"].message
-      });
-    }
-  });
-}
+          message:
+            error.message ||
+            httpStatusCode["internal_server_error"].message
+        });
+      }
+    });
+  }
 
 
   /**
@@ -499,29 +499,26 @@ module.exports = class UserExtension extends Abstract {
    * @returns {json} Response consists of created user details
   */
 
- bulkUserSampleCsvDwonload(req) {
-  return new Promise(async (resolve, reject) => {
-    try {
+  bulkUserSampleCsvDwonload(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
 
-      let sampleCsvFile = await userExtensionHelper.bulkUserSampleCsvDwonload(req.userDetails.userToken);
-      return resolve(sampleCsvFile);
-     
-    } catch (error) {
+        let sampleCsvFile = await userExtensionHelper.bulkUserSampleCsvDwonload(req.userDetails.userToken);
+        return resolve(sampleCsvFile);
 
-      return reject({
-        status:
-          error.status ||
-          httpStatusCode["internal_server_error"].status,
+      } catch (error) {
 
-        message:
-          error.message ||
-          httpStatusCode["internal_server_error"].message
-      });
-    }
-  });
-}
+        return reject({
+          status:
+            error.status ||
+            httpStatusCode["internal_server_error"].status,
 
-  
-
+          message:
+            error.message ||
+            httpStatusCode["internal_server_error"].message
+        });
+      }
+    });
+  }
 
 };

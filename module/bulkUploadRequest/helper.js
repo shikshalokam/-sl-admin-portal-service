@@ -1,11 +1,11 @@
 /**
- * name : bulk-upload-request/helper.js
+ * name : bulkUploadRequest/helper.js
  * author : Rakesh Kumar
  * Date : 18-March-2020
  * Description : Consist of bulk upload request information.
  */
 
-let sunBirdService =
+let sunbirdService =
     require(ROOT_PATH + "/generics/services/sunbird");
 let kendrService =
     require(ROOT_PATH + "/generics/services/kendra-service");
@@ -513,7 +513,7 @@ function _checkAccess(token, userId) {
     return new Promise(async (resolve, reject) => {
         try {
             let profileInfo =
-                await sunBirdService.getUserProfileInfo(token, userId);
+                await sunbirdService.getUserProfileInfo(token, userId);
 
             let response;
             let profileData = JSON.parse(profileInfo);

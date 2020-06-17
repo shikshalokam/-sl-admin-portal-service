@@ -63,7 +63,7 @@ function uploadFileToCloud(filePath, uploadPath, bucketName, token, endpoint) {
 }
 
 /**
- * to downloadable Urls
+ * To downloadable Urls for cloud files 
  * @name getDownloadableUrls
  * @param {Json} inputData - cloud storage details
  * @param {String} token - logged in user token

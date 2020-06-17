@@ -5,7 +5,7 @@
  * Description : All platform organisation related information.
  */
 
-let sunBirdService =
+let sunbirdService =
     require(ROOT_PATH + "/generics/services/sunbird");
 
 let formsHelper = require(MODULES_BASE_PATH + "/forms/helper");
@@ -46,7 +46,7 @@ module.exports = class OrganisationsHelper {
                             "filters": {
                             }
                         }
-                        let organisationList = await sunBirdService.searchOrganisation(request, token);
+                        let organisationList = await sunbirdService.searchOrganisation(request, token);
                         if (organisationList.responseCode == constants.common.RESPONSE_OK) {
                             if (organisationList.result && organisationList.result.response &&
                                 organisationList.result.response && organisationList.result.response.content) {
@@ -148,7 +148,7 @@ module.exports = class OrganisationsHelper {
                     }
 
                     let usersList =
-                        await sunBirdService.users(token, bodyOfRequest);
+                        await sunbirdService.users(token, bodyOfRequest);
 
                     let platformRoles =
                         await database.models.platformRolesExt.find({}, {
@@ -372,7 +372,7 @@ module.exports = class OrganisationsHelper {
                     userId: orgnaisationInfo.userId
                 }
 
-                let response = await sunBirdService.addUser(orgCreateRequest, token);
+                let response = await sunbirdService.addUser(orgCreateRequest, token);
 
                 if (response && response.responseCode == constants.common.RESPONSE_OK) {
                     if (response.result.response == constants.common.SUCCESS_RESPONSE) {
@@ -449,7 +449,7 @@ module.exports = class OrganisationsHelper {
                 }
                 orgnisationInfo.roles = plaformRoles;
 
-                let response = await sunBirdService.assignRoles(orgnisationInfo, token);
+                let response = await sunbirdService.assignRoles(orgnisationInfo, token);
                 if (response && response.responseCode == constants.common.RESPONSE_OK) {
                     if (response.result.response == constants.common.SUCCESS_RESPONSE) {
                         let userDetails = await database.models.userExtension.updateOne({
@@ -515,7 +515,7 @@ module.exports = class OrganisationsHelper {
                         }
 
                         let organisationInfo = [];
-                        let organisationList = await sunBirdService.searchOrganisation(request, inputData.userToken);
+                        let organisationList = await sunbirdService.searchOrganisation(request, inputData.userToken);
                         if (organisationList.responseCode == constants.common.RESPONSE_OK) {
                             if (organisationList.result && organisationList.result.response &&
                                 organisationList.result.response && organisationList.result.response.content) {
@@ -619,7 +619,7 @@ module.exports = class OrganisationsHelper {
                     // "license": "string",
                     // "isSSOEnabled": true,
                 }
-                let createOrg = await sunBirdService.createOrganisation(requestBody, token);
+                let createOrg = await sunbirdService.createOrganisation(requestBody, token);
                 if (createOrg && createOrg.responseCode == constants.common.RESPONSE_OK) {
                     resolve({ result: createOrg.result, message: constants.apiResponses.ORG_CREATED });
                 } else {
@@ -692,7 +692,7 @@ module.exports = class OrganisationsHelper {
                     requestBody['provider'] = process.env.SUNBIRD_PROVIDER;
                 }
 
-                let updateOrg = await sunBirdService.updateOrganisationDetails(requestBody, token);
+                let updateOrg = await sunbirdService.updateOrganisationDetails(requestBody, token);
                 if (updateOrg && updateOrg.responseCode == constants.common.RESPONSE_OK) {
                     resolve({ result: updateOrg.result, message: constants.apiResponses.ORG_UPDATED });
                 } else {
@@ -717,7 +717,7 @@ module.exports = class OrganisationsHelper {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let orgDetails = await sunBirdService.getOrganisationDetails({ organisationId: organisationId }, token);
+                let orgDetails = await sunbirdService.getOrganisationDetails({ organisationId: organisationId }, token);
                 if (orgDetails && orgDetails.responseCode == constants.common.RESPONSE_OK) {
                     let response = orgDetails.result.response;
                     let address = "";
@@ -765,7 +765,7 @@ module.exports = class OrganisationsHelper {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let updateOrg = await sunBirdService.updateOrgStatus(inputData, token);
+                let updateOrg = await sunbirdService.updateOrgStatus(inputData, token);
                 if (updateOrg && updateOrg.responseCode == constants.common.RESPONSE_OK) {
 
                     let msg = constants.apiResponses.ORG_ACTIVATED;
@@ -796,7 +796,7 @@ module.exports = class OrganisationsHelper {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let removeUser = await sunBirdService.removeUser(inputData, token);
+                let removeUser = await sunbirdService.removeUser(inputData, token);
                 if (removeUser && removeUser.responseCode == constants.common.RESPONSE_OK) {
 
                     if (removeUser.result.response == constants.common.SUCCESS_RESPONSE) {
@@ -845,7 +845,7 @@ function _checkUserAdminAccess(token, userId, organisationId) {
     return new Promise(async (resolve, reject) => {
         try {
             let profileInfo =
-                await sunBirdService.getUserProfileInfo(token, userId);
+                await sunbirdService.getUserProfileInfo(token, userId);
 
             let response;
 
@@ -1008,7 +1008,7 @@ function _getOrganisationDetailsById(orgId, token) {
         }
 
         // let organisationsList = [];
-        let organisationList = await sunBirdService.searchOrganisation(request, token);
+        let organisationList = await sunbirdService.searchOrganisation(request, token);
         if (organisationList.responseCode == constants.common.RESPONSE_OK) {
             if (organisationList.result && organisationList.result.response &&
                 organisationList.result.response && organisationList.result.response.content) {
@@ -1033,7 +1033,7 @@ function _getProfileData(token, userId) {
     return new Promise(async (resolve, reject) => {
         try {
             let profileInfo =
-                await sunBirdService.getUserProfileInfo(token, userId);
+                await sunbirdService.getUserProfileInfo(token, userId);
 
             let profileData = JSON.parse(profileInfo);
             return resolve(profileData);

@@ -5,7 +5,7 @@
  * Description : bulk upload operations 
  */
 
-const bulkUploadHelper = require(MODULES_BASE_PATH + "/bulk-upload-request/helper.js");
+const bulkUploadHelper = require(MODULES_BASE_PATH + "/bulkUploadRequest/helper.js");
 
 /**
    * BulkUploadRequest
@@ -27,7 +27,7 @@ module.exports = class BulkUploadRequest extends Abstract {
   * @apiGroup Bulk Upload
   * @apiHeader {String} X-authenticated-user-token Authenticity token
   * @apiSampleRequest /admin-service/api/v1/bulkUploadRequest/bulkUpload
-  * @apiParam {File} users list file of type CSV. 
+  * @apiParam {File} uploadFile users list file of type CSV. 
   * @apiUse successBody
   * @apiUse errorBody
   * @apiParamExample {json} Response:
@@ -48,7 +48,7 @@ module.exports = class BulkUploadRequest extends Abstract {
   bulkUpload(req) {
     return new Promise(async (resolve, reject) => {
       try {
-        if (!req.files || !req.files.uploadFile ) {
+        if (!req.files || !req.files.uploadFile) {
           throw {
             status: httpStatusCode["bad_request"].status,
             message: httpStatusCode["bad_request"].message
@@ -173,7 +173,7 @@ module.exports = class BulkUploadRequest extends Abstract {
           req.searchText,
           req.pageSize,
           req.pageNo,
-          req.userDetails.userToken, 
+          req.userDetails.userToken,
           req.query.status,
           req.query.requestType
         );
@@ -195,7 +195,7 @@ module.exports = class BulkUploadRequest extends Abstract {
   }
 
   /**
-   * @api {get} /admin-service/api/v1/bulkUploadRequest/getDownloadableUrls 
+   * @api {get} /admin-service/api/v1/bulkUploadRequest/getDownloadableUrls/_id
    * Get downloadable url of bulk csv files
    * @apiVersion 1.0.0
    * @apiGroup Bulk Upload
@@ -226,8 +226,6 @@ module.exports = class BulkUploadRequest extends Abstract {
     return new Promise(async (resolve, reject) => {
       try {
 
-        console.log("req.body", req.params._id);
-
         let response = await bulkUploadHelper.getDownloadableUrls(req.userDetails.userToken, req.params._id, req.query.fileType);
         return resolve(response);
 
@@ -247,33 +245,33 @@ module.exports = class BulkUploadRequest extends Abstract {
   }
 
 
-   /**
-   * @api {get} /admin-service/api/v1/bulkUploadRequest/getStatus 
-   * Get all status of bulk upload
-   * @apiVersion 1.0.0
-   * @apiGroup Bulk Upload
-   * @apiHeader {String} X-authenticated-user-token Authenticity token
-   * @apiSampleRequest /admin-service/api/v1/bulkUploadRequest/getStatus
-   * @apiUse successBody
-   * @apiUse errorBodyuser
-   * @apiParamExample {json} Response:
-   {
-    "message": "Status list featched successfully",
-    "status": 200,
-    "result": [
-        {
-            "label": "All",
-            "value": "all"
-        },
-        {
-            "label": "Completed",
-            "value": "completed"
-        },
-        {
-            "label": "Proccessing",
-            "value": "proccessing"
-        }
-    ]
+  /**
+  * @api {get} /admin-service/api/v1/bulkUploadRequest/getStatus 
+  * Get all status of bulk upload
+  * @apiVersion 1.0.0
+  * @apiGroup Bulk Upload
+  * @apiHeader {String} X-authenticated-user-token Authenticity token
+  * @apiSampleRequest /admin-service/api/v1/bulkUploadRequest/getStatus
+  * @apiUse successBody
+  * @apiUse errorBodyuser
+  * @apiParamExample {json} Response:
+  {
+   "message": "Status list featched successfully",
+   "status": 200,
+   "result": [
+       {
+           "label": "All",
+           "value": "all"
+       },
+       {
+           "label": "Completed",
+           "value": "completed"
+       },
+       {
+           "label": "Proccessing",
+           "value": "proccessing"
+       }
+   ]
 }
 **/
 
@@ -285,27 +283,27 @@ module.exports = class BulkUploadRequest extends Abstract {
    * @returns {json} Response consists of status list
   */
 
- getStatus(req) {
-  return new Promise(async (resolve, reject) => {
-    try {
+  getStatus(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
 
-      let response = await bulkUploadHelper.getStatus();
-      return resolve(response);
+        let response = await bulkUploadHelper.getStatus();
+        return resolve(response);
 
-    } catch (error) {
+      } catch (error) {
 
-      return reject({
-        status:
-          error.status ||
-          httpStatusCode["internal_server_error"].status,
+        return reject({
+          status:
+            error.status ||
+            httpStatusCode["internal_server_error"].status,
 
-        message:
-          error.message ||
-          httpStatusCode["internal_server_error"].message
-      });
-    }
-  });
-}
+          message:
+            error.message ||
+            httpStatusCode["internal_server_error"].message
+        });
+      }
+    });
+  }
 
 
   /**
@@ -350,26 +348,26 @@ module.exports = class BulkUploadRequest extends Abstract {
    * @returns {json} Response consists of request types 
   */
 
- getTypes(req) {
-  return new Promise(async (resolve, reject) => {
-    try {
+  getTypes(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
 
-      let response = await bulkUploadHelper.getTypes();
-      return resolve(response);
+        let response = await bulkUploadHelper.getTypes();
+        return resolve(response);
 
-    } catch (error) {
+      } catch (error) {
 
-      return reject({
-        status:
-          error.status ||
-          httpStatusCode["internal_server_error"].status,
+        return reject({
+          status:
+            error.status ||
+            httpStatusCode["internal_server_error"].status,
 
-        message:
-          error.message ||
-          httpStatusCode["internal_server_error"].message
-      });
-    }
-  });
-}
+          message:
+            error.message ||
+            httpStatusCode["internal_server_error"].message
+        });
+      }
+    });
+  }
 
 };

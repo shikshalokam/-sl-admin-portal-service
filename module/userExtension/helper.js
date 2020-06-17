@@ -10,7 +10,7 @@ let formsHelper = require(MODULES_BASE_PATH + "/forms/helper");
 let userManagementService =
     require(ROOT_PATH + "/generics/services/user-management");
 
-let sunBirdService =
+let sunbirdService =
     require(ROOT_PATH + "/generics/services/sunbird");
 
 let kendrService =
@@ -93,7 +93,7 @@ module.exports = class UserCreationHelper {
 
 
                 let profileInfo =
-                    await sunBirdService.getUserProfileInfo(token, userId);
+                    await sunbirdService.getUserProfileInfo(token, userId);
 
                 let organisations = [];
 
@@ -270,17 +270,17 @@ module.exports = class UserCreationHelper {
     /**
    * To activate the user.
    * @method
-   * @name  activateUser
+   * @name  activate
    * @param  {userId}  - userId
    * @param  {userToken}  - user access token
    * @returns {json} Response consists of updated user details.
    */
 
-    static activateUser(userId, userToken) {
+    static activate(userId, userToken) {
         return new Promise(async (resolve, reject) => {
             try {
                 let statusUpdateUserInfo =
-                    await userManagementService.activateUser(
+                    await userManagementService.activate(
                         userId,
                         userToken
                     );
@@ -294,17 +294,17 @@ module.exports = class UserCreationHelper {
     /**
    * To in-activate the user.
    * @method
-   * @name  inActivateUser
+   * @name  inactivate
    * @param  {userId}  - userId
    * @param  {userToken}  - user access token
    * @returns {json} Response consists of updated user details.
    */
 
-    static inActivateUser(userId, userToken) {
+    static inactivate(userId, userToken) {
         return new Promise(async (resolve, reject) => {
             try {
                 let statusUpdateUserInfo =
-                    await userManagementService.inActivateUser(
+                    await userManagementService.inactivate(
                         userId,
                         userToken
                     );
@@ -330,7 +330,7 @@ module.exports = class UserCreationHelper {
             try {
 
                 let profileData =
-                    await sunBirdService.getUserProfileInfo(userToken, userId);
+                    await sunbirdService.getUserProfileInfo(userToken, userId);
                 profileData = JSON.parse(profileData);
                 let userCustomeRole = await database.models.userExtension.findOne({ userId: orgAdminUserId }, { roles: 1 });
                 if (profileData.responseCode == constants.common.RESPONSE_OK) {
@@ -338,7 +338,7 @@ module.exports = class UserCreationHelper {
                     let orgInfo = [];
                     let organisationsList = await _getOrganisationlist(profileData, orgAdminUserId, userToken);
                     let apiAccessUserData =
-                        await sunBirdService.getUserProfileInfo(userToken, orgAdminUserId);
+                        await sunbirdService.getUserProfileInfo(userToken, orgAdminUserId);
                     apiAccessUserData = JSON.parse(apiAccessUserData);
                     if (apiAccessUserData.responseCode != constants.common.RESPONSE_OK) {
                         reject({
@@ -633,17 +633,11 @@ function _getOrganisationlist(userProfileInfo, userId, token) {
             }
 
             if (profileRoles.includes(constants.common.PLATFROM_ADMIN_ROLE)) {
-
-                // let organisationsDoc = await cassandraDatabase.models.organisation.findAsync({},
-                //     { raw: true, select: ["orgname", "id"] });
-
-                // let organisationsDoc = await sunBirdService. 
-
                 let request = {
                     "filters": {
                     }
                 }
-                let organisationList = await sunBirdService.searchOrganisation(request, token);
+                let organisationList = await sunbirdService.searchOrganisation(request, token);
                 if (organisationList.responseCode == constants.common.RESPONSE_OK) {
                     if (organisationList.result && organisationList.result.response &&
                         organisationList.result.response && organisationList.result.response.content) {
@@ -694,7 +688,7 @@ function _getOrganisationlist(userProfileInfo, userId, token) {
                                     id: organisation.organisationId
                                 }
                             }
-                            let organisationList = await sunBirdService.searchOrganisation(request, token);
+                            let organisationList = await sunbirdService.searchOrganisation(request, token);
                             if (organisationList.responseCode == constants.common.RESPONSE_OK) {
                                 if (organisationList.result && organisationList.result.response &&
                                     organisationList.result.response && organisationList.result.response.content) {

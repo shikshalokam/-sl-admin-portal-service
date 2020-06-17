@@ -21,7 +21,7 @@ const organisationList = async function (token) {
     return new Promise(async (resolve, reject) => {
 
         const createUserUrl =
-        process.env.sunbird_url + constants.endpoints.SUNBIRD_ORGANISATION_LIST;
+            process.env.sunbird_url + constants.endpoints.SUNBIRD_ORGANISATION_LIST;
 
         let options = {
             "headers": {
@@ -56,10 +56,10 @@ const organisationList = async function (token) {
 
 const getUserProfileInfo = function (token, userId) {
     return new Promise(async (resolve, reject) => {
-        
+
         const createUserUrl =
-        process.env.sunbird_url + constants.endpoints.SUNBIRD_USER_READ + "/" 
-        + userId + "?fields=completeness,missingFields,lastLoginTime";
+            process.env.sunbird_url + constants.endpoints.SUNBIRD_USER_READ + "/"
+            + userId + "?fields=completeness,missingFields,lastLoginTime";
         let options = {
             "headers": {
                 "content-type": "application/json",
@@ -95,7 +95,7 @@ const users = function (token, body) {
     return new Promise(async (resolve, reject) => {
 
         const userSearchAPI =
-        process.env.sunbird_url + constants.endpoints.SUNBIRD_SEARCH_USER;
+            process.env.sunbird_url + constants.endpoints.SUNBIRD_SEARCH_USER;
 
         let options = {
             "headers": {
@@ -174,7 +174,7 @@ const assignRoles = function (rolesInfo, token) {
   * @returns {JSON} - return response from the sunbird api.
 */
 
-function callToSunbird(token, requestBody, url,type ="") {
+function callToSunbird(token, requestBody, url, type = "") {
 
     return new Promise(async (resolve, reject) => {
         let options = {
@@ -187,12 +187,12 @@ function callToSunbird(token, requestBody, url,type ="") {
 
         };
 
-        if(type=="PATCH"){
-            request.patch(url, options, callback);    
-        }else{
+        if (type == "PATCH") {
+            request.patch(url, options, callback);
+        } else {
             request.post(url, options, callback);
         }
-        
+
         function callback(err, data) {
 
             if (err) {
@@ -200,7 +200,7 @@ function callToSunbird(token, requestBody, url,type ="") {
                     message: constants.apiResponses.SUNBIRD_SERVICE_DOWN
                 });
             } else {
-            
+
                 return resolve(data.body);
             }
         }
@@ -258,12 +258,12 @@ const createOrganisation = function (organisationDetails, token) {
   * @param token - Logged in user token.
   * @returns {JSON} - return updated organisation details
 */
-const updateOrganisationDetails  = function (organisationDetails, token) {
+const updateOrganisationDetails = function (organisationDetails, token) {
     return new Promise(async (resolve, reject) => {
 
         const updateOrgDetails =
             process.env.sunbird_url + constants.endpoints.SUNBIRD_UPDATE_ORG;
-        let response = await callToSunbird(token, organisationDetails, updateOrgDetails ,"PATCH");
+        let response = await callToSunbird(token, organisationDetails, updateOrgDetails, "PATCH");
         return resolve(response);
 
 
@@ -303,10 +303,8 @@ const updateOrgStatus = function (organisationDetails, token) {
 
         const OrgDetails =
             process.env.sunbird_url + constants.endpoints.SUNBIRD_ORG_STATUS_UPDATE;
-        let response = await callToSunbird(token, organisationDetails, OrgDetails,"PATCH");
+        let response = await callToSunbird(token, organisationDetails, OrgDetails, "PATCH");
         return resolve(response);
-
-
     })
 }
 
@@ -335,10 +333,10 @@ module.exports = {
     users: users,
     addUser: addUser,
     assignRoles: assignRoles,
-    searchOrganisation:searchOrganisation,
-    createOrganisation:createOrganisation,
-    updateOrganisationDetails:updateOrganisationDetails,
-    getOrganisationDetails:getOrganisationDetails,
-    updateOrgStatus:updateOrgStatus,
-    removeUser:removeUser
+    searchOrganisation: searchOrganisation,
+    createOrganisation: createOrganisation,
+    updateOrganisationDetails: updateOrganisationDetails,
+    getOrganisationDetails: getOrganisationDetails,
+    updateOrgStatus: updateOrgStatus,
+    removeUser: removeUser
 };

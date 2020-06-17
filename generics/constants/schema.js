@@ -6,12 +6,12 @@
  */
 
 module.exports = {
-    METAINFORMATION : "metaInformation",
-    EXTERNALID : "externalId",
-    NAME : "name",
-    ENTITYTYPE : "entityType",
-    GROUPS : "groups",
-    ID : "_id",
-    CREATED_AT:"createdAt",
-    CHILD_HIERARCHY_PATH:"childHierarchyPath"
+    METAINFORMATION: "metaInformation",
+    EXTERNALID: "externalId",
+    NAME: "name",
+    ENTITYTYPE: "entityType",
+    GROUPS: "groups",
+    ID: "_id",
+    CREATED_AT: "createdAt",
+    CHILD_HIERARCHY_PATH: "childHierarchyPath"
 }

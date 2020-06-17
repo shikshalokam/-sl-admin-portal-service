@@ -13,58 +13,58 @@ const platformUserRolesHelper = require(MODULES_BASE_PATH + "/platform-user-role
 */
 
 module.exports = class PlatformUserRoles extends Abstract {
-  
-   /**
-     * @apiDefine errorBody
-     * @apiError {String} status 4XX,5XX
-     * @apiError {String} message Error
-     */
 
-    /**
-     * @apiDefine successBody
-     *  @apiSuccess {String} status 200
-     * @apiSuccess {String} result Data
-     */
+  /**
+    * @apiDefine errorBody
+    * @apiError {String} status 4XX,5XX
+    * @apiError {String} message Error
+    */
 
-    constructor() {
-      super(schemas["platformUserRolesExt"]);
-    }
+  /**
+   * @apiDefine successBody
+   *  @apiSuccess {String} status 200
+   * @apiSuccess {String} result Data
+   */
+
+  constructor() {
+    super(schemas["platformUserRolesExt"]);
+  }
 
   static get name() {
     return "platform-user-roles";
   }
 
-   /**
-     * @api {post} /admin/api/v1/platform-user-roles/getProfile 
-     * Get platform user profile information.
-     * @apiVersion 1.0.0
-     * @apiGroup Email
-     * @apiHeader {String} X-authenticated-user-token Authenticity token
-     * @apiSampleRequest /admin/api/v1/platform-user-roles/getProfile
-     * @apiUse successBody
-     * @apiUse errorBody
-     * @apiParamExample {json} Response:
-     * {
-     * "message": "Platform user profile fetched successfully.",
-     * "status": 200,
-     * "result": {
-     * "_id": "5da84a7641a40f1392162b8d",
-     * "roles": [
-     * "OBS_DESIGNER",
-     * "OBS_REVIEWER"
-      ],
-      "username": "a2"
-    }
-  }
-  */
+  /**
+    * @api {post} /admin/api/v1/platform-user-roles/getProfile 
+    * Get platform user profile information.
+    * @apiVersion 1.0.0
+    * @apiGroup Email
+    * @apiHeader {String} X-authenticated-user-token Authenticity token
+    * @apiSampleRequest /admin/api/v1/platform-user-roles/getProfile
+    * @apiUse successBody
+    * @apiUse errorBody
+    * @apiParamExample {json} Response:
+    * {
+    * "message": "Platform user profile fetched successfully.",
+    * "status": 200,
+    * "result": {
+    * "_id": "5da84a7641a40f1392162b8d",
+    * "roles": [
+    * "OBS_DESIGNER",
+    * "OBS_REVIEWER"
+     ],
+     "username": "a2"
+   }
+ }
+ */
 
-   /**
-   * Get platform users information.
-   * @method
-   * @name getProfile
-   * @param  {req}  - requested data.
-   * @returns {json} Response consists of platform user roles information
-   */
+  /**
+  * Get platform users information.
+  * @method
+  * @name getProfile
+  * @param  {req}  - requested data.
+  * @returns {json} Response consists of platform user roles information
+  */
 
   getProfile(req) {
     return new Promise(async (resolve, reject) => {
@@ -76,16 +76,16 @@ module.exports = class PlatformUserRoles extends Abstract {
         );
         return resolve(getUserProfile);
 
-      } catch(error) {
-        
-        return reject({
-          status: 
-          error.status || 
-          httpStatusCode["internal_server_error"].status,
+      } catch (error) {
 
-          message: 
-          error.message || 
-          httpStatusCode["internal_server_error"].message
+        return reject({
+          status:
+            error.status ||
+            httpStatusCode["internal_server_error"].status,
+
+          message:
+            error.message ||
+            httpStatusCode["internal_server_error"].message
         });
       }
     });

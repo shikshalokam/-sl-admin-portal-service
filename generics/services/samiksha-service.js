@@ -43,7 +43,7 @@ function bulkUploadEntities(filePath, token, type) {
 }
 
 /**
- * entiies bulk mapping upload 
+ * Entiies bulk mapping upload 
  * @name entityMapping
  * @param {String} filePath filePath of the file to upload
  * @param {String} token user access token
@@ -77,7 +77,7 @@ function entityMapping(filePath, token, programId, solutionId) {
 * @name httpCall
 * @param {String} url filePath of the file to upload
 * @param {String} token user access token
-* @param {String} formData form data of the request
+* @param {Json} formData form data of the request
 * @returns {Json} - consists of api response body
 */
 function httpCall(url, token, formData) {

@@ -97,7 +97,7 @@ const createPlatFormUser = function (userDetails, token) {
 }
 
 /**
-  * to update PlatForm User data
+  * To update platForm user data
   * @function
   * @name updatePlatFormUser
   * @param userInfo - user details
@@ -141,13 +141,13 @@ const updatePlatFormUser = function (userInfo, token) {
 /**
   * To activate the user
   * @function
-  * @name activateUser
+  * @name activate
   * @param userId - keyclock user id
   * @param token - logged in user token
   * @returns {json} consists of response from the actiavte api
 */
 
-const activateUser = function (userId, token) {
+const activate = function (userId, token) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -184,13 +184,13 @@ const activateUser = function (userId, token) {
 /**
   * To deactivate the user
   * @function
-  * @name inActivateUser
+  * @name inactivate
   * @param userId - keyclock user id
   * @param token - logged in user token
   * @returns consists of response from the deactiavte api
 */
 
-const inActivateUser = function (userId, token) {
+const inactivate = function (userId, token) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -226,7 +226,7 @@ const inActivateUser = function (userId, token) {
 
 
 /**
-  * To get user details for user
+  * To get user details for a specific user
   * @function
   * @name userDetails
   * @param userId - user id.
@@ -273,6 +273,6 @@ module.exports = {
     createPlatFormUser: createPlatFormUser,
     updatePlatFormUser: updatePlatFormUser,
     userDetails: userDetails,
-    activateUser: activateUser,
-    inActivateUser: inActivateUser
+    activate: activate,
+    inactivate: inactivate
 };
