@@ -20,7 +20,7 @@ module.exports = class EntityTypesHelper {
       * @returns {Object} returns a entity types list from the filtered data.
      */
 
-    static list(queryParameter = "all", projection = {}) {
+    static list(queryParameter = "all", fieldsArray = "all" ) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -28,9 +28,15 @@ module.exports = class EntityTypesHelper {
                     queryParameter = {};
                 };
 
-                projection = {
-                    name: 1, _id: 1
+                let projection = {}
+    
+                if (fieldsArray != "all") {
+                    fieldsArray.forEach(field => {
+                        projection[field] = 1;
+                    });
                 }
+
+
 
                 let entityTypeData =
                     await database.models.entityTypes.find(queryParameter, projection).lean();

@@ -7,7 +7,7 @@
 
 //dependencies
 
-let urlPrefix =
+let apiBaseUrl =
     process.env.KENDRA_SERIVCE_HOST +
     process.env.KENDRA_SERIVCE_BASE_URL +
     process.env.URL_PREFIX;
@@ -16,7 +16,7 @@ const request = require('request');
 const fs = require('fs');
 
 /**
- * to upload file to uploadFileToCloud
+ * To upload file to cloud 
  * @name uploadFileToCloud
  * @param {String} filePath filePath of the file to upload
  * @param {String} uploadPath - location of bucket where to upload
@@ -43,7 +43,7 @@ function uploadFileToCloud(filePath, uploadPath, bucketName, token, endpoint) {
             };
 
             let apiUrl =
-                urlPrefix + endpoint;
+                apiBaseUrl + endpoint;
 
             request.post(apiUrl, options, callback);
             function callback(err, data) {
@@ -85,7 +85,7 @@ function getDownloadableUrls(inputData, token) {
                 endpoint = constants.endpoints.DOWNLOAD_AZURE_URL;
             }
             const apiUrl =
-                urlPrefix + endpoint;
+                apiBaseUrl + endpoint;
 
             let options = {
                 "headers": {

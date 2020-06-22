@@ -1,5 +1,5 @@
 module.exports = {
-    name: "bulkUploadRequest",
+    name: "bulkUploadRequests",
     schema: {
       id: "ObjectId",
       requestId:{

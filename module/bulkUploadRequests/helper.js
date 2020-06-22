@@ -27,15 +27,15 @@ module.exports = class UserCreationHelper {
 
 
     /**
-     * Bulk Upload request
+     * Bulk upload request
      * @method
-     * @name  bulkUpload
+     * @name  create
      * @param {Request} req - contains upload file
      * @param {String} userId - user id of the uploader
      * @returns {json} Response consists sample request details
      */
 
-    static bulkUpload(req, userId) {
+    static create(req, userId) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -43,7 +43,6 @@ module.exports = class UserCreationHelper {
                 if (profileData && profileData['allowed']) {
 
                     let uploadFileData = await csv().fromString(req.files.uploadFile.data.toString());
-
                     let status = "";
                     if (req.query.requestType == "entityMapping") {
 
@@ -148,10 +147,9 @@ module.exports = class UserCreationHelper {
                         metaInformation: {
                             state: req.query.state,
                             entityType: req.query.entityType
-                        },
-                        // remarks: ""
+                        }
                     }
-                    let request = await database.models.bulkUploadRequest.create(doc);
+                    let request = await database.models.bulkUploadRequests.create(doc);
 
 
                     if (req.body.requestType == "entityCreation") {
@@ -185,7 +183,7 @@ module.exports = class UserCreationHelper {
 
 
     /**
-    * to get bulk request List.
+    * To get bulk request List.
     * @method
     * @name  list
     * @param {String} userId - user id
@@ -221,8 +219,8 @@ module.exports = class UserCreationHelper {
                         }
                     }
 
-                    let count = await database.models.bulkUploadRequest.countDocuments(query);
-                    let request = await database.models.bulkUploadRequest.find(query,
+                    let count = await database.models.bulkUploadRequests.countDocuments(query);
+                    let request = await database.models.bulkUploadRequests.find(query,
                         {
                             requestId: 1,
                             requestType: 1,
@@ -290,7 +288,7 @@ module.exports = class UserCreationHelper {
                 let profileData = await _checkAccess(token, userId);
                 if (profileData && profileData['allowed']) {
 
-                    let requestDoc = await database.models.bulkUploadRequest.findOne({ requestId: requestId });
+                    let requestDoc = await database.models.bulkUploadRequests.findOne({ requestId: requestId });
                     if (requestDoc) {
                         resolve({ result: { data: { requestDoc } } });
                     } else {
@@ -310,7 +308,7 @@ module.exports = class UserCreationHelper {
     }
 
     /**
-    * to get request details.
+    * To get request details.
     * @method
     * @name  getDownloadableUrls
     * @param {String} token - user access token
@@ -324,7 +322,7 @@ module.exports = class UserCreationHelper {
             try {
 
 
-                let requestDoc = await database.models.bulkUploadRequest.findOne({ requestId: requestId })
+                let requestDoc = await database.models.bulkUploadRequests.findOne({ requestId: requestId })
 
                 if (requestDoc) {
 
@@ -354,14 +352,14 @@ module.exports = class UserCreationHelper {
     /**
     * To get all request status.
     * @method
-    * @name  getStatus
+    * @name  statusList
     * @returns {json} Response consists status list
     */
-    static getStatus() {
+    static statusList() {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let bulkRequestDocument = await database.models.bulkUploadRequest.distinct("status");
+                let bulkRequestDocument = await database.models.bulkUploadRequests.distinct("status");
 
                 let status = [];
                 if (bulkRequestDocument && bulkRequestDocument.length == 0) {
@@ -390,14 +388,14 @@ module.exports = class UserCreationHelper {
     /**
     * To get request types.
     * @method
-    * @name  getTypes
+    * @name  types
     * @returns {json} Response consists of request types
     */
-    static getTypes() {
+    static types() {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let bulkRequestDocument = await database.models.bulkUploadRequest.distinct("requestType");
+                let bulkRequestDocument = await database.models.bulkUploadRequests.distinct("requestType");
 
                 let requestTypes = [];
                 if (bulkRequestDocument && bulkRequestDocument.length == 0) {
@@ -503,7 +501,7 @@ function _bulkRequestList() {
 }
 
 /**
- * to check weather user has ORG_ADMIN or PLATFORM_ADMIN role
+ * To check weather user has ORG_ADMIN or PLATFORM_ADMIN role
  * @name _checkAccess
  * @param {*} token access token of the user
  * @param {*} userId userId
@@ -581,7 +579,7 @@ function _checkAccess(token, userId) {
 
 
 /**
- * to check weather user creation is valid or not
+ * To check weather user creation is valid or not
  * @name _validateUsers
  * @param {*} inputArray user json
  */
@@ -667,7 +665,7 @@ function _bulkUploadEntities(bulkRequestId, fileCompletePath, token, entityType,
                     cloudStorage: config.storage,
                     bucket: config.bucketName
                 }
-                let update = await database.models.bulkUploadRequest.findOneAndUpdate(
+                let update = await database.models.bulkUploadRequests.findOneAndUpdate(
                     { requestId: bulkRequestId },
                     { $set: { "successFile": successFileData, status: constants.common.BULK_UPLOAD_COMPLETE } }
                 )
@@ -675,7 +673,7 @@ function _bulkUploadEntities(bulkRequestId, fileCompletePath, token, entityType,
 
             } else {
 
-                let update = await database.models.bulkUploadRequest.findOneAndUpdate(
+                let update = await database.models.bulkUploadRequests.findOneAndUpdate(
                     { requestId: bulkRequestId },
                     { $set: { status: constants.common.BULK_UPLOAD_FAILURE } }
                 )
@@ -768,14 +766,14 @@ function _entityMapping(bulkRequestId,
                         bucket: config.bucketName
                     }
 
-                    let update = await database.models.bulkUploadRequest.findOneAndUpdate(
+                    let update = await database.models.bulkUploadRequests.findOneAndUpdate(
                         { requestId: bulkRequestId },
                         { $set: { status: constants.common.BULK_UPLOAD_COMPLETE, "successFile": successFileData } }
                     );
                     resolve(update);
                 }
             } else {
-                let update = await database.models.bulkUploadRequest.findOneAndUpdate(
+                let update = await database.models.bulkUploadRequests.findOneAndUpdate(
                     { requestId: bulkRequestId },
                     { $set: { status: constants.common.BULK_UPLOAD_FAILURE } }
                 )
@@ -788,7 +786,7 @@ function _entityMapping(bulkRequestId,
 }
 
 /**
- * to check weather entity mapping csv is valid or not
+ * To check weather entity mapping csv is valid or not
  * @name _validateEntityMapping
  * @param {*} inputArray entity mapping csv json
  */

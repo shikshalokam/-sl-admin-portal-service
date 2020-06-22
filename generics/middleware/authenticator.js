@@ -15,15 +15,15 @@ const shikshalokam = require("../helpers/shikshalokam");
 
 var reqMsg = messageUtil.REQUEST;
 var keyCloakConfig = {
-  authServerUrl: process.env.sunbird_keycloak_auth_server_url,
-  realm: process.env.sunbird_keycloak_realm,
-  clientId: process.env.sunbird_keycloak_client_id,
-  public: process.env.sunbird_keycloak_public
+  authServerUrl: process.env.SUNBIRD_KEYCLOAK_AUTH_SERVER_URL,
+  realm: process.env.SUNBIRD_KEYCLOAK_REALM,
+  clientId: process.env.SUNBIRD_KEYCLOAK_CLIENT_ID,
+  public: process.env.SUNBIRD_KEYCLOAK_PUBLIC
 };
 
 var cacheConfig = {
-  store: process.env.sunbird_cache_store,
-  ttl: process.env.sunbird_cache_ttl
+  store: process.env.SUNBIRD_CACHE_STORE,
+  ttl: process.env.SUNBIRD_CACHE_TTL
 };
 
 var respUtil = function (resp) {

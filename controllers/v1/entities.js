@@ -264,7 +264,6 @@ module.exports = class Entities extends Abstract {
 */
 
   details(req) {
-
     return new Promise(async (resolve, reject) => {
 
       try {
@@ -274,7 +273,6 @@ module.exports = class Entities extends Abstract {
         return resolve(result);
 
       } catch (error) {
-
         return reject({
           status: error.status || httpStatusCode.internal_server_error.status,
           message: error.message || httpStatusCode.internal_server_error.message,
@@ -372,11 +370,9 @@ module.exports = class Entities extends Abstract {
           status: error.status || httpStatusCode.internal_server_error.status,
           message: error.message || httpStatusCode.internal_server_error.message,
           errorObject: error
-        })
+        });
 
       }
-
-
     })
   }
 
@@ -500,7 +496,8 @@ module.exports = class Entities extends Abstract {
           status: error.status || httpStatusCode.internal_server_error.status,
           message: error.message || httpStatusCode.internal_server_error.message,
           errorObject: error
-        })
+        });
+
       }
     })
   }
@@ -542,7 +539,8 @@ module.exports = class Entities extends Abstract {
           status: error.status || httpStatusCode.internal_server_error.status,
           message: error.message || httpStatusCode.internal_server_error.message,
           errorObject: error
-        })
+        });
+
       }
     })
   }
@@ -588,11 +586,11 @@ module.exports = class Entities extends Abstract {
           status:
             error.status ||
             httpStatusCode["internal_server_error"].status,
-
           message:
             error.message ||
             httpStatusCode["internal_server_error"].message
         });
+
       }
     });
   }
@@ -632,17 +630,18 @@ module.exports = class Entities extends Abstract {
 
         let sampleCsvFile = await entitiesHelper.bulkEntityMappingSampleCsvDwonload(req.userDetails.userToken);
         return resolve(sampleCsvFile);
+
       } catch (error) {
 
         return reject({
           status:
             error.status ||
             httpStatusCode["internal_server_error"].status,
-
           message:
             error.message ||
             httpStatusCode["internal_server_error"].message
         });
+
       }
     });
   }
@@ -698,15 +697,16 @@ module.exports = class Entities extends Abstract {
         return resolve(stateList);
 
       } catch (error) {
+
         return reject({
           status:
             error.status ||
             httpStatusCode["internal_server_error"].status,
-
           message:
             error.message ||
             httpStatusCode["internal_server_error"].message
         });
+        
       }
     });
   }

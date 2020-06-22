@@ -1,32 +1,32 @@
 /**
- * name : bulkUploadRequest.js
+ * name : bulkUploadRequests.js
  * author : Rakesh Kumar
  * created-date : 13-May-2020
  * Description : bulk upload operations 
  */
 
-const bulkUploadHelper = require(MODULES_BASE_PATH + "/bulkUploadRequest/helper.js");
+const bulkUploadHelper = require(MODULES_BASE_PATH + "/bulkUploadRequests/helper.js");
 
 /**
-   * BulkUploadRequest
+   * BulkUploadRequests
    * @class
 */
-module.exports = class BulkUploadRequest extends Abstract {
+module.exports = class BulkUploadRequests extends Abstract {
   constructor() {
-    super(schemas["bulkUploadRequest"]);
+    super(schemas["bulkUploadRequests"]);
   }
 
   static get name() {
-    return "bulkUploadRequest";
+    return "bulkUploadRequests";
   }
 
   /**
-  * @api {get} /admin-service/api/v1/bulkUploadRequest/bulkUpload 
+  * @api {get} /admin-service/api/v1/bulkUploadRequests/create 
   * For bulk upload
   * @apiVersion 1.0.0
   * @apiGroup Bulk Upload
   * @apiHeader {String} X-authenticated-user-token Authenticity token
-  * @apiSampleRequest /admin-service/api/v1/bulkUploadRequest/bulkUpload
+  * @apiSampleRequest /admin-service/api/v1/bulkUploadRequests/create
   * @apiParam {File} uploadFile users list file of type CSV. 
   * @apiUse successBody
   * @apiUse errorBody
@@ -38,14 +38,14 @@ module.exports = class BulkUploadRequest extends Abstract {
   **/
 
   /**
-   * For bulk upload
+   * For bulk upload 
    * @method
-   * @name bulkUpload
+   * @name create
    * @param  {req}  - requested data.
    * @returns {json} Response consists of request details
   */
 
-  bulkUpload(req) {
+ create(req) {
     return new Promise(async (resolve, reject) => {
       try {
         if (!req.files || !req.files.uploadFile) {
@@ -54,7 +54,7 @@ module.exports = class BulkUploadRequest extends Abstract {
             message: httpStatusCode["bad_request"].message
           };
         }
-        let uploadRequest = await bulkUploadHelper.bulkUpload(req, req.userDetails.userId);
+        let uploadRequest = await bulkUploadHelper.create(req, req.userDetails.userId);
         return resolve(uploadRequest);
 
       } catch (error) {
@@ -75,12 +75,12 @@ module.exports = class BulkUploadRequest extends Abstract {
 
 
   /**
-   * @api {get} /admin-service/api/v1/bulkUploadRequest/list 
+   * @api {get} /admin-service/api/v1/bulkUploadRequests/list 
    * Bulk request list
    * @apiVersion 1.0.0
    * @apiGroup Bulk Upload
    * @apiHeader {String} X-authenticated-user-token Authenticity token
-   * @apiSampleRequest /admin-service/api/v1/bulkUploadRequest/list
+   * @apiSampleRequest /admin-service/api/v1/bulkUploadRequests/list
    * @apiUse successBody
    * @apiUse errorBodyuser
    * @apiParamExample {json} Response:
@@ -195,12 +195,12 @@ module.exports = class BulkUploadRequest extends Abstract {
   }
 
   /**
-   * @api {get} /admin-service/api/v1/bulkUploadRequest/getDownloadableUrls/_id
+   * @api {get} /admin-service/api/v1/bulkUploadRequests/getDownloadableUrls/_id
    * Get downloadable url of bulk csv files
    * @apiVersion 1.0.0
    * @apiGroup Bulk Upload
    * @apiHeader {String} X-authenticated-user-token Authenticity token
-   * @apiSampleRequest /admin-service/api/v1/bulkUploadRequest/getDownloadableUrls/p0f4n3o1kamjmacu?fileType=input
+   * @apiSampleRequest /admin-service/api/v1/bulkUploadRequests/getDownloadableUrls/p0f4n3o1kamjmacu?fileType=input
    * @apiUse successBody
    * @apiUse errorBodyuser
    * @apiParamExample {json} Response:
@@ -215,7 +215,7 @@ module.exports = class BulkUploadRequest extends Abstract {
   */
 
   /**
-   * to get getDownloadable url
+   * To get getDownloadable url
    * @method
    * @name details
    * @param  {req}  - requested data.
@@ -246,12 +246,12 @@ module.exports = class BulkUploadRequest extends Abstract {
 
 
   /**
-  * @api {get} /admin-service/api/v1/bulkUploadRequest/getStatus 
+  * @api {get} /admin-service/api/v1/bulkUploadRequests/statusList 
   * Get all status of bulk upload
   * @apiVersion 1.0.0
   * @apiGroup Bulk Upload
   * @apiHeader {String} X-authenticated-user-token Authenticity token
-  * @apiSampleRequest /admin-service/api/v1/bulkUploadRequest/getStatus
+  * @apiSampleRequest /admin-service/api/v1/bulkUploadRequests/statusList
   * @apiUse successBody
   * @apiUse errorBodyuser
   * @apiParamExample {json} Response:
@@ -278,20 +278,20 @@ module.exports = class BulkUploadRequest extends Abstract {
   /**
    * To get all status
    * @method
-   * @name getStatus
+   * @name statusList
    * @param  {req}  - requested data.
    * @returns {json} Response consists of status list
   */
 
-  getStatus(req) {
+  statusList(req) {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let response = await bulkUploadHelper.getStatus();
+        let response = await bulkUploadHelper.statusList();
         return resolve(response);
 
       } catch (error) {
-
+        
         return reject({
           status:
             error.status ||
@@ -307,12 +307,12 @@ module.exports = class BulkUploadRequest extends Abstract {
 
 
   /**
-   * @api {get} /admin-service/api/v1/bulkUploadRequest/getTypes 
+   * @api {get} /admin-service/api/v1/bulkUploadRequests/types 
    * Get all request type of bulk upload
    * @apiVersion 1.0.0
    * @apiGroup Bulk Upload
    * @apiHeader {String} X-authenticated-user-token Authenticity token
-   * @apiSampleRequest /admin-service/api/v1/bulkUploadRequest/getTypes
+   * @apiSampleRequest /admin-service/api/v1/bulkUploadRequests/types
    * @apiUse successBody
    * @apiUse errorBodyuser
    * @apiParamExample {json} Response:
@@ -341,18 +341,18 @@ module.exports = class BulkUploadRequest extends Abstract {
 }
   */
   /**
-   * to get all request types
+   * To get all request types
    * @method
-   * @name getTypes
+   * @name types
    * @param  {req}  - requested data.
    * @returns {json} Response consists of request types 
   */
 
-  getTypes(req) {
+ types(req) {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let response = await bulkUploadHelper.getTypes();
+        let response = await bulkUploadHelper.types();
         return resolve(response);
 
       } catch (error) {

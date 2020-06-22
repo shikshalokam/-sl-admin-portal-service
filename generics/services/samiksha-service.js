@@ -7,7 +7,7 @@
 
 //dependencies
 
-let urlPrefix =
+let samikshaServiceBaseURL =
     process.env.SAMIKSHA_SERIVCE_HOST +
     process.env.SAMIKSHA_SERIVCE_BASE_URL +
     process.env.URL_PREFIX;
@@ -31,7 +31,7 @@ function bulkUploadEntities(filePath, token, type) {
                 entities: fs.createReadStream(filePath)
             }
             let apiUrl =
-                urlPrefix + constants.endpoints.BULK_ENTITY + "?type=" + type;
+                samikshaServiceBaseURL + constants.endpoints.BULK_ENTITY + "?type=" + type;
 
             let response = await httpCall(apiUrl, token, formData);
             resolve(response);
@@ -59,10 +59,8 @@ function entityMapping(filePath, token, programId, solutionId) {
                 entityMap: fs.createReadStream(filePath)
             }
             let apiUrl =
-                urlPrefix + constants.endpoints.BULK_ENTITY_MAPPING;
-
+                samikshaServiceBaseURL + constants.endpoints.BULK_ENTITY_MAPPING;
             let response = await httpCall(apiUrl, token, formData);
-
             return resolve(response);
 
         } catch (error) {

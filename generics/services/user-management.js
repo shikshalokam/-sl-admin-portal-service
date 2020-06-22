@@ -7,7 +7,7 @@
 
 //dependencies
 
-let urlPrefix =
+let apiBaseUrl =
     process.env.USER_MANAGEMENT_HOST +
     process.env.USER_MANAGEMENT_BASE_URL +
     process.env.URL_PREFIX;
@@ -26,9 +26,9 @@ const request = require('request');
 const platformUserProfile = function (userId, token) {
     return new Promise(async (resolve, reject) => {
         try {
-            let platformUserRolesUrl =
-                urlPrefix + constants.endpoints.PLATFORM_USER_PROFILE + "/" + userId;
 
+            let platformUserRolesUrl =
+                apiBaseUrl + constants.endpoints.PLATFORM_USER_PROFILE + "/" + userId;
             const _userManagementCallBack = function (err, response) {
                 if (err) {
                     logger.error("Failed to connect to user management service.");
@@ -50,8 +50,7 @@ const platformUserProfile = function (userId, token) {
         } catch (error) {
             return reject(error);
         }
-    })
-
+    });
 }
 
 /**
@@ -68,7 +67,7 @@ const createPlatFormUser = function (userDetails, token) {
         try {
 
             let platformUserRolesUrl =
-                urlPrefix + constants.endpoints.PLATFORM_USER_CREATE;
+                apiBaseUrl + constants.endpoints.PLATFORM_USER_CREATE;
             let options = {
                 "headers": {
                     "content-type": "application/json",
@@ -92,8 +91,7 @@ const createPlatFormUser = function (userDetails, token) {
         } catch (error) {
             return reject(error);
         }
-    })
-
+    });
 }
 
 /**
@@ -110,7 +108,7 @@ const updatePlatFormUser = function (userInfo, token) {
         try {
 
             let platformUserUpdateUrl =
-                urlPrefix + constants.endpoints.PLATFORM_USER_UPDATE;
+                apiBaseUrl + constants.endpoints.PLATFORM_USER_UPDATE;
             let options = {
                 "headers": {
                     "content-type": "application/json",
@@ -134,8 +132,7 @@ const updatePlatFormUser = function (userInfo, token) {
         } catch (error) {
             return reject(error);
         }
-    })
-
+    });
 }
 
 /**
@@ -152,7 +149,7 @@ const activate = function (userId, token) {
         try {
 
             let platformUserStatusUpdateUrl =
-                urlPrefix + constants.endpoints.ACTIVE_USER;
+                apiBaseUrl + constants.endpoints.ACTIVE_USER;
 
             let options = {
                 "headers": {
@@ -177,8 +174,7 @@ const activate = function (userId, token) {
         } catch (error) {
             return reject(error);
         }
-    })
-
+    });
 }
 
 /**
@@ -195,8 +191,7 @@ const inactivate = function (userId, token) {
         try {
 
             let platformUserStatusUpdateUrl =
-                urlPrefix + constants.endpoints.INACTIVE_USER;
-
+                apiBaseUrl + constants.endpoints.INACTIVE_USER;
             let options = {
                 "headers": {
                     "content-type": "application/json",
@@ -220,8 +215,7 @@ const inactivate = function (userId, token) {
         } catch (error) {
             return reject(error);
         }
-    })
-
+    });
 }
 
 
@@ -237,9 +231,9 @@ const inactivate = function (userId, token) {
 const userDetails = function (userId, token) {
     return new Promise(async (resolve, reject) => {
         try {
-            const userDetailsAPIUrl =
-                urlPrefix + constants.endpoints.USER_DETAILS;
 
+            const userDetailsAPIUrl =
+                apiBaseUrl + constants.endpoints.USER_DETAILS;
             let options = {
                 "headers": {
                     "content-type": "application/json",
@@ -264,7 +258,7 @@ const userDetails = function (userId, token) {
         } catch (error) {
             return reject(error);
         }
-    })
+    });
 }
 
 

@@ -8,8 +8,6 @@
 // Dependencies
 
 const entityTypesHelper = require(MODULES_BASE_PATH + "/entity-types/helper.js");
-//  const bulkUploadHelper = require(MODULES_BASE_PATH + "/bulk-upload-request/helper.js");
-
 /**
    * EntityTypes
    * @class
@@ -102,7 +100,8 @@ module.exports = class EntityTypes extends Abstract {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let entityTypesList = await entityTypesHelper.list();
+        let projection = ["name","_id"];
+        let entityTypesList = await entityTypesHelper.list("all",projection);
         return resolve(entityTypesList);
 
       } catch (error) {

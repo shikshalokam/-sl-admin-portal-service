@@ -51,27 +51,27 @@ let enviromentVariables = {
   "message" : "Required internal access token",
   "optional" : false
 },
-"sunbird_keycloak_auth_server_url" : {
+"SUNBIRD_KEYCLOAK_AUTH_SERVER_URL" : {
   "message" : "Required sunbird keycloak auth server url",
   "optional" : false
 },
-"sunbird_keycloak_realm" : {
+"SUNBIRD_KEYCLOAK_REALM" : {
   "message" : "Required sunbird keycloak realm",
   "optional" : false
 },
-"sunbird_keycloak_client_id" : {
+"SUNBIRD_KEYCLOAK_CLIENT_ID" : {
   "message" : "Required sunbird keycloak client id",
   "optional" : false
 },
-"sunbird_keycloak_public" : {
+"SUNBIRD_KEYCLOAK_PUBLIC" : {
   "message" : "Required sunbird keycloak public",
   "optional" : false
 },
-"sunbird_cache_store" : {
+"SUNBIRD_CACHE_STORE" : {
   "message" : "Required sunbird cache store",
   "optional" : false
 },
-"sunbird_cache_ttl" : {
+"SUNBIRD_CACHE_TTL" : {
   "message" : "Required sunbird cache ttl",
   "optional" : false
 },
