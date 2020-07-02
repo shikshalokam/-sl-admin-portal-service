@@ -1,5 +1,5 @@
 /**
- * name : user-creation/helper.js
+ * name : users/helper.js
  * author : Rakesh Kumar
  * Date : 18-March-2020
  * Description : Consist of User creation and user related information.
@@ -18,7 +18,7 @@ let kendrService =
 
 const csv = require('csvtojson');
 
-module.exports = class UserCreationHelper {
+module.exports = class UsersHelper {
 
     /**
    * Get user creation form.
@@ -531,14 +531,14 @@ module.exports = class UserCreationHelper {
     }
 
     /**
-    * to get bulkUserSampleCsvDwonload.
+    * To download bulk upload user sample csv
     * @method
-    * @name  bulkUserSampleCsvDwonload
+    * @name  bulkUploadSampleFile
     * @param  {String} userToken  - user access token
     * @returns {json} Response consists sample csv data
     */
 
-    static bulkUserSampleCsvDwonload(token) {
+    static bulkUploadSampleFile(token) {
         return new Promise(async (resolve, reject) => {
             try {
 

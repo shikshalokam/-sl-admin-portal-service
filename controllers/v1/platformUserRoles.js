@@ -1,11 +1,11 @@
 /**
- * name : platform-user-roles.js
+ * name : platformUserRoles.js
  * author : Rakesh Kumar
  * created-date : 17-March-2020
  * Description : All Platform user roles related information.
  */
 
-const platformUserRolesHelper = require(MODULES_BASE_PATH + "/platform-user-roles/helper.js");
+const platformUserRolesHelper = require(MODULES_BASE_PATH + "/platformUserRoles/helper.js");
 
 /**
     * PlatformUserRoles
@@ -31,14 +31,14 @@ module.exports = class PlatformUserRoles extends Abstract {
   }
 
   static get name() {
-    return "platform-user-roles";
+    return "platformUserRoles";
   }
 
   /**
-    * @api {post} /admin/api/v1/platform-user-roles/getProfile 
+    * @api {get} /admin/api/v1/platform-user-roles/getProfile 
     * Get platform user profile information.
     * @apiVersion 1.0.0
-    * @apiGroup Email
+    * @apiGroup Platform Users Rolels
     * @apiHeader {String} X-authenticated-user-token Authenticity token
     * @apiSampleRequest /admin/api/v1/platform-user-roles/getProfile
     * @apiUse successBody

@@ -1,5 +1,5 @@
 /**
- * name : platform-roles.js
+ * name : platformRoles.js
  * author : Rakesh Kumar
  * created-date : 24-March-2020
  * Description : Platform Roles information. 

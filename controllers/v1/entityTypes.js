@@ -7,7 +7,7 @@
 
 // Dependencies
 
-const entityTypesHelper = require(MODULES_BASE_PATH + "/entity-types/helper.js");
+const entityTypesHelper = require(MODULES_BASE_PATH + "/entityTypes/helper.js");
 /**
    * EntityTypes
    * @class

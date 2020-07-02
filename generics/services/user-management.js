@@ -7,7 +7,7 @@
 
 //dependencies
 
-let apiBaseUrl =
+const apiBaseUrl =
     process.env.USER_MANAGEMENT_HOST +
     process.env.USER_MANAGEMENT_BASE_URL +
     process.env.URL_PREFIX;
@@ -81,7 +81,7 @@ const createPlatFormUser = function (userDetails, token) {
             function callback(err, data) {
                 if (err) {
                     return reject({
-                        message: constants.apiResponses.SUNBIRD_SERVICE_DOWN
+                        message: constants.apiResponses.USER_MANAGEMENT_SERVICE_DOWN
                     });
                 } else {
                     let dialCodeData = data.body;
@@ -122,7 +122,7 @@ const updatePlatFormUser = function (userInfo, token) {
             function callback(err, data) {
                 if (err) {
                     return reject({
-                        message: constants.apiResponses.SUNBIRD_SERVICE_DOWN
+                        message: constants.apiResponses.USER_MANAGEMENT_SERVICE_DOWN
                     });
                 } else {
                     let dialCodeData = data.body;
@@ -149,7 +149,7 @@ const activate = function (userId, token) {
         try {
 
             let platformUserStatusUpdateUrl =
-                apiBaseUrl + constants.endpoints.ACTIVE_USER;
+                apiBaseUrl + constants.endpoints.ACTIVATE_USER;
 
             let options = {
                 "headers": {
@@ -164,7 +164,7 @@ const activate = function (userId, token) {
             function callback(err, data) {
                 if (err) {
                     return reject({
-                        message: constants.apiResponses.SUNBIRD_SERVICE_DOWN
+                        message: constants.apiResponses.USER_MANAGEMENT_SERVICE_DOWN
                     });
                 } else {
                     return resolve(data.body);
@@ -191,7 +191,7 @@ const inactivate = function (userId, token) {
         try {
 
             let platformUserStatusUpdateUrl =
-                apiBaseUrl + constants.endpoints.INACTIVE_USER;
+                apiBaseUrl + constants.endpoints.INACTIVATE_USER;
             let options = {
                 "headers": {
                     "content-type": "application/json",
@@ -205,7 +205,7 @@ const inactivate = function (userId, token) {
             function callback(err, data) {
                 if (err) {
                     return reject({
-                        message: constants.apiResponses.SUNBIRD_SERVICE_DOWN
+                        message: constants.apiResponses.USER_MANAGEMENT_SERVICE_DOWN
                     });
                 } else {
                     return resolve(data.body);
@@ -247,7 +247,7 @@ const userDetails = function (userId, token) {
             function callback(err, data) {
                 if (err) {
                     return reject({
-                        message: constants.apiResponses.SUNBIRD_SERVICE_DOWN
+                        message: constants.apiResponses.USER_MANAGEMENT_SERVICE_DOWN
                     });
                 } else {
 

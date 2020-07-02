@@ -1,19 +1,19 @@
 /**
- * name : userExtension.js
+ * name : users.js
  * author : Rakesh Kumar
  * created-date : 18-March-2020
  * Description : User creation and related information.
  */
 
-const userExtensionHelper = require(MODULES_BASE_PATH + "/userExtension/helper.js");
+const usersHelper = require(MODULES_BASE_PATH + "/users/helper.js");
 const csvFileStream = require(ROOT_PATH + "/generics/file-stream");
 
 /**
-    * UserExtension
+    * Users
     * @class
 */
 
-module.exports = class UserExtension extends Abstract {
+module.exports = class Users extends Abstract {
 
   /**
     * @apiDefine errorBody
@@ -33,7 +33,7 @@ module.exports = class UserExtension extends Abstract {
   }
 
   static get name() {
-    return "user";
+    return "Users";
   }
 
   /**
@@ -47,12 +47,12 @@ module.exports = class UserExtension extends Abstract {
       */
 
   /**
-    * @api {get} /admin-service/api/v1/userExtension/getForm/:userId 
+    * @api {get} /admin-service/api/v1/users/getForm/:userId 
     * Get user creation form.
     * @apiVersion 1.0.0
-    * @apiGroup User Creation
+    * @apiGroup Users
     * @apiHeader {String} X-authenticated-user-token Authenticity token
-    * @apiSampleRequest /admin-service/api/v1/userExtension/getForm/8f6d6fd2-c069-41f1-b94d-ad2befcc964b
+    * @apiSampleRequest /admin-service/api/v1/users/getForm/8f6d6fd2-c069-41f1-b94d-ad2befcc964b
     * @apiUse successBody
     * @apiUse errorBody
     * @apiParamExample {json} Response:
@@ -132,7 +132,7 @@ module.exports = class UserExtension extends Abstract {
       try {
 
         let getUserForm =
-          await userExtensionHelper.getForm(
+          await usersHelper.getForm(
             req.params._id ? req.params._id : req.userDetails.userId,
             req.userDetails.userToken,
 
@@ -155,12 +155,12 @@ module.exports = class UserExtension extends Abstract {
   }
 
   /**
-   * @api {get} /admin-service/api/v1/userExtension/create 
+   * @api {post} /admin-service/api/v1/users/create 
    * To create the user 
    * @apiVersion 1.0.0
-   * @apiGroup User Creation
+   * @apiGroup Users
    * @apiHeader {String} X-authenticated-user-token Authenticity token
-   * @apiSampleRequest /admin-service/api/v1/userExtension/create
+   * @apiSampleRequest /admin-service/api/v1/users/create
    * {
    *   "firstName":"test",
    *   "lastName":"test",
@@ -209,7 +209,7 @@ module.exports = class UserExtension extends Abstract {
       try {
 
         let getUserForm =
-          await userExtensionHelper.create(
+          await usersHelper.create(
             req.body,
             req.userDetails.userToken
           );
@@ -233,12 +233,12 @@ module.exports = class UserExtension extends Abstract {
 
 
   /**
-  * @api {get} /admin-service/api/v1/userExtension/update 
-  * to update user details
+  * @api {POST} /admin-service/api/v1/users/update 
+  * To update user details
   * @apiVersion 1.0.0
-  * @apiGroup User Creation
+  * @apiGroup Users
   * @apiHeader {String} X-authenticated-user-token Authenticity token
-  * @apiSampleRequest /admin-service/api/v1/userExtension/update
+  * @apiSampleRequest /admin-service/api/v1/users/update
   * @apiUse successBody
   * @apiUse errorBodyuser
   * @apiParamExample {json} Response:
@@ -257,7 +257,7 @@ module.exports = class UserExtension extends Abstract {
       try {
 
         let getUserForm =
-          await userExtensionHelper.update(
+          await usersHelper.update(
             req.body,
             req.userDetails.userToken
           );
@@ -279,12 +279,12 @@ module.exports = class UserExtension extends Abstract {
   }
 
   /**
-  * @api {get} /admin-service/api/v1/userExtension/activate/:userid
+  * @api {get} /admin-service/api/v1/users/activate/:userid
   * To activate the user 
   * @apiVersion 1.0.0
-  * @apiGroup User Creation
+  * @apiGroup Users
   * @apiHeader {String} X-authenticated-user-token Authenticity token
-  * @apiSampleRequest /admin-service/api/v1/userExtension/activate/a082787f-8f8f-42f2-a706-35457ca6f1fd
+  * @apiSampleRequest /admin-service/api/v1/users/activate/a082787f-8f8f-42f2-a706-35457ca6f1fd
   * @apiUse successBody
   * @apiUse errorBodyuser
   * @apiParamExample {json} Response:
@@ -311,7 +311,7 @@ module.exports = class UserExtension extends Abstract {
       try {
 
         let updateUserData =
-          await userExtensionHelper.activate(req.params._id,
+          await usersHelper.activate(req.params._id,
             req.userDetails.userToken
           );
         return resolve(updateUserData);
@@ -332,18 +332,18 @@ module.exports = class UserExtension extends Abstract {
 
 
   /**
-* @api {get} /admin-service/api/v1/userExtension/inactivate/:userid
+* @api {get} /admin-service/api/v1/users/inactivate/:userid
 * To inActivate the user 
 * @apiVersion 1.0.0
-* @apiGroup User Creation
+* @apiGroup Users
 * @apiHeader {String} X-authenticated-user-token Authenticity token
-* @apiSampleRequest /admin-service/api/v1/userExtension/inactivate/a082787f-8f8f-42f2-a706-35457ca6f1fd
+* @apiSampleRequest /admin-service/api/v1/users/inactivate/a082787f-8f8f-42f2-a706-35457ca6f1fd
 * @apiUse successBody
 * @apiUse errorBodyuser
 * @apiParamExample {json} Response:
 * 
 * {
-*  "message": "User activated successfully",
+*  "message": "User deactivated successfully",
 *  "status": 200,
 *  "result": {
 *     "response": "SUCCESS"
@@ -364,7 +364,7 @@ module.exports = class UserExtension extends Abstract {
       try {
 
         let updateUserData =
-          await userExtensionHelper.inactivate(req.params._id,
+          await usersHelper.inactivate(req.params._id,
             req.userDetails.userToken
           );
         return resolve(updateUserData);
@@ -385,12 +385,12 @@ module.exports = class UserExtension extends Abstract {
 
 
   /**
-     * @api {get} /admin-service/api/v1/userExtension/details 
+     * @api {get} /admin-service/api/v1/users/details 
      * To get the user details
      * @apiVersion 1.0.0
-     * @apiGroup User Creation
+     * @apiGroup Users
      * @apiHeader {String} X-authenticated-user-token Authenticity token
-     * @apiSampleRequest /admin-service/api/v1/userExtension/details/:id
+     * @apiSampleRequest /admin-service/api/v1/users/details/:id
      * @apiUse successBody
      * @apiUse errorBodyuser
      * @apiParamExample {json} Response:
@@ -457,7 +457,7 @@ module.exports = class UserExtension extends Abstract {
       try {
 
         let userDetails =
-          await userExtensionHelper.details(
+          await usersHelper.details(
             (req.params._id && req.params._id != "") ? req.params._id : req.userDetails.userId,
             req.userDetails.userToken, req.userDetails.userId
           );
@@ -481,12 +481,12 @@ module.exports = class UserExtension extends Abstract {
 
 
   /**
-     * @api {get} /admin-service/api/v1/userExtension/bulkUserSampleCsvDwonload 
+     * @api {get} /admin-service/api/v1/users/bulkUploadSampleFile 
      * To download bulk user sample csv
      * @apiVersion 1.0.0
-     * @apiGroup User Creation
+     * @apiGroup Users
      * @apiHeader {String} X-authenticated-user-token Authenticity token
-     * @apiSampleRequest /admin-service/api/v1/userExtension/bulkUserSampleCsvDwonload
+     * @apiSampleRequest /admin-service/api/v1/users/bulkUploadSampleFile
      * @apiUse successBody
      * @apiUse errorBodyuser
     */
@@ -494,16 +494,16 @@ module.exports = class UserExtension extends Abstract {
   /**
    * Bulk user sample csv 
    * @method
-   * @name bulkUserSampleCsvDwonload
+   * @name bulkUploadSampleFile
    * @param  {req}  - requested data.
    * @returns {json} Response consists of created user details
   */
 
-  bulkUserSampleCsvDwonload(req) {
+ bulkUploadSampleFile(req) {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let sampleCsvFile = await userExtensionHelper.bulkUserSampleCsvDwonload(req.userDetails.userToken);
+        let sampleCsvFile = await usersHelper.bulkUploadSampleFile(req.userDetails.userToken);
         return resolve(sampleCsvFile);
 
       } catch (error) {

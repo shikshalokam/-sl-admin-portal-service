@@ -28,7 +28,7 @@ module.exports = {
     USERS_LIST_FETCHED: "Users List Fetched Successfully",
     INVALID_ACCESS: "Invalid Access",
     REQUEST_SUBMITTED: "Request Submitted Successfully",
-    KENDRA_SERVICE_DOWN: "Kendra serviece down",
+    KENDRA_SERVICE_DOWN: "Kendra service down",
     ENTITIES_FETCHED: "List of entities fetched successfully",
     ENTITY_NOT_FOUND: "Requested entity not found",
     ENTITY_INFORMATION_FETCHED: "Entity information fetched successfully",
@@ -39,10 +39,13 @@ module.exports = {
     STATES_NOT_FOUND: "State not found",
     STATE_LIST_FETCHED: "State list fetched successfully",
     ENTITY_TYPE_NOT_FOUND: "Entity type not found",
-    ENTITY_TYPE_FETCHED: "Entity type featched successfully",
-    BULK_REQUEST_TYPE: "Request type featched successfully",
+    ENTITY_TYPE_FETCHED: "Entity type fetched successfully",
+    BULK_REQUEST_TYPE: "Request type fetched successfully",
     BULK_REQUEST_TYPE_NOT_FOUND: "Request type not found",
     STATUS_LIST_NOT_FOUND: "Status list not found",
-    STATUS_LIST: "Status list featched successfully",
-    VALIDATION_FAILED: "Validation failed"
+    STATUS_LIST: "Status list fetched successfully",
+    VALIDATION_FAILED: "Validation failed",
+    SUNBIRD_SERVICE_DOWN: "Sunbird service down",
+    USER_MANAGEMENT_SERVICE_DOWN: "User management service down",
+    SAMIKSHA_SERVICE_DOWN: "Samiksha service down"
 };

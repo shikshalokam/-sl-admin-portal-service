@@ -1,12 +1,11 @@
 module.exports = {
     name: "bulkUploadRequests",
     schema: {
-      id: "ObjectId",
       requestId:{
         type:String,
         required:true
       },
-      requestType:{
+      type:{
         type: String,
         required: true
       },

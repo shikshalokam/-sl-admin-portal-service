@@ -7,7 +7,7 @@
 
 //dependencies
 
-let samikshaServiceBaseURL =
+const samikshaServiceBaseURL =
     process.env.SAMIKSHA_SERIVCE_HOST +
     process.env.SAMIKSHA_SERIVCE_BASE_URL +
     process.env.URL_PREFIX;
@@ -18,7 +18,7 @@ const fs = require('fs');
 
 /**
  * Entiies bulk upload 
- * @name uploadFileToCloud
+ * @name bulkUploadEntities
  * @param {String} filePath - filePath of the file to upload
  * @param {String} token - user access token
  * @param {String} type - type of entity

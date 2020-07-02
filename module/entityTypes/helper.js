@@ -16,11 +16,12 @@ module.exports = class EntityTypesHelper {
       * @method
       * @name list
       * @param {Object} [queryParameter = "all"] - Filtered query data.
-      * @param {Object} [projection = {}] - Projected data.   
+      * @param {Array} [fieldsArray = {}] - Projected data.   
+      * @param {Object} [skipFields = "none" ]
       * @returns {Object} returns a entity types list from the filtered data.
      */
 
-    static list(queryParameter = "all", fieldsArray = "all" ) {
+    static list(queryParameter = "all", fieldsArray = "all",skipFields = "none") {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -36,6 +37,11 @@ module.exports = class EntityTypesHelper {
                     });
                 }
 
+                if (skipFields != "none") {
+                    skipFields.forEach(element => {
+                        projection[element] = 0;
+                    });
+                }
 
 
                 let entityTypeData =

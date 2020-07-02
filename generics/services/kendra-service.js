@@ -7,7 +7,7 @@
 
 //dependencies
 
-let apiBaseUrl =
+const apiBaseUrl =
     process.env.KENDRA_SERIVCE_HOST +
     process.env.KENDRA_SERIVCE_BASE_URL +
     process.env.URL_PREFIX;
@@ -17,15 +17,13 @@ const fs = require('fs');
 
 /**
  * To upload file to cloud 
- * @name uploadFileToCloud
+ * @name uploadFile
  * @param {String} filePath filePath of the file to upload
  * @param {String} uploadPath - location of bucket where to upload
- * @param {String} bucketName - name of the bucket
  * @param {String} token - logged in user token
- * @param {String} endpoint - endpoint of the api 
  * @returns {json} - upload file details
  */
-function uploadFileToCloud(filePath, uploadPath, bucketName, token, endpoint) {
+function uploadFile(filePath, uploadPath,token) {
     return new Promise(async (resolve, reject) => {
         try {
             let options = {
@@ -36,11 +34,22 @@ function uploadFileToCloud(filePath, uploadPath, bucketName, token, endpoint) {
                 },
                 formData: {
                     filePath: uploadPath,
-                    bucketName: bucketName,
+                    bucketName: process.env.STORAGE_BUCKET,
                     file: fs.createReadStream(filePath)
 
                 }
             };
+
+             let endpoint = "";
+
+            let cloudStorage = process.env.CLOUD_STORAGE;
+            if (cloudStorage == constants.common.AWS_SERVICE) {
+                endpoint = constants.endpoints.UPLOAD_TO_AWS;
+            } else if (cloudStorage == constants.common.GOOGLE_CLOUD_SERVICE) {
+                endpoint = constants.endpoints.UPLOAD_TO_GCP;
+            } else if (cloudStorage == constants.common.AZURE_SERVICE) {
+                endpoint = constants.endpoints.UPLOAD_TO_AZURE;
+            }
 
             let apiUrl =
                 apiBaseUrl + endpoint;
@@ -74,14 +83,15 @@ function getDownloadableUrls(inputData, token) {
         try {
             let requestBody = {
                 filePaths: inputData.sourcePath,
-                bucketName: inputData.bucket
+                bucketName: process.env.STORAGE_BUCKET
             }
             let endpoint = "";
-            if (inputData.cloudStorage == constants.common.AWS_SERVICE) {
+            let cloudStorage = process.env.CLOUD_STORAGE;
+            if (cloudStorage == constants.common.AWS_SERVICE) {
                 endpoint = constants.endpoints.DOWNLOAD_AWS_URL;
-            } else if (inputData.cloudStorage == constants.common.GOOGLE_CLOUD_SERVICE) {
+            } else if (cloudStorage == constants.common.GOOGLE_CLOUD_SERVICE) {
                 endpoint = constants.endpoints.DOWNLOAD_GCP_URL;
-            } else if (inputData.cloudStorage == constants.common.AZURE_SERVICE) {
+            } else if (cloudStorage == constants.common.AZURE_SERVICE) {
                 endpoint = constants.endpoints.DOWNLOAD_AZURE_URL;
             }
             const apiUrl =
@@ -112,7 +122,8 @@ function getDownloadableUrls(inputData, token) {
 }
 
 
+
 module.exports = {
-    uploadFileToCloud: uploadFileToCloud,
+    uploadFile: uploadFile,
     getDownloadableUrls: getDownloadableUrls
 };

@@ -7,33 +7,30 @@ const request = require('request');
 module.exports = {
   async up(db) {
 
-
-    global.migrationMsg = "upload sample csv to cloud"
+    global.migrationMsg = "upload bulk user sample csv to cloud"
    
-    let files = [
-      { name: "users.csv", path: process.env.BULK_USER_SAMPLE_CSV_PATH },
-      { name: "entities.csv", path: process.env.BULK_ENTITIES_SAMPLE_CSV_PATH },
-      { name: "entityMapping.csv", path: process.env.BULK_ENTITY_MAPPING_SAMPLE_CSV_PATH }
-    ];
+    let uploadfileInfo = { name: "users.csv", path: process.env.BULK_USER_SAMPLE_CSV_PATH };
 
     let uploadFoilderPath = "bulkUpload/";
     
-    let endPoint = "/cloud-services/gcp/uploadFile";
+    let endPoint = "";
+
+    if(process.env.CLOUD_STORAGE == "AWS"){
+      endPoint = "/cloud-services/aws/uploadFile";
+    }else if(process.env.CLOUD_STORAGE == "GC"){
+      endPoint = "/cloud-services/gcp/uploadFile";
+    }else if(process.env.CLOUD_STORAGE == "AZURE"){
+      endPoint = "/cloud-services/azure/uploadFile";
+    }
+
     let bucketName = process.env.STORAGE_BUCKET;
 
-    let urlPrefix =
+    let kendraBaseUrl =
       process.env.KENDRA_SERIVCE_HOST +
       process.env.KENDRA_SERIVCE_BASE_URL +
       process.env.URL_PREFIX;
 
-
-     await Promise.all(files.map(async function (file) {
-
-      let apiUrl = urlPrefix + endPoint;
-      let response = await apiCall(apiUrl,file);
-    
-    }));
-
+    let response = await apiCall(kendraBaseUrl+endPoint,uploadfileInfo);
 
     function apiCall(apiUrl,file) {
       return new Promise(async function (resolve, reject) {
@@ -55,12 +52,9 @@ module.exports = {
         request.post(apiUrl, options, callback);
         function callback(err, data) {
           if (err) {
-            console.log("error", error);
             return resolve(data);
           } else {
-  
-            console.log("status code", data.statusCode)
-            return resolve(data.body);
+             return resolve(data.body);
           }
         }
        

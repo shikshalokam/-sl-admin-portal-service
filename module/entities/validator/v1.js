@@ -14,7 +14,7 @@ module.exports = (req) => {
         relatedEntities: function () {
             req.checkBody('_id').exists().withMessage("required entityId");
         },
-        createStateEntity: function () {
+        createState: function () {
             req.checkBody('name').exists().withMessage("required name");
             req.checkBody('externalId').exists().withMessage("required externalId");
             req.checkBody('capital').exists().withMessage("required capital");

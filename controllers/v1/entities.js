@@ -504,11 +504,11 @@ module.exports = class Entities extends Abstract {
 
 
   /**
- * @api {get} /admin-service/api/v1/entities/createStateEntity
+ * @api {POST} /admin-service/api/v1/entities/createState
  * To create state entity
  * @apiVersion 1.0.0
  * @apiGroup Entities
- * @apiSampleRequest /admin-service/api/v1/entities/createStateEntity
+ * @apiSampleRequest /admin-service/api/v1/entities/createState
  * @apiUse successBody
  * @apiUse errorBody
  * @apiParamExample {json} Response:
@@ -519,18 +519,18 @@ module.exports = class Entities extends Abstract {
  **/
 
   /**
- * Get state create form
+ * To create state entity
  * @method
- * @name createStateEntity
+ * @name createState
  * @param {Object} req - requested data.
- * @returns {JSON} - response consist of state create form
+ * @returns {JSON} - response consist of success or failure of entity creation
  */
 
-  createStateEntity(req) {
+  createState(req) {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let result = await entitiesHelper.createStateEntity(req.body);
+        let result = await entitiesHelper.createState(req.body);
         return resolve(result);
 
       } catch (error) {

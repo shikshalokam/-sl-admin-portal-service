@@ -1,5 +1,5 @@
 const moment = require("moment");
-let entityTypesHelper = require(MODULES_BASE_PATH + "/entity-types/helper");
+let entityTypesHelper = require(MODULES_BASE_PATH + "/entityTypes/helper");
 
 let kendrService =
     require(ROOT_PATH + "/generics/services/kendra-service");
@@ -684,13 +684,12 @@ module.exports = class entitiesHelper {
     /**
        * Create State Entity
        * @method
-       * @name createStateEntity
+       * @name createState
        * @returns {Array} - response consist of created entity information
        */
-    static createStateEntity(entityDocument) {
+    static createState(entityDocument) {
         return new Promise(async (resolve, reject) => {
             try {
-
 
                 let entityType = await database.models.entityTypes.findOne({ name: constants.common.STATE_ENTITY_TYPE });
 
