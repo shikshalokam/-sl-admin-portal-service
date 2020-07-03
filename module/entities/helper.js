@@ -1,7 +1,7 @@
 const moment = require("moment");
 let entityTypesHelper = require(MODULES_BASE_PATH + "/entityTypes/helper");
 
-let kendrService =
+let kendraService =
     require(ROOT_PATH + "/generics/services/kendra-service");
 
 const csv = require('csvtojson');
@@ -726,14 +726,14 @@ module.exports = class entitiesHelper {
     }
 
     /**
-    * to download entities sample Csv
+    * To download entities sample Csv
     * @method
-    * @name  bulkEntitiesSampleCsvDwonload
+    * @name  bulkUploadSampleFile
     * @param {String} token - user access token
     * @returns {json} Response consists of sample csv file information
     */
 
-    static bulkEntitiesSampleCsvDwonload(token) {
+    static bulkUploadSampleFile(token) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -744,7 +744,7 @@ module.exports = class entitiesHelper {
                     cloudStorage: process.env.CLOUD_STORAGE,
                 }
 
-                let response = await kendrService.getDownloadableUrls(fileInfo, token);
+                let response = await kendraService.getDownloadableUrls(fileInfo, token);
                 resolve(response);
             } catch (error) {
                 console.log("error", error);
@@ -756,15 +756,14 @@ module.exports = class entitiesHelper {
     /**
     * To download Entity Mapping Sample Csv
     * @method
-    * @name  bulkEntityMappingSampleCsvDwonload
+    * @name  bulkEntityMappingUploadSampleFile
     * @param {String} token - user access token
     * @returns {json} Response consists of sample csv file information
     */
 
-    static bulkEntityMappingSampleCsvDwonload(token) {
+    static bulkEntityMappingUploadSampleFile(token) {
         return new Promise(async (resolve, reject) => {
             try {
-
 
                 let fileInfo = {
                     sourcePath: constants.common.SAMPLE_ENTITY_MAPPING_CSV,
@@ -772,7 +771,7 @@ module.exports = class entitiesHelper {
                     cloudStorage: process.env.CLOUD_STORAGE,
                 }
 
-                let response = await kendrService.getDownloadableUrls(fileInfo, token);
+                let response = await kendraService.getDownloadableUrls(fileInfo, token);
 
                 resolve(response);
             } catch (error) {
@@ -783,7 +782,7 @@ module.exports = class entitiesHelper {
     }
 
     /**
-    * to get state list.
+    * To get state list.
     * @method
     * @name  stateList
     * @returns {json} Response consists state list

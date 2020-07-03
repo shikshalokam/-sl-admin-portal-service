@@ -547,12 +547,12 @@ module.exports = class Entities extends Abstract {
 
 
   /**
-   * @api {get} /admin-service/api/v1/entities/bulkEntitiesSampleCsvDwonload 
+   * @api {get} /admin-service/api/v1/entities/bulkUploadSampleFile 
    * Sample csv for bulk entities  
    * @apiVersion 1.0.0
    * @apiGroup Entities
    * @apiHeader {String} X-authenticated-user-token Authenticity token
-   * @apiSampleRequest /admin-service/api/v1/entities/bulkEntitiesSampleCsvDwonload
+   * @apiSampleRequest /admin-service/api/v1/entities/bulkUploadSampleFile
    * @apiUse successBody
    * @apiUse errorBodyuser
    * @apiParamExample {json} Response:
@@ -569,16 +569,16 @@ module.exports = class Entities extends Abstract {
   /**
    * Bulk entities sample csv 
    * @method
-   * @name bulkEntitiesSampleCsvDwonload
+   * @name bulkUploadSampleFile
    * @param  {req}  - requested data.
    * @returns {json} Response consists of sample csv info
   */
 
-  bulkEntitiesSampleCsvDwonload(req) {
+ bulkUploadSampleFile(req) {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let sampleCsvFile = await entitiesHelper.bulkEntitiesSampleCsvDwonload(req.userDetails.userToken);
+        let sampleCsvFile = await entitiesHelper.bulkUploadSampleFile(req.userDetails.userToken);
         return resolve(sampleCsvFile);
       } catch (error) {
 
@@ -597,12 +597,12 @@ module.exports = class Entities extends Abstract {
 
 
   /**
-  * @api {get} /admin-service/api/v1/entities/bulkEntityMappingSampleCsvDwonload 
+  * @api {get} /admin-service/api/v1/entities/bulkEntityMappingUploadSampleFile 
   * Sample csv for entity mapping  
   * @apiVersion 1.0.0
   * @apiGroup Entities
   * @apiHeader {String} X-authenticated-user-token Authenticity token
-  * @apiSampleRequest /admin-service/api/v1/entities/bulkEntityMappingSampleCsvDwonload
+  * @apiSampleRequest /admin-service/api/v1/entities/bulkEntityMappingUploadSampleFile
   * @apiUse successBody
   * @apiUse errorBodyuser
   * @apiParamExample {json} Response:
@@ -619,16 +619,16 @@ module.exports = class Entities extends Abstract {
   /**
    * Bulk entity mapping sample csv 
    * @method
-   * @name bulkEntityMappingSampleCsvDwonload
+   * @name bulkEntityMappingSampleFile
    * @param  {req}  - requested data.
    * @returns {json} Response consists of sample csv info
   */
-
-  bulkEntityMappingSampleCsvDwonload(req) {
+ 
+  bulkEntityMappingUploadSampleFile(req) {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let sampleCsvFile = await entitiesHelper.bulkEntityMappingSampleCsvDwonload(req.userDetails.userToken);
+        let sampleCsvFile = await entitiesHelper.bulkEntityMappingUploadSampleFile(req.userDetails.userToken);
         return resolve(sampleCsvFile);
 
       } catch (error) {

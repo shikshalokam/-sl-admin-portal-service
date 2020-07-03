@@ -13,7 +13,7 @@ let userManagementService =
 let sunbirdService =
     require(ROOT_PATH + "/generics/services/sunbird");
 
-let kendrService =
+let kendraService =
     require(ROOT_PATH + "/generics/services/kendra-service");
 
 const csv = require('csvtojson');
@@ -548,7 +548,7 @@ module.exports = class UsersHelper {
                     cloudStorage: process.env.CLOUD_STORAGE,
                 }
 
-                let response = await kendrService.getDownloadableUrls(fileInfo, token);
+                let response = await kendraService.getDownloadableUrls(fileInfo, token);
                 resolve(response);
 
             } catch (error) {

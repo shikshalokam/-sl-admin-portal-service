@@ -7,7 +7,7 @@
 
 let sunbirdService =
     require(ROOT_PATH + "/generics/services/sunbird");
-let kendrService =
+let kendraService =
     require(ROOT_PATH + "/generics/services/kendra-service");
 
 let samikshaService =
@@ -114,7 +114,7 @@ module.exports = class UserCreationHelper {
                     let successFileData = {};
 
                     await Promise.all(files.map(async function (fileData) {
-                        let uploadResp = await kendrService.uploadFile(fileCompletePath,
+                        let uploadResp = await kendraService.uploadFile(fileCompletePath,
                             fileData, req.userDetails.userToken);
                         uploadResp = JSON.parse(uploadResp);
                         if (uploadResp.status != httpStatusCode["ok"].status) {
@@ -334,7 +334,7 @@ module.exports = class UserCreationHelper {
                     } else {
                         fileInfo = requestDoc.inputFile;
                     }
-                    let response = await kendrService.getDownloadableUrls(fileInfo, token);
+                    let response = await kendraService.getDownloadableUrls(fileInfo, token);
                     resolve(response);
 
                 } else {
@@ -652,7 +652,7 @@ function _bulkUploadEntities(bulkRequestId, fileCompletePath, token, entityType,
             await cv.toDisk(ROOT_PATH + process.env.BATCH_FOLDER_PATH + successFile);
             files.push(userId + "/" + successFile);
 
-            let uploadResponse = await kendrService.uploadFile(ROOT_PATH + process.env.BATCH_FOLDER_PATH + successFile,
+            let uploadResponse = await kendraService.uploadFile(ROOT_PATH + process.env.BATCH_FOLDER_PATH + successFile,
                 userId + "/" + successFile, token);
 
             uploadResponse = JSON.parse(uploadResponse);
@@ -712,7 +712,7 @@ function _entityMapping(bulkRequestId,
 
 
                 let successFile = gen.utils.generateUniqueId() + "_success.csv";
-                let uploadResponse = await kendrService.uploadFile(filePath,
+                let uploadResponse = await kendraService.uploadFile(filePath,
                     userId + "/" + successFile, userToken);
 
                 uploadResponse = JSON.parse(uploadResponse);
