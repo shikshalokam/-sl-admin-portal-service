@@ -2,21 +2,16 @@
  * name : users/helper.js
  * author : Rakesh Kumar
  * Date : 18-March-2020
- * Description : Consist of User creation and user related information.
+ * Description : Consist of user creation and user related information.
  */
 
 let formsHelper = require(MODULES_BASE_PATH + "/forms/helper");
-
 let userManagementService =
-    require(ROOT_PATH + "/generics/services/user-management");
-
+    require(SERVICES_PATH+"/user-management");
 let sunbirdService =
-    require(ROOT_PATH + "/generics/services/sunbird");
-
+    require(SERVICES_PATH+"/sunbird");
 let kendraService =
-    require(ROOT_PATH + "/generics/services/kendra-service");
-
-const csv = require('csvtojson');
+    require(SERVICES_PATH+"/kendra-service");
 
 module.exports = class UsersHelper {
 
@@ -98,30 +93,7 @@ module.exports = class UsersHelper {
                 let organisations = [];
 
                 let userProfileInfo = JSON.parse(profileInfo);
-
-
-                // let profileRoles;
-                // if (userProfileInfo &&
-                //     userProfileInfo.result &&
-                //     userProfileInfo.result.response &&
-                //     userProfileInfo.result.response.roles
-                // ) {
-                //     profileRoles = userProfileInfo.result.response.roles;
-                // }
-
-                // let userCustomeRole = await database.models.platformUserRolesExt.findOne({ userId: userId }, { roles: 1 });
-
-                // if (userCustomeRole && userCustomeRole.roles && userCustomeRole.roles.length > 0) {
-                //     userCustomeRole.roles.map(customRole => {
-                //         if (!profileRoles.includes(customRole.code)) {
-                //             profileRoles.push(customRole.code)
-                //         }
-                //     })
-                // }
-
                 organisations = await _getOrganisationlist(userProfileInfo, userId, token);
-
-
                 let platformRoles =
                     await database.models.platformRolesExt.find({ isDeleted: false }, {
                         code: 1,
@@ -218,7 +190,7 @@ module.exports = class UsersHelper {
             try {
 
                 let userProfileCreationData =
-                    await userManagementService.createPlatFormUser(
+                    await userManagementService.createPlatformUser(
                         requestedBodyData,
                         userToken
                     );
@@ -407,13 +379,11 @@ module.exports = class UsersHelper {
                             if (sunBirdRoles) {
                                 sunBirdRoles.map(function (sunBirdrole) {
 
-                                    // if (sunBirdrole.id != constants.common.PUBLIC_ROLE) {
                                     roles.push({
                                         label: sunBirdrole.name,
                                         value: sunBirdrole.id
                                     })
-                                    //    }
-
+ 
                                 });
                             }
 
@@ -447,9 +417,6 @@ module.exports = class UsersHelper {
                                         data.roles.map(function (sunbirdUserRole) {
 
                                             if (sunbirdUserRole) {
-
-                                                console.log("sunbirdUserRole", sunbirdUserRole);
-
                                                 let roleInfo = roles.filter(function (roleDetails) {
                                                     return roleDetails.value === sunbirdUserRole
                                                 });
@@ -524,8 +491,7 @@ module.exports = class UsersHelper {
                     reject({ message: profileData.params.errmsg });
                 }
             } catch (error) {
-                console.log("error", error);
-                return reject(error);
+               return reject(error);
             }
         })
     }
@@ -552,10 +518,84 @@ module.exports = class UsersHelper {
                 resolve(response);
 
             } catch (error) {
-                console.log("error", error);
                 return reject(error);
             }
         })
+    }
+
+      /**
+      * To get all users
+      * @method
+      * @name all
+      * @param {Object} [queryParameter = "all"] - Filtered query data.
+      * @param {Array} [fieldsArray = {}] - Projected data.   
+      * @param {Object} [skipFields = "none" ]
+      * @returns {Object} returns a entity types list from the filtered data.
+     */
+
+    static all(queryParameter = "all", fieldsArray = "all", skipFields = "none") {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                if (queryParameter === "all") {
+                    queryParameter = {};
+                };
+                let projection = {}
+
+                if (fieldsArray != "all") {
+                    fieldsArray.forEach(field => {
+                        projection[field] = 1;
+                    });
+                }
+
+                if (skipFields != "none") {
+                    skipFields.forEach(element => {
+                        projection[element] = 0;
+                    });
+                }
+
+                let usersData =
+                    await database.models.userExtension.find(queryParameter, projection).lean();
+
+                if (!usersData) {
+                    return resolve({
+                        message: constants.apiResponses.USERS_NOT_FOUND,
+                    });
+                }
+                return resolve({ message: constants.apiResponses.USERS_FOUND, result: usersData });
+
+            } catch (error) {
+                return reject(error);
+            }
+        })
+
+    }
+
+    /**
+      * To update user data
+      * @method
+      * @name all
+      * @param {Object} [queryParameter] - Filtered query data.
+      * @param {Object} [updateObject]  - update object 
+      * @returns {Object} returns the updated response
+     */
+
+    static update(queryParameter, updateObject) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                let usersData =
+                    await database.models.userExtension.findOneAndUpdate(queryParameter, updateObject).lean();
+                if(usersData){
+                    return resolve({ message: constants.apiResponses.USER_UPDATED, result: usersData });
+                }
+                
+
+            } catch (error) {
+                return reject(error);
+            }
+        })
+
     }
 };
 
@@ -652,17 +692,7 @@ function _getOrganisationlist(userProfileInfo, userId, token) {
                         }))
                     }
                 }
-                // if (organisationsDoc) {
-                //     await Promise.all(organisationsDoc.map(function (orgInfo) {
-
-                //         let orgDetails = {
-                //             label: orgInfo.orgname,
-                //             value: orgInfo.id
-                //         }
-                //         organisations.push(orgDetails);
-                //     }));
-                // }
-
+ 
             }
             else if (
                 userProfileInfo &&
@@ -675,14 +705,6 @@ function _getOrganisationlist(userProfileInfo, userId, token) {
                     userProfileInfo.result.response.organisations.map(
                         async function (organisation) {
 
-                            // let organisationDetails =
-                            //     await cassandraDatabase.models.organisation.findOneAsync(
-                            //         {
-                            //             id: organisation.organisationId
-                            //         }, {
-                            //         raw: true
-                            //     });
-
                             let request = {
                                 "filters": {
                                     id: organisation.organisationId
@@ -694,10 +716,6 @@ function _getOrganisationlist(userProfileInfo, userId, token) {
                                     organisationList.result.response && organisationList.result.response.content) {
                                     await Promise.all(organisationList.result.response.content.map(async function (orgInfo) {
 
-                                        // let orgDetails = {
-                                        //     label: orgInfo.orgname,
-                                        //     value: orgInfo.id
-                                        // }
                                         organisations.push({
                                             label: orgInfo.orgName,
                                             value: orgInfo.id
@@ -706,15 +724,6 @@ function _getOrganisationlist(userProfileInfo, userId, token) {
                                     }))
                                 }
                             }
-
-
-                            // if (organisationDetails) {
-
-                            //     organisations.push({
-                            //         "label": organisationDetails.orgname,
-                            //         "value": organisation.organisationId
-                            //     });
-                            // }
 
                         }));
             }

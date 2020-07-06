@@ -5,7 +5,7 @@ module.exports = (req) => {
         addUser: function () {
             req.checkBody('userId').exists().withMessage("required userId");
             req.checkBody('roles').exists().withMessage("required roles");
-            req.checkBody('lastName').exists().withMessage("required lastName"); 
+            
         },
         assignRoles: function () {
             req.checkBody('organisationId').exists().withMessage("required organisationId");

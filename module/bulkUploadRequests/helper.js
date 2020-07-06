@@ -5,22 +5,21 @@
  * Description : Consist of bulk upload request information.
  */
 
-let sunbirdService =
-    require(ROOT_PATH + "/generics/services/sunbird");
-let kendraService =
-    require(ROOT_PATH + "/generics/services/kendra-service");
+const sunbirdService =
+    require(SERVICES_PATH+"/sunbird");
+const kendraService =
+    require(SERVICES_PATH+"/kendra-service");
 
-let samikshaService =
-    require(ROOT_PATH + "/generics/services/samiksha-service");
+const samikshaService =
+    require(SERVICES_PATH+"/samiksha-service");
 
 
 const csv = require('csvtojson');
-const request = require('request');
-var uniqid = require('uniqid');
+const uniqid = require('uniqid');
 const ObjectsToCsv = require('objects-to-csv');
 const fs = require('fs');
 const moment = require("moment");
-var ObjectId = require('mongoose').Types.ObjectId;
+const ObjectId = require('mongoose').Types.ObjectId;
 
 
 module.exports = class UserCreationHelper {
@@ -488,7 +487,6 @@ function _bulkRequestList() {
             obj["type"] = "action";
             obj["actions"] = _actions();
         } else if (field === "select") {
-            // obj['type'] = "checkbox";
             obj["key"] = "id";
             obj["visible"] = false;
 
@@ -613,8 +611,6 @@ function _validateUsers(inputArray) {
                     var re = /^[(0/91)?[7-9][0-9]{9}]$/;
                     let result = re.test(String(element.phone).toLowerCase());
                     if (result == false) {
-
-                        console.log("phone failed")
                         valid = false;
                     }
 
@@ -633,9 +629,9 @@ function _validateUsers(inputArray) {
 * Bulk upload entities 
 * @method
 * @name  _bulkUploadEntities
-* @param {String} token - user access token
 * @param {String} bulkRequestId - bulk upload request id.
 * @param {String} fileCompletePath - complete file path
+* @param {String} token - user access token
 * @param {String} entityType - type of entity
 * @param {String} userid - user id 
 * @returns {json} Response consist upload request
@@ -686,10 +682,9 @@ function _bulkUploadEntities(bulkRequestId, fileCompletePath, token, entityType,
 * Bulk upload entity mapping  
 * @method
 * @name  _entityMapping
-* @param {String} userToken - user access token
 * @param {String} bulkRequestId - bulk upload request id.
 * @param {String} filePath - complete file path
-* @param {String} entityType - type of entity
+* @param {String} userToken - user access token
 * @param {String} userid - user id 
 * @param {String} programId - program id  
 * @param {String} solutionId - solution id
@@ -704,10 +699,7 @@ function _entityMapping(bulkRequestId,
     return new Promise(async (resolve, reject) => {
 
         try {
-            console.log("entity mapp");
             let samikshaResponse = await samikshaService.entityMapping(filePath, userToken, programId, solutionId);
-            console.log("entity mapp");
-
             if (samikshaResponse && samikshaResponse.statusCode == httpStatusCode["ok"].status) {
 
 

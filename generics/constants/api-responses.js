@@ -47,5 +47,10 @@ module.exports = {
     VALIDATION_FAILED: "Validation failed",
     SUNBIRD_SERVICE_DOWN: "Sunbird service down",
     USER_MANAGEMENT_SERVICE_DOWN: "User management service down",
-    SAMIKSHA_SERVICE_DOWN: "Samiksha service down"
+    SAMIKSHA_SERVICE_DOWN: "Samiksha service down",
+    SUB_ENTITIES_NOT_FOUND: "Sub entities not found",
+    USERS_FOUND: "Users fetched successfully",
+    USERS_NOT_FOUND: "Users not found",
+    PLATFORMROLES_FOUND: "Platform roles fetched successfully",
+    PLATFORMROLES_NOT_FOUND: "Platform roles not found",
 };

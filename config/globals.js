@@ -18,6 +18,7 @@ module.exports = function () {
   global._ = require("lodash");
   gen.utils = require(ROOT_PATH + "/generics/helpers/utils");
   global.config = require(".");
+  global.SERVICES_PATH = ROOT_PATH + "/generics/services";
 
   
 

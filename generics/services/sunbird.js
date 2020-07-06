@@ -58,7 +58,7 @@ const getUserProfileInfo = function (token, userId) {
 
         const createUserUrl =
             process.env.SUNBIRD_URL + constants.endpoints.SUNBIRD_USER_READ + "/"
-            + userId + "?fields=completeness,missingFields,lastLoginTime";
+            + userId;
         let options = {
             "headers": {
                 "content-type": "application/json",

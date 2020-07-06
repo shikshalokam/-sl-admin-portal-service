@@ -56,13 +56,13 @@ const platformUserProfile = function (userId, token) {
 /**
   * To create platForm User 
   * @function
-  * @name createPlatFormUser
+  * @name createPlatformUser
   * @param userDetails - user details 
   * @param token - logged in user token  
   * @returns {json} returns created user details
 */
 
-const createPlatFormUser = function (userDetails, token) {
+const createPlatformUser = function (userDetails, token) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -264,7 +264,7 @@ const userDetails = function (userId, token) {
 
 module.exports = {
     platformUserProfile: platformUserProfile,
-    createPlatFormUser: createPlatFormUser,
+    createPlatformUser: createPlatformUser,
     updatePlatFormUser: updatePlatFormUser,
     userDetails: userDetails,
     activate: activate,

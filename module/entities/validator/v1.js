@@ -12,7 +12,7 @@ module.exports = (req) => {
             req.checkParams('_id').exists().withMessage("required entityId");
         },
         relatedEntities: function () {
-            req.checkBody('_id').exists().withMessage("required entityId");
+            req.checkParams('_id').exists().withMessage("required entityId");
         },
         createState: function () {
             req.checkBody('name').exists().withMessage("required name");

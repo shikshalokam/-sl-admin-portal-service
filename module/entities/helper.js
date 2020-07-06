@@ -1,10 +1,11 @@
 const moment = require("moment");
-let entityTypesHelper = require(MODULES_BASE_PATH + "/entityTypes/helper");
+const entityTypesHelper = require(MODULES_BASE_PATH + "/entityTypes/helper");
 
-let kendraService =
-    require(ROOT_PATH + "/generics/services/kendra-service");
+const kendraService =
+    require(SERVICES_PATH + "/kendra-service");
 
 const csv = require('csvtojson');
+
 
 
 module.exports = class entitiesHelper {
@@ -93,32 +94,24 @@ module.exports = class entitiesHelper {
      * @returns {Array} - List of all entities based on type.
      */
 
-    static listByEntityType(data) {
+    static listByEntityType(entityFilter) {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let entityName = constants.schema.METAINFORMATION + "." +
-                    constants.schema.NAME;
-
-                let entityExternalId = constants.schema.METAINFORMATION + "." +
-                    constants.schema.EXTERNALID;
-
-                let createdAt = constants.schema.CREATED_AT;
-
-                let childHierarchyPath = constants.schema.CHILD_HIERARCHY_PATH;
-
+                const entityName = "metaInformation.name";
+                const entityExternalId = "metaInformation.externalId"
+                const createdAt = "createdAt";
+                const childHierarchyPath = "childHierarchyPath";
                 let projection = [childHierarchyPath, entityName, entityExternalId, createdAt];
 
 
-                let skippingValue = data.pageSize * (data.pageNo - 1);
-
-
+                let skippingValue = entityFilter.pageSize * (entityFilter.pageNo - 1);
                 let entityDocs = await this.entityDocuments({
-                    entityType: data.entityType
+                    entityType: entityFilter.entityType
                 },
                     projection,
                     "none",
-                    data.pageSize,
+                    entityFilter.pageSize,
                     skippingValue,
                     {
                         [entityName]: 1
@@ -132,9 +125,7 @@ module.exports = class entitiesHelper {
                         message: constants.apiResponses.ENTITY_NOT_FOUND
                     };
                 }
-
                 entityDocuments = entityDocuments.map(entityDocument => {
-
                     return {
                         externalId: entityDocument.metaInformation.externalId,
                         name: entityDocument.metaInformation.name,
@@ -167,7 +158,6 @@ module.exports = class entitiesHelper {
  * Get immediate entities for requested Array.
  * @method
  * @name subList
- * @param {params} entities - array of entitity ids
  * @param {params} entityId - single entitiy id
  * @param {params} type - sub list entity type. 
  * @param {params} search - search entity data. 
@@ -176,13 +166,12 @@ module.exports = class entitiesHelper {
  * @returns {Array} - List of all sub list entities.
  */
 
-    static subEntityList(entities, entityId, type, search, limit, pageNo) {
+    static subEntityList(entityId, type, search, limit, pageNo) {
         return new Promise(async (resolve, reject) => {
-
             try {
 
                 let result = [];
-                let obj = {
+                let entityQueryObject = {
                     entityId: entityId,
                     type: type,
                     search: search,
@@ -192,31 +181,14 @@ module.exports = class entitiesHelper {
 
                 if (entityId !== "") {
                     result = await this.subEntities(
-                        obj
+                        entityQueryObject
                     );
-                } else {
-
-                    await Promise.all(entities.map(async (entity) => {
-
-                        obj["entityId"] = entity;
-                        let entitiesDocument = await this.subEntities(
-                            obj
-                        );
-
-                        if (Array.isArray(entitiesDocument.data) &&
-                            entitiesDocument.data.length > 0
-                        ) {
-                            result = entitiesDocument;
-                        }
-                    }));
                 }
 
                 if (result.data && result.data.length > 0) {
                     result.data = result.data.map(data => {
 
                         let cloneData = { ...data };
-                        // cloneData["label"] = cloneData.name;
-                        // cloneData["_id"] = cloneData._id;
                         cloneData['address'] = cloneData.addressLine1;
                         if (cloneData.addressLine1) {
                             delete cloneData.addressLine1;
@@ -241,6 +213,115 @@ module.exports = class entitiesHelper {
     }
 
     /**
+* Get sub entities details.
+* @method
+* @name getSubEntityDetails
+* @param {ObjectId} entityId
+* @param {String} searchText - search text,
+* @param {String} pageSize - maximum limit
+* @param {String} pageNo - page number
+* @param {String} entityTraversalType - sub entity type
+* @returns {Array} - List of all immediateEntities
+*/
+    static getSubEntityDetails(entityId,
+        searchText,
+        pageSize,
+        pageNo,
+        entityTraversalType = ""
+    ) {
+        return new Promise(async (resolve, reject) => {
+
+            try {
+                let projection = [];
+                let queryObject = {};
+
+
+                if (entityTraversalType != "") {
+                    let entityTraversal = `groups.${entityTraversalType}`;
+                    projection.push(entityTraversal);
+                    queryObject = {
+                        _id: entityId,
+                        "groups": { $exists: true },
+                        [entityTraversal]: { $exists: true }
+                    }
+
+                } else {
+
+                    queryObject = {
+                        _id: entityId
+                    }
+                    projection = [
+                        "entityType",
+                        "groups"
+                    ];
+                }
+
+                let entityDocs =
+                    await this.entityDocuments(
+                        queryObject,
+                        projection
+                    );
+                let entitiesDocument = entityDocs.data;
+
+                let immediateEntities = [];
+                let immediateEntitiesIds;
+
+                if (entitiesDocument[0] &&
+                    entitiesDocument[0].groups &&
+                    Object.keys(entitiesDocument[0].groups).length > 0 && entityTraversalType == ""
+                ) {
+
+                    let getImmediateEntityTypes =
+                        await entityTypesHelper.all({
+                            name: entitiesDocument[0].entityType
+                        }, ["immediateChildrenEntityType"]
+                        );
+                    if (getImmediateEntityTypes && getImmediateEntityTypes.result && getImmediateEntityTypes.result.length > 0) {
+                        getImmediateEntityTypes = getImmediateEntityTypes.result[0];
+                        Object.keys(entitiesDocument[0].groups).forEach(entityGroup => {
+                            if (
+                                getImmediateEntityTypes.immediateChildrenEntityType &&
+                                getImmediateEntityTypes.immediateChildrenEntityType.length > 0 &&
+                                getImmediateEntityTypes.immediateChildrenEntityType.includes(entityGroup)
+                            ) {
+                                immediateEntitiesIds =
+                                    entitiesDocument[0].groups[entityGroup];
+                            }
+                        });
+                    }
+                }
+                else if (entityTraversalType && entitiesDocument[0]) {
+                    if (entitiesDocument[0].groups[entityTraversalType].length > 0) {
+                        immediateEntitiesIds = entitiesDocument[0].groups[entityTraversalType];
+                    }
+                }
+
+                if (
+                    immediateEntitiesIds &&
+                    immediateEntitiesIds.length > 0
+                ) {
+                    let searchImmediateData = await this.search(
+                        searchText,
+                        pageSize,
+                        pageNo,
+                        immediateEntitiesIds
+                    );
+                    immediateEntities = searchImmediateData[0];
+                }
+                if (immediateEntities && immediateEntities.length == 0) {
+
+                    return resolve({ message: constants.apiResponses.SUB_ENTITIES_NOT_FOUND, status: httpStatusCode.not_found.status });
+                } else {
+                    return resolve(immediateEntities);
+                }
+
+            } catch (ex) {
+
+            }
+        });
+    }
+
+    /**
    * Get either immediate entities or entity traversal based upon the type.
    * @method
    * @name subEntities
@@ -253,28 +334,13 @@ module.exports = class entitiesHelper {
 
             try {
 
-                let entitiesDocument;
-
-                if (entitiesData.type !== "") {
-
-                    entitiesDocument = await this.entityTraversal(
-                        entitiesData.entityId,
-                        entitiesData.type,
-                        entitiesData.search,
-                        entitiesData.limit,
-                        entitiesData.pageNo
-                    );
-                } else {
-
-                    entitiesDocument = await this.immediateEntities(
-                        entitiesData.entityId,
-                        entitiesData.search,
-                        entitiesData.limit,
-                        entitiesData.pageNo
-                    );
-                }
-
-
+                let entitiesDocument = await this.getSubEntityDetails(
+                    entitiesData.entityId,
+                    entitiesData.search,
+                    entitiesData.limit,
+                    entitiesData.pageNo,
+                    entitiesData.type,
+                );
                 return resolve(entitiesDocument);
             } catch (error) {
                 return reject(error);
@@ -282,64 +348,7 @@ module.exports = class entitiesHelper {
         })
     }
 
-    /**
-   * Get immediate entities.
-   * @method
-   * @name entityTraversal
-   * @param {Object} entityId
-   * @returns {Array} - List of all immediateEntities based on entityId.
-   */
 
-    static entityTraversal(
-        entityId,
-        entityTraversalType = "",
-        searchText = "",
-        pageSize,
-        pageNo
-    ) {
-        return new Promise(async (resolve, reject) => {
-            try {
-
-                let entityTraversal = `groups.${entityTraversalType}`;
-
-                let entityDocs =
-                    await this.entityDocuments(
-                        {
-                            _id: entityId,
-                            "groups": { $exists: true },
-                            [entityTraversal]: { $exists: true }
-                        },
-                        [entityTraversal]
-                    );
-
-                let entitiesDocument = entityDocs.data;
-
-                if (!entitiesDocument[0]) {
-                    return resolve([]);
-                }
-
-                let result = [];
-
-                if (entitiesDocument[0].groups[entityTraversalType].length > 0) {
-
-                    let entityTraversalData = await this.search(
-                        searchText,
-                        pageSize,
-                        pageNo,
-                        entitiesDocument[0].groups[entityTraversalType]
-                    );
-
-                    result = entityTraversalData[0];
-
-                }
-
-                return resolve(result);
-
-            } catch (error) {
-                return reject(error);
-            }
-        })
-    }
 
     /**
     * Search entity.
@@ -414,82 +423,6 @@ module.exports = class entitiesHelper {
         })
     }
 
-    /**
-  * Get immediate entities.
-  * @method
-  * @name listByEntityType
-  * @param {ObjectId} entityId
-  * @param {String} searchText - search text,
-  * @param {String} pageSize - maximum limit
-  * @param {String} pageNo - page number
-  * @returns {Array} - List of all immediateEntities based on entityId.
-  */
-
-    static immediateEntities(entityId, searchText = "", pageSize = "", pageNo = "") {
-        return new Promise(async (resolve, reject) => {
-
-            try {
-
-                let projection = [
-                    constants.schema.ENTITYTYPE,
-                    constants.schema.GROUPS
-                ];
-
-                let entiesDocs =
-                    await this.entityDocuments({
-                        _id: entityId
-                    }, projection);
-
-                let entitiesDocument = entiesDocs.data;
-                let immediateEntities = [];
-
-                if (entitiesDocument[0] &&
-                    entitiesDocument[0].groups &&
-                    Object.keys(entitiesDocument[0].groups).length > 0
-                ) {
-
-                    let getImmediateEntityTypes =
-                        await entityTypesHelper.list({
-                            name: entitiesDocument[0].entityType
-                        }, ["immediateChildrenEntityType"]
-                        );
-
-                    let immediateEntitiesIds;
-
-                    Object.keys(entitiesDocument[0].groups).forEach(entityGroup => {
-                        if (
-                            getImmediateEntityTypes[0].immediateChildrenEntityType &&
-                            getImmediateEntityTypes[0].immediateChildrenEntityType.length > 0 &&
-                            getImmediateEntityTypes[0].immediateChildrenEntityType.includes(entityGroup)
-                        ) {
-                            immediateEntitiesIds =
-                                entitiesDocument[0].groups[entityGroup];
-                        }
-                    })
-
-                    if (
-                        Array.isArray(immediateEntitiesIds) &&
-                        immediateEntitiesIds.length > 0
-                    ) {
-
-                        let searchImmediateData = await this.search(
-                            searchText,
-                            pageSize,
-                            pageNo,
-                            immediateEntitiesIds
-                        );
-
-                        immediateEntities = searchImmediateData[0];
-                    }
-                }
-
-                return resolve(immediateEntities);
-
-            } catch (error) {
-                return reject(error);
-            }
-        })
-    }
 
     /**
     * Entity details information.
@@ -511,10 +444,17 @@ module.exports = class entitiesHelper {
                     ["groups"]
                 );
 
-                let projection = ["metaInformation.externalId", "metaInformation.name",
-                    "metaInformation.addressLine1", "metaInformation.addressLine2",
-                    "metaInformation.administration", "metaInformation.city",
-                    "metaInformation.country", "entityTypeId", "entityType"];
+                let projection = [
+                    "metaInformation.externalId",
+                    "metaInformation.name",
+                    "metaInformation.addressLine1",
+                    "metaInformation.addressLine2",
+                    "metaInformation.administration",
+                    "metaInformation.city",
+                    "metaInformation.country",
+                    "entityTypeId",
+                    "entityType"
+                ];
 
 
                 if (entityDocument && entityDocument.data && entityDocument.data.length == 0) {
@@ -563,10 +503,17 @@ module.exports = class entitiesHelper {
         return new Promise(async (resolve, reject) => {
             try {
                 let result = {}
-                let projection = ["metaInformation.externalId", "metaInformation.name",
-                    "metaInformation.addressLine1", "metaInformation.addressLine2",
-                    "metaInformation.administration", "metaInformation.city",
-                    "metaInformation.country", "entityTypeId", "entityType"];
+                let projection = [
+                    "metaInformation.externalId",
+                    "metaInformation.name",
+                    "metaInformation.addressLine1",
+                    "metaInformation.addressLine2",
+                    "metaInformation.administration",
+                    "metaInformation.city",
+                    "metaInformation.country",
+                    "entityTypeId",
+                    "entityType"
+                ];
                 let entityDocs = await this.entityDocuments({ _id: entityId }, projection);
 
                 let entityDocument = entityDocs.data;
@@ -610,10 +557,6 @@ module.exports = class entitiesHelper {
     static relatedEntitiesDetails(entityId, entityTypeId, entityType, projection = "all") {
         return new Promise(async (resolve, reject) => {
             try {
-
-                if (this.entityMapProcessData && this.entityMapProcessData.relatedEntities && this.entityMapProcessData.relatedEntities[entityId.toString()]) {
-                    return resolve(this.entityMapProcessData.relatedEntities[entityId.toString()]);
-                }
 
                 let relatedEntitiesQuery = {};
 
@@ -747,7 +690,6 @@ module.exports = class entitiesHelper {
                 let response = await kendraService.getDownloadableUrls(fileInfo, token);
                 resolve(response);
             } catch (error) {
-                console.log("error", error);
                 return reject(error);
             }
         })
@@ -775,11 +717,11 @@ module.exports = class entitiesHelper {
 
                 resolve(response);
             } catch (error) {
-                console.log("error", error);
                 return reject(error);
             }
         })
     }
+
 
     /**
     * To get state list.
@@ -792,25 +734,21 @@ module.exports = class entitiesHelper {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let stateInfo = await database.models.entities.find(
-                    {
-                        entityType: constants.common.STATE_ENTITY_TYPE
-                    },
-                    {
-                        entityTypeId: 1,
-                        _id: 1,
-                        metaInformation: 1,
-                        groups: 1,
-                        childHierarchyPath: 1
-                    }
-                ).lean();
+                const queryObject = { entityType: constants.common.STATE_ENTITY_TYPE };
+                const projection = [
+                    "metaInformation.name"
+                ]
 
-                if (!stateInfo) {
+                let stateData = await this.entityDocuments(queryObject, projection);
+
+                if (!stateData && !stateData.data) {
                     reject({
                         message: constants.apiResponses.STATES_NOT_FOUND,
                         status: httpStatusCode.bad_request.status
                     });
                 }
+
+                let stateInfo = stateData.data;
                 let states = [];
                 await Promise.all(stateInfo.map(async function (state) {
                     states.push({
@@ -822,8 +760,6 @@ module.exports = class entitiesHelper {
                 if (states) {
                     states = states.sort(gen.utils.sortArrayOfObjects('label'));
                 }
-
-
                 resolve({ message: constants.apiResponses.STATE_LIST_FETCHED, result: states });
 
             } catch (error) {
@@ -846,7 +782,6 @@ function _subEntityListColumns() {
     let columns = [
         'externalId',
         'name',
-        // 'label',
         'address',
         'actions'
     ];

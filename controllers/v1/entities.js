@@ -200,7 +200,6 @@ module.exports = class Entities extends Abstract {
 
       try {
         let entityDocuments = await entitiesHelper.subEntityList(
-          req.body.entities ? req.body.entities : "",
           req.params._id ? req.params._id : "",
           req.query.type ? req.query.type : "",
           req.searchText,

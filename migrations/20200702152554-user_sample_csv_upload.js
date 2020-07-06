@@ -7,11 +7,11 @@ const request = require('request');
 module.exports = {
   async up(db) {
 
-    global.migrationMsg = "upload bulk user sample csv to cloud"
+    global.migrationMsg = "Upload bulk user sample csv to cloud"
    
     let uploadfileInfo = { name: "users.csv", path: process.env.BULK_USER_SAMPLE_CSV_PATH };
 
-    let uploadFoilderPath = "bulkUpload/";
+    let uploadFolderPath = "bulkUpload/";
     
     let endPoint = "";
 
@@ -42,7 +42,7 @@ module.exports = {
             "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN
           },
           formData: {
-            filePath: uploadFoilderPath+file.name,
+            filePath: uploadFolderPath+file.name,
             bucketName: bucketName,
             file: fs.createReadStream(file.path) 
   

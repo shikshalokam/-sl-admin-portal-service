@@ -6,7 +6,7 @@
  */
 
 let userManagementService = 
-require(ROOT_PATH +"/generics/services/user-management");
+require( SERVICES_PATH+"/user-management");
 
 module.exports = class platFormUserProfileHelper {
 

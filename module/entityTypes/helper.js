@@ -12,16 +12,16 @@
 module.exports = class EntityTypesHelper {
 
     /**
-      * List of all entity types.
+      * To get all entityTypes
       * @method
-      * @name list
+      * @name all
       * @param {Object} [queryParameter = "all"] - Filtered query data.
       * @param {Array} [fieldsArray = {}] - Projected data.   
       * @param {Object} [skipFields = "none" ]
       * @returns {Object} returns a entity types list from the filtered data.
      */
 
-    static list(queryParameter = "all", fieldsArray = "all",skipFields = "none") {
+    static all(queryParameter = "all", fieldsArray = "all", skipFields = "none") {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -30,7 +30,7 @@ module.exports = class EntityTypesHelper {
                 };
 
                 let projection = {}
-    
+
                 if (fieldsArray != "all") {
                     fieldsArray.forEach(field => {
                         projection[field] = 1;
@@ -49,20 +49,44 @@ module.exports = class EntityTypesHelper {
 
                 if (!entityTypeData) {
 
-                    return resolve({ message: constants.apiResponses.ENTITY_TYPE_NOT_FOUND, 
-                         });
-
+                    return resolve({
+                        message: constants.apiResponses.ENTITY_TYPE_NOT_FOUND,
+                    });
                 }
-                
-                let entityTypeArray = [];
-                entityTypeData.map(types => {
 
-                    let entityType = {
-                        label: types.name,
-                        value: types._id
-                    }
-                    entityTypeArray.push(entityType);
-                })
+                return resolve({ message: constants.apiResponses.ENTITY_TYPE_FETCHED, result: entityTypeData });
+
+            } catch (error) {
+                return reject(error);
+            }
+        })
+
+    }
+
+    /**
+    * List of all entity types.
+    * @method
+    * @name list
+    * @param {Object} [queryParameter = "all"] - Filtered query data.
+    * @param {Array} [fieldsArray = {}] - Projected data.   
+   */
+
+    static list(queryObject, fieldsArray) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                let entityTypeData = await this.all(queryObject, fieldsArray);
+
+                let entityTypeArray = [];
+                if (entityTypeData && entityTypeData.result) {
+                    entityTypeData.result.map(types => {
+                        let entityType = {
+                            label: types.name,
+                            value: types._id,
+                        }
+                        entityTypeArray.push(entityType);
+                    })
+                }
                 return resolve({ message: constants.apiResponses.ENTITY_TYPE_FETCHED, result: entityTypeArray });
 
             } catch (error) {

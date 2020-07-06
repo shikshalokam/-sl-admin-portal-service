@@ -6,9 +6,12 @@
  */
 
 let sunbirdService =
-    require(ROOT_PATH + "/generics/services/sunbird");
+    require(SERVICES_PATH + "/sunbird");
 
 let formsHelper = require(MODULES_BASE_PATH + "/forms/helper");
+let usersHelper = require(MODULES_BASE_PATH + "/users/helper");
+
+let platformRolesHelper = require(MODULES_BASE_PATH + "/platformRoles/helper");
 
 module.exports = class OrganisationsHelper {
 
@@ -31,14 +34,20 @@ module.exports = class OrganisationsHelper {
                     let organisationsList = [];
 
                     let roles = profileData.result.response.roles;
-                    let userCustomeRole = await database.models.userExtension.findOne({ userId: userId }, { roles: 1 });
 
-                    if (userCustomeRole && userCustomeRole.roles && userCustomeRole.roles.length > 0) {
-                        userCustomeRole.roles.map(customRole => {
-                            if (!roles.includes(customRole.code)) {
-                                roles.push(customRole.code)
-                            }
-                        })
+                    const fieldsArray = ["roles"];
+                    const queryObject = { userId: userId };
+
+                    let userData = await usersHelper.all(queryObject, fieldsArray);
+                    if (userData && userData.result && userData.result.length > 0) {
+                        let userCustomeRole = userData.result[0];
+                        if (userCustomeRole && userCustomeRole.roles && userCustomeRole.roles.length > 0) {
+                            userCustomeRole.roles.map(customRole => {
+                                if (!roles.includes(customRole.code)) {
+                                    roles.push(customRole.code)
+                                }
+                            })
+                        }
                     }
                     if (roles.includes(constants.common.PLATFROM_ADMIN_ROLE)) {
 
@@ -150,11 +159,15 @@ module.exports = class OrganisationsHelper {
                     let usersList =
                         await sunbirdService.users(token, bodyOfRequest);
 
-                    let platformRoles =
-                        await database.models.platformRolesExt.find({}, {
-                            code: 1,
-                            title: 1
-                        }).lean();
+
+                    const projection = ["code", "title"];
+                    let rolesDoc = await platformRolesHelper.all("all", projection);
+
+                    let platformRoles = [];
+                    if (rolesDoc && rolesDoc.result) {
+                        platformRoles = rolesDoc.result;
+                    }
+
                     let sunBirdRoles =
                         await cassandraDatabase.models.role.findAsync(
                             {
@@ -167,9 +180,7 @@ module.exports = class OrganisationsHelper {
                         let allRoles = {};
                         if (sunBirdRoles) {
                             sunBirdRoles.map(function (sunBirdrole) {
-                                // if (sunBirdrole.id != constants.common.PUBLIC_ROLE) {
                                 allRoles[sunBirdrole.id] = sunBirdrole.name;
-                                // }
 
                             });
                         }
@@ -183,12 +194,13 @@ module.exports = class OrganisationsHelper {
                         await Promise.all(usersList.result.response.content.map(async function (userItem) {
 
                             let rolesOfUser = "";
-                            let customRoles = await database.models.userExtension.findOne({
-                                userId: userItem.id
-                            }, {
-                                roles: 1, organisationRoles: 1
-                            })
-                            if (customRoles) {
+
+                            const fieldsArray = ["roles", "organisationRoles"];
+                            const queryObject = { userId: userItem.id };
+
+                            let userData = await usersHelper.all(queryObject, fieldsArray);
+                            if (userData && userData.result && userData.result.length > 0) {
+                                let customRoles = userData.result[0];
                                 if (customRoles.organisationRoles) {
                                     let orgRolesOfUser = [];
                                     customRoles.organisationRoles.map(userRoles => {
@@ -218,11 +230,9 @@ module.exports = class OrganisationsHelper {
 
                                     let orgRoles = [];
                                     orgInfo.roles.map(roleItem => {
-                                        // if(roleItem!="PUBLIC"){
                                         if (allRoles[roleItem]) {
                                             orgRoles.push(allRoles[roleItem]);
                                         }
-                                        // }
                                     });
 
                                     orgRoles = (orgRoles).toString();
@@ -334,11 +344,15 @@ module.exports = class OrganisationsHelper {
                 let plaformRoles = [];
                 let rolesId = [];
 
+                const projection = ["code", "title"];
+                let rolesDoc = await platformRolesHelper.all("all", projection);
 
-                let rolesDocuments = await database.models.platformRolesExt.find({}, {
-                    _id: 1, code: 1, title: 1
-                }).lean();
-                plaformRoles.push("PUBLIC");
+                let rolesDocuments = [];
+                if (rolesDoc && rolesDoc.result) {
+                    rolesDocuments = rolesDoc.result;
+                }
+                plaformRoles.push(constants.common.PUBLIC_ROLE);
+
                 await Promise.all(orgnaisationInfo.roles.map(async function (roleInfo) {
                     let found = false;
                     if (rolesDocuments) {
@@ -364,7 +378,7 @@ module.exports = class OrganisationsHelper {
 
 
                 if (plaformRoles.length == 0) {
-                    plaformRoles.push("PUBLIC");
+                    plaformRoles.push(constants.common.PUBLIC_ROLE);
                 }
                 let orgCreateRequest = {
                     organisationId: orgnaisationInfo.organisation.value,
@@ -379,9 +393,10 @@ module.exports = class OrganisationsHelper {
                         let organisationsRoles = [];
                         organisationsRoles.push({ organisationId: orgnaisationInfo.organisation.value, roles: rolesId });
 
-                        let updateUser = await database.models.userExtension.findOneAndUpdate({ userId: orgnaisationInfo.userId },
-                            { $push: { organisations: orgnaisationInfo.organisation, organisationRoles: organisationsRoles } });
+                        let queryObject = { userId: orgnaisationInfo.userId };
+                        let updateData = { $push: { organisations: orgnaisationInfo.organisation, organisationRoles: organisationsRoles } };
 
+                        let update = await usersHelper.update(queryObject, updateData);
                         resolve({ result: response.result, message: constants.apiResponses.USER_ADDED_TO_ORG });
                     } else {
 
@@ -417,9 +432,13 @@ module.exports = class OrganisationsHelper {
                 let plaformRoles = [];
                 let rolesId = [];
 
-                let rolesDocuments = await database.models.platformRolesExt.find({}, {
-                    _id: 1, code: 1, title: 1
-                }).lean();
+                const projection = ["code", "title"];
+                let rolesDoc = await platformRolesHelper.all("all", projection);
+
+                let rolesDocuments = [];
+                if (rolesDoc && rolesDoc.result) {
+                    rolesDocuments = rolesDoc.result;
+                }
 
                 if (orgnisationInfo.roles) {
                     await Promise.all(orgnisationInfo.roles.map(async function (roleInfo) {
@@ -445,18 +464,22 @@ module.exports = class OrganisationsHelper {
                 }
 
                 if (plaformRoles.length == 0) {
-                    plaformRoles.push("PUBLIC");
+                    plaformRoles.push(constants.common.PUBLIC_ROLE);
                 }
                 orgnisationInfo.roles = plaformRoles;
 
                 let response = await sunbirdService.assignRoles(orgnisationInfo, token);
                 if (response && response.responseCode == constants.common.RESPONSE_OK) {
                     if (response.result.response == constants.common.SUCCESS_RESPONSE) {
-                        let userDetails = await database.models.userExtension.updateOne({
+
+                        let queryObject = {
                             userId: orgnisationInfo.userId, "organisationRoles.organisationId": orgnisationInfo.organisationId
-                        }, {
+                        };
+                        let updateData = {
                             $set: { "organisationRoles.$.roles": rolesId }
-                        });
+                        }
+                        let updateUserDetails = await usersHelper.update(queryObject, updateData)
+
                     }
 
                     let message = constants.apiResponses.ASSIGNED_ROLE_SUCCESSFULLY;
@@ -488,16 +511,21 @@ module.exports = class OrganisationsHelper {
 
                     let organisationsList = [];
                     let roles = profileData.result.response.roles;
-                    let userCustomeRole = await database.models.userExtension.findOne({ userId: inputData.userId }, { roles: 1 });
 
-                    if (userCustomeRole && userCustomeRole.roles && userCustomeRole.roles.length > 0) {
-                        userCustomeRole.roles.map(customRole => {
-                            if (!roles.includes(customRole.code)) {
-                                roles.push(customRole.code)
-                            }
-                        })
+                    const fieldsArray = ["roles"];
+                    const queryObject = { userId: inputData.userId };
+
+                    let userData = await usersHelper.all(queryObject, fieldsArray);
+                    if (userData && userData.result && userData.result.length > 0) {
+                        let userCustomeRole = userData.result[0];
+                        if (userCustomeRole && userCustomeRole.roles && userCustomeRole.roles.length > 0) {
+                            userCustomeRole.roles.map(customRole => {
+                                if (!roles.includes(customRole.code)) {
+                                    roles.push(customRole.code)
+                                }
+                            })
+                        }
                     }
-
                     let offset = inputData.pageSize * (inputData.pageNo - 1);
                     if (roles.includes(constants.common.PLATFROM_ADMIN_ROLE)) {
                         let request = {
@@ -534,10 +562,7 @@ module.exports = class OrganisationsHelper {
                                         externalId: orgInfo.externalId,
                                         status: orgInfo.status == 0 ? "Inactive" : "Active",
                                         provider: orgInfo.provider,
-                                        // channel:orgInfo.channel
                                         address: address,
-                                        // dateOfBirth:
-
                                     }
                                     organisationInfo.push(orgDetails);
                                 }));
@@ -605,19 +630,13 @@ module.exports = class OrganisationsHelper {
                     "channel": process.env.SUNBIRD_CHANNEL,
                     "description": inputData.description,
                     "externalId": inputData.externalId,
-                    // "isRootOrg": true,
                     "provider": process.env.SUNBIRD_PROVIDER,
                     "orgName": inputData.name,
                     "address": {
                         addressLine1: inputData.address,
                         city: inputData.address
                     },
-                    // "orgType": "string",
-                    // "orgTypeId": "string",
-                    // "rootOrgId": "string",
                     "email": inputData.email,
-                    // "license": "string",
-                    // "isSSOEnabled": true,
                 }
                 let createOrg = await sunbirdService.createOrganisation(requestBody, token);
                 if (createOrg && createOrg.responseCode == constants.common.RESPONSE_OK) {
@@ -800,17 +819,17 @@ module.exports = class OrganisationsHelper {
                 if (removeUser && removeUser.responseCode == constants.common.RESPONSE_OK) {
 
                     if (removeUser.result.response == constants.common.SUCCESS_RESPONSE) {
-                        let updateUser = await database.models.userExtension.findOneAndUpdate(
-                            { userId: inputData.userId }
-                            , {
-                                $pull: {
-                                    organisations: { value: inputData.organisationId },
-                                    organisationRoles: {
-                                        organisationId: inputData.organisationId
-                                    }
-                                }
 
-                            });
+                        let queryObject = { userId: inputData.userId };
+                        let updateData = {
+                            $pull: {
+                                organisations: { value: inputData.organisationId },
+                                organisationRoles: {
+                                    organisationId: inputData.organisationId
+                                }
+                            }
+                        }
+                        let updateUserDetails = await usersHelper.update(queryObject, updateData);
 
 
                     }
@@ -858,13 +877,20 @@ function _checkUserAdminAccess(token, userId, organisationId) {
                 roles = profileData.result.response.roles;
             }
 
-            let userCustomeRole = await database.models.userExtension.findOne({ userId: userId }, { roles: 1 });
-            if (userCustomeRole && userCustomeRole.roles && userCustomeRole.roles.length > 0) {
-                userCustomeRole.roles.map(customRole => {
-                    if (!roles.includes(customRole.code)) {
-                        roles.push(customRole.code)
-                    }
-                })
+            const queryObject = { userId: userId };
+            const fieldsArray = ["roles"];
+
+            let userData = await usersHelper.all(queryObject, fieldsArray);
+            if (userData && userData.result && userData.result.length > 0) {
+                let userCustomeRole = userData.result[0];
+
+                if (userCustomeRole && userCustomeRole.roles && userCustomeRole.roles.length > 0) {
+                    userCustomeRole.roles.map(customRole => {
+                        if (!roles.includes(customRole.code)) {
+                            roles.push(customRole.code)
+                        }
+                    })
+                }
             }
 
             if (profileData.responseCode == constants.common.RESPONSE_OK) {
@@ -955,7 +981,6 @@ function _userColumn() {
         } else if (field === "select") {
             obj['type'] = "checkbox";
             obj["key"] = "id";
-            // obj["visible"] = true;
         }
 
         result.push(obj);
@@ -1007,7 +1032,6 @@ function _getOrganisationDetailsById(orgId, token) {
             }
         }
 
-        // let organisationsList = [];
         let organisationList = await sunbirdService.searchOrganisation(request, token);
         if (organisationList.responseCode == constants.common.RESPONSE_OK) {
             if (organisationList.result && organisationList.result.response &&
@@ -1058,8 +1082,6 @@ function _organisationColumn() {
         'select',
         'name',
         'description',
-        // 'email',
-        // 'noOfMembers',
         'externalId',
         'address',
         'status',
@@ -1084,7 +1106,6 @@ function _organisationColumn() {
             obj["type"] = "action";
             obj["actions"] = _actions();
         } else if (field === "select") {
-            // obj['type'] = "checkbox";
             obj["key"] = "id";
             obj["visible"] = false;
 
