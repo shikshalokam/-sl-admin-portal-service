@@ -12,6 +12,7 @@ let formsHelper = require(MODULES_BASE_PATH + "/forms/helper");
 let usersHelper = require(MODULES_BASE_PATH + "/users/helper");
 
 let platformRolesHelper = require(MODULES_BASE_PATH + "/platformRoles/helper");
+let sessionHelpers = require(ROOT_PATH+"/generics/helpers/sessions");
 
 module.exports = class OrganisationsHelper {
 
@@ -51,10 +52,14 @@ module.exports = class OrganisationsHelper {
                     }
                     if (roles.includes(constants.common.PLATFROM_ADMIN_ROLE)) {
 
-                        let request = {
-                            "filters": {
+                        let  sessionOrganisationData = sessionHelpers.get(constants.common.ORGANISATIONS_SESSION);
+                        if(sessionOrganisationData){
+                             organisationsList =  sessionOrganisationData;
+                        }else{
+                            let request = {
+                              "filters": {
                             }
-                        }
+                            }
                         let organisationList = await sunbirdService.searchOrganisation(request, token);
                         if (organisationList.responseCode == constants.common.RESPONSE_OK) {
                             if (organisationList.result && organisationList.result.response &&
@@ -66,18 +71,30 @@ module.exports = class OrganisationsHelper {
                                     });
 
                                 }))
+                                sessionHelpers.set(constants.common.ORGANISATIONS_SESSION,organisationsList);
                             }
                         }
+                      }
 
                     } else if (profileData.result.response.organisations) {
                         let orgList = profileData.result.response.organisations;
                         await Promise.all(orgList.map(async function (orgInfo) {
                             if (roles.includes(constants.common.ORG_ADMIN_ROLE) ||
                                 orgInfo.roles.includes(constants.common.ORG_ADMIN_ROLE)) {
-                                let result = await _getOrganisationDetailsById(orgInfo.organisationId, token);
-                                let orgDetails = { value: orgInfo.organisationId, label: result.orgName };
+                                        
+                                    let sessionOrganisationData = sessionHelpers.get(constants.common.ORGANISATIONS_SESSION);
+                                    if(sessionOrganisationData){
 
-                                organisationsList.push(orgDetails);
+                                        let orgData = sessionOrganisationData.filter(orgDetails=>{
+                                            return orgDetails.value == orgInfo.organisationId;
+                                        });
+                                        organisationsList.push(orgData);
+
+                                    }else{
+                                        let result = await _getOrganisationDetailsById(orgInfo.organisationId, token);
+                                        let orgDetails = { value: orgInfo.organisationId, label: result.orgName };
+                                        organisationsList.push(orgDetails);
+                                    }
                             }
                         }));
 
@@ -640,6 +657,13 @@ module.exports = class OrganisationsHelper {
                 }
                 let createOrg = await sunbirdService.createOrganisation(requestBody, token);
                 if (createOrg && createOrg.responseCode == constants.common.RESPONSE_OK) {
+
+                    let sessionOrganisationData = sessionHelpers.get(constants.common.ORGANISATIONS_SESSION);
+                    if(sessionOrganisationData){
+                         sessionOrganisationData.push({ label :inputData.name,value: createOrg.result.organisationId });
+                         sessionHelpers.set(constants.common.ORGANISATIONS_SESSION,sessionOrganisationData);
+                    }
+
                     resolve({ result: createOrg.result, message: constants.apiResponses.ORG_CREATED });
                 } else {
                     reject({ message: createOrg.params.errmsg });

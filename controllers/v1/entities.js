@@ -130,7 +130,8 @@ module.exports = class Entities extends Abstract {
         let requestedData = {
           entityType: req.params._id,
           pageSize: req.pageSize,
-          pageNo: req.pageNo
+          pageNo: req.pageNo,
+          searchText : req.searchText
         }
 
         let entityDocuments = await entitiesHelper.listByEntityType(

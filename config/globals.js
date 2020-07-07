@@ -19,8 +19,7 @@ module.exports = function () {
   gen.utils = require(ROOT_PATH + "/generics/helpers/utils");
   global.config = require(".");
   global.SERVICES_PATH = ROOT_PATH + "/generics/services";
-
-  
+  global.sessions = {};
 
   global.httpStatusCode = 
   require(ROOT_PATH + "/generics/http-status-codes");
@@ -69,7 +68,6 @@ module.exports = function () {
       require(ROOT_PATH + "/generics/constants/" + file);
     }
   });
-
 
 };
 

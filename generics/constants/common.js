@@ -25,6 +25,7 @@ module.exports = {
     BULK_ENTITY_CREATION_TYPE: "Entity Creation",
     BULK_ENTITY_MAPPING_TYPE: "Entity Mapping",
     BULK_UPLOAD_COMPLETE: "completed",
-    BULK_UPLOAD_FAILURE: "failed"
+    BULK_UPLOAD_FAILURE: "failed",
+    ORGANISATIONS_SESSION: "organisations"
 
 };

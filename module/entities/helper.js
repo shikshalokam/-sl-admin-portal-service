@@ -21,6 +21,7 @@ module.exports = class entitiesHelper {
     * returns all the field
     * @param {Number} [limitingValue = ""] - total data to limit.
     * @param {Number} [skippingValue = ""] - total data to skip.
+    * @param {String} searchText - search text
     * @returns {Array} - returns an array of entities data.
     */
     static entityDocuments(
@@ -29,7 +30,8 @@ module.exports = class entitiesHelper {
         skipFields = "none",
         limitingValue = "",
         skippingValue = "",
-        sortedData = ""
+        sortedData = "",
+        searchText = ""
     ) {
         return new Promise(async (resolve, reject) => {
             try {
@@ -53,6 +55,16 @@ module.exports = class entitiesHelper {
                     skipFields.forEach(element => {
                         projectionObject[element] = 0;
                     });
+                }
+
+
+                if (searchText !== "") {
+                    queryObject["$or"] = [
+                        { "metaInformation.name": new RegExp(searchText, 'i') },
+                        { "metaInformation.externalId": new RegExp("^" + searchText, 'm') },
+                        { "metaInformation.addressLine1": new RegExp(searchText, 'i') },
+                        { "metaInformation.addressLine2": new RegExp(searchText, 'i') }
+                    ];
                 }
 
                 let entitiesDocuments;
@@ -91,6 +103,7 @@ module.exports = class entitiesHelper {
      * @param {String} data.entityType - entity type
      * @param {Number} data.pageSize - total page size.
      * @param {Number} data.pageNo - page number.
+     * @param {String} data.searchText - search text
      * @returns {Array} - List of all entities based on type.
      */
 
@@ -106,6 +119,7 @@ module.exports = class entitiesHelper {
 
 
                 let skippingValue = entityFilter.pageSize * (entityFilter.pageNo - 1);
+                
                 let entityDocs = await this.entityDocuments({
                     entityType: entityFilter.entityType
                 },
@@ -115,7 +129,8 @@ module.exports = class entitiesHelper {
                     skippingValue,
                     {
                         [entityName]: 1
-                    }
+                    },
+                    entityFilter.searchText
                 );
                 let entityDocuments = entityDocs.data;
 
