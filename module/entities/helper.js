@@ -609,16 +609,16 @@ module.exports = class entitiesHelper {
     /**
        * State create entity form
        * @method
-       * @name stateCreateForm
+       * @name stateCreationForm
        * @returns {json} - response consist of state create dynamic form
        */
-    static stateCreateForm() {
+    static stateCreationForm() {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let stateCreateForm = await database.models.forms.findOne({ name: "stateEntityCreateForm" });
+                let stateCreationForm = await database.models.forms.findOne({ name: "stateEntityCreateForm" });
 
-                if (!stateCreateForm) {
+                if (!stateCreationForm) {
                     reject({
                         status: httpStatusCode.not_found.status,
                         message: constants.apiResponses.STATE_CREATE_FORM_NOT_FOUND
@@ -627,7 +627,7 @@ module.exports = class entitiesHelper {
                 }
                 resolve({
                     message: constants.apiResponses.STATE_CREATE_FORM,
-                    result: stateCreateForm.value
+                    result: stateCreationForm.value
                 })
 
             } catch (error) {
@@ -713,12 +713,12 @@ module.exports = class entitiesHelper {
     /**
     * To download Entity Mapping Sample Csv
     * @method
-    * @name  bulkEntityMappingUploadSampleFile
+    * @name  bulkEntityMappingSampleFile
     * @param {String} token - user access token
     * @returns {json} Response consists of sample csv file information
     */
 
-    static bulkEntityMappingUploadSampleFile(token) {
+    static bulkEntityMappingSampleFile(token) {
         return new Promise(async (resolve, reject) => {
             try {
 

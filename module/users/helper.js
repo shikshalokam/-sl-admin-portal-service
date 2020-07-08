@@ -458,7 +458,7 @@ module.exports = class UsersHelper {
                             let userDeactiveStatus = await _checkDeactiveAccess(profileData, orgAdminUserId);
 
                             userDetails = {
-                                userDeactiveAccess: userDeactiveStatus.userDeactiveAccess,
+                                canDeactivate: userDeactiveStatus.canDeactivate,
                                 firstName: reponseObj.firstName,
                                 gender: gender,
                                 userName: reponseObj.userName,
@@ -772,7 +772,7 @@ function _checkDeactiveAccess(userProfileInfo, userId) {
             }
 
             if (profileRoles.includes(constants.common.PLATFROM_ADMIN_ROLE)) {
-                resolve({ userDeactiveAccess: true })
+                resolve({ canDeactivate: true })
             } else if (
                 userProfileInfo &&
                 userProfileInfo.result &&
@@ -790,12 +790,12 @@ function _checkDeactiveAccess(userProfileInfo, userId) {
                         }
                     }));
                     if (count == orgInfo.length) {
-                        resolve({ userDeactiveAccess: true })
+                        resolve({ canDeactivate: true })
                     } else {
-                        resolve({ userDeactiveAccess: false })
+                        resolve({ canDeactivate: false })
                     }
                 } else {
-                    resolve({ userDeactiveAccess: false })
+                    resolve({ canDeactivate: false })
                 }
 
             }

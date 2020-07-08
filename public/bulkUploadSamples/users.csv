@@ -1,0 +1,3 @@
+"name","phone","email","roles","userName","password","phoneVerified","emailVerified"
+"Bulk1","1231231230","abc@gmail.com","PUBLIC","bulk1","sluser@733","TRUE","TRUE"
+"Bulk2","1231231231","but2@gmail.com","PUBLIC","bulk2","sluser@733","TRUE","TRUE"

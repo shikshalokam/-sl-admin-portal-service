@@ -1,0 +1,2 @@
+externalId,name,schoolName,noOfMembers,headOfCommittee,types,address,city,schoolTypes,administrationTypes,state,_programId(optional),_solutionId(optional),_arrayFields,_existingKeyField
+SMC-S1,SMC of School 1,SMC -School 1,5,Mr. Prakash,"A1,A2",Address of school 1,Noida,"Primary,Secondary",bbmp,Delhi,PGM-SMC,SOLUTION-SMC,"types,schoolTypes,administrationTypes",externalId

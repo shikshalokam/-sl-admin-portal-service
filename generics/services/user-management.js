@@ -29,24 +29,11 @@ const platformUserProfile = function (userId, token) {
 
             let platformUserRolesUrl =
                 apiBaseUrl + constants.endpoints.PLATFORM_USER_PROFILE + "/" + userId;
-            const _userManagementCallBack = function (err, response) {
-                if (err) {
-                    logger.error("Failed to connect to user management service.");
-                } else {
-                    let userManagementData = JSON.parse(response.body);
-                    return resolve(userManagementData);
-                }
-            }
+            let requestBody = {}
+            let userManagementData = await httpCall(platformUserRolesUrl, token, requestBody, "GET");
+            userManagementData = JSON.parse(userManagementData);
+            return resolve(userManagementData);
 
-            request.get(
-                platformUserRolesUrl, {
-                headers: {
-                    "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN,
-                    "X-authenticated-user-token": token
-                }
-            },
-                _userManagementCallBack
-            )
         } catch (error) {
             return reject(error);
         }
@@ -68,26 +55,12 @@ const createPlatformUser = function (userDetails, token) {
 
             let platformUserRolesUrl =
                 apiBaseUrl + constants.endpoints.PLATFORM_USER_CREATE;
-            let options = {
-                "headers": {
-                    "content-type": "application/json",
-                    "authorization": process.env.AUTHORIZATION,
-                    "x-authenticated-user-token": token,
-                },
-                json: userDetails
-            };
+            let requestBody = userDetails;
+            console.log(platformUserRolesUrl,"createResponse");
+            let createResponse = await httpCall(platformUserRolesUrl, token, requestBody, "POST");
+            console.log(platformUserRolesUrl,"createResponse",createResponse);
+            return resolve(createResponse);
 
-            request.post(platformUserRolesUrl, options, callback);
-            function callback(err, data) {
-                if (err) {
-                    return reject({
-                        message: constants.apiResponses.USER_MANAGEMENT_SERVICE_DOWN
-                    });
-                } else {
-                    let dialCodeData = data.body;
-                    return resolve(dialCodeData);
-                }
-            }
         } catch (error) {
             return reject(error);
         }
@@ -109,26 +82,11 @@ const updatePlatFormUser = function (userInfo, token) {
 
             let platformUserUpdateUrl =
                 apiBaseUrl + constants.endpoints.PLATFORM_USER_UPDATE;
-            let options = {
-                "headers": {
-                    "content-type": "application/json",
-                    "authorization": process.env.AUTHORIZATION,
-                    "x-authenticated-user-token": token,
-                },
-                json: userInfo
-            };
+            let requestBody = userInfo;
+            let response = await httpCall(platformUserUpdateUrl, token, requestBody, "POST");
+            console.log("response",response);
+            return resolve(response);
 
-            request.post(platformUserUpdateUrl, options, callback);
-            function callback(err, data) {
-                if (err) {
-                    return reject({
-                        message: constants.apiResponses.USER_MANAGEMENT_SERVICE_DOWN
-                    });
-                } else {
-                    let dialCodeData = data.body;
-                    return resolve(dialCodeData);
-                }
-            }
         } catch (error) {
             return reject(error);
         }
@@ -150,26 +108,9 @@ const activate = function (userId, token) {
 
             let platformUserStatusUpdateUrl =
                 apiBaseUrl + constants.endpoints.ACTIVATE_USER;
-
-            let options = {
-                "headers": {
-                    "content-type": "application/json",
-                    "authorization": process.env.AUTHORIZATION,
-                    "x-authenticated-user-token": token,
-                    "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN
-                },
-                json: { userId: userId }
-            };
-            request.post(platformUserStatusUpdateUrl, options, callback);
-            function callback(err, data) {
-                if (err) {
-                    return reject({
-                        message: constants.apiResponses.USER_MANAGEMENT_SERVICE_DOWN
-                    });
-                } else {
-                    return resolve(data.body);
-                }
-            }
+            let requestBody = { userId: userId };
+            let response = await httpCall(platformUserStatusUpdateUrl, token, requestBody, "POST");
+            return resolve(response);
 
         } catch (error) {
             return reject(error);
@@ -192,25 +133,9 @@ const inactivate = function (userId, token) {
 
             let platformUserStatusUpdateUrl =
                 apiBaseUrl + constants.endpoints.INACTIVATE_USER;
-            let options = {
-                "headers": {
-                    "content-type": "application/json",
-                    "authorization": process.env.AUTHORIZATION,
-                    "x-authenticated-user-token": token,
-                    "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN
-                },
-                json: { userId: userId }
-            };
-            request.post(platformUserStatusUpdateUrl, options, callback);
-            function callback(err, data) {
-                if (err) {
-                    return reject({
-                        message: constants.apiResponses.USER_MANAGEMENT_SERVICE_DOWN
-                    });
-                } else {
-                    return resolve(data.body);
-                }
-            }
+            let requestBody = { userId: userId };
+            let response = await httpCall(platformUserStatusUpdateUrl, token, requestBody, "POST");
+            return resolve(response);
 
         } catch (error) {
             return reject(error);
@@ -234,31 +159,60 @@ const userDetails = function (userId, token) {
 
             const userDetailsAPIUrl =
                 apiBaseUrl + constants.endpoints.USER_DETAILS;
+            let requestBody = { userId: userId };
+            let userDetails = await httpCall(userDetailsAPIUrl, token, requestBody, "POST");
+            return resolve(userDetails);
+
+        } catch (error) {
+            return reject(error);
+        }
+    });
+}
+
+
+/**
+* Common http request call 
+* @name httpCall
+* @param {String} url filePath of the file to upload
+* @param {String} token user access token
+* @param {Json} requestBody body of the request
+* @returns {Json} - consists of api response body
+*/
+function httpCall(url, token, requestBody= "", type = "") {
+    return new Promise(async (resolve, reject) => {
+        try {
+
             let options = {
                 "headers": {
-                    "content-type": "application/json",
+                    'Content-Type': "application/json",
+                    "X-authenticated-user-token": token,
                     "authorization": process.env.AUTHORIZATION,
-                    "x-authenticated-user-token": token,
-                },
-                json: { userId: userId }
+                    "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN
+                }
             };
-            request.post(userDetailsAPIUrl, options, callback);
 
+            let apiUrl = url;
+
+            if (type == "POST") {
+                options["json"] = requestBody;
+                request.post(apiUrl, options, callback);
+            } else {
+                request.get(apiUrl, options, callback);
+            }
             function callback(err, data) {
                 if (err) {
                     return reject({
                         message: constants.apiResponses.USER_MANAGEMENT_SERVICE_DOWN
                     });
                 } else {
-
+                    console.log("data.body---",data.body);
                     return resolve(data.body);
                 }
             }
-
         } catch (error) {
             return reject(error);
         }
-    });
+    })
 }
 
 

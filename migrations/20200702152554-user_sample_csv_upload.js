@@ -11,7 +11,7 @@ module.exports = {
    
     let uploadfileInfo = { name: "users.csv", path: process.env.BULK_USER_SAMPLE_CSV_PATH };
 
-    let uploadFolderPath = "bulkUpload/";
+    let uploadFolderPath = "bulkUploadSamples/";
     
     let endPoint = "";
 

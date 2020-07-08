@@ -11,7 +11,7 @@ module.exports = {
    
     let uploadfileInfo = { name: "entityMapping.csv", path: process.env.BULK_ENTITY_MAPPING_SAMPLE_CSV_PATH };
 
-    let uploadFolderPath = "bulkUpload/";
+    let uploadFolderPath = "bulkUploadSamples/";
     
     let endPoint = "";
 

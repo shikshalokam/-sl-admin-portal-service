@@ -192,7 +192,7 @@ module.exports = class Entities extends Abstract {
   subEntityList(req) {
     return new Promise(async (resolve, reject) => {
 
-      if (!(req.params._id || req.body.entities)) {
+      if (!(req.params._id)) {
         return resolve({
           status: httpStatusCode.bad_request.status,
           message: constants.apiResponses.ENTITY_ID_NOT_FOUND
@@ -378,11 +378,11 @@ module.exports = class Entities extends Abstract {
 
 
   /**
-  * @api {get} /admin-service/api/v1/entities/stateCreateForm
+  * @api {get} /admin-service/api/v1/entities/stateCreationForm
   * Get state create form
   * @apiVersion 1.0.0
   * @apiGroup Entities
-  * @apiSampleRequest /admin-service/api/v1/entities/stateCreateForm
+  * @apiSampleRequest /admin-service/api/v1/entities/stateCreationForm
   * @apiUse successBody
   * @apiUse errorBody
   * @apiParamExample {json} Response:
@@ -478,16 +478,16 @@ module.exports = class Entities extends Abstract {
   /**
    * Get state create form
    * @method
-   * @name stateCreateForm
+   * @name stateCreationForm
    * @param {Object} req - requested data.
    * @returns {JSON} - response consist of state create form
    */
 
-  stateCreateForm(req) {
+  stateCreationForm(req) {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let result = await entitiesHelper.stateCreateForm();
+        let result = await entitiesHelper.stateCreationForm();
         return resolve(result);
 
       } catch (error) {
@@ -597,12 +597,12 @@ module.exports = class Entities extends Abstract {
 
 
   /**
-  * @api {get} /admin-service/api/v1/entities/bulkEntityMappingUploadSampleFile 
+  * @api {get} /admin-service/api/v1/entities/bulkEntityMappingSampleFile 
   * Sample csv for entity mapping  
   * @apiVersion 1.0.0
   * @apiGroup Entities
   * @apiHeader {String} X-authenticated-user-token Authenticity token
-  * @apiSampleRequest /admin-service/api/v1/entities/bulkEntityMappingUploadSampleFile
+  * @apiSampleRequest /admin-service/api/v1/entities/bulkEntityMappingSampleFile
   * @apiUse successBody
   * @apiUse errorBodyuser
   * @apiParamExample {json} Response:
@@ -624,11 +624,11 @@ module.exports = class Entities extends Abstract {
    * @returns {json} Response consists of sample csv info
   */
  
-  bulkEntityMappingUploadSampleFile(req) {
+ bulkEntityMappingSampleFile(req) {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let sampleCsvFile = await entitiesHelper.bulkEntityMappingUploadSampleFile(req.userDetails.userToken);
+        let sampleCsvFile = await entitiesHelper.bulkEntityMappingSampleFile(req.userDetails.userToken);
         return resolve(sampleCsvFile);
 
       } catch (error) {
