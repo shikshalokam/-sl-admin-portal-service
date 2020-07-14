@@ -115,7 +115,6 @@ module.exports = class UserCreationHelper {
                     await Promise.all(files.map(async function (fileData) {
                         let uploadResp = await kendraService.uploadFile(fileCompletePath,
                             fileData, req.userDetails.userToken);
-                        uploadResp = JSON.parse(uploadResp);
                         if (uploadResp.status != httpStatusCode["ok"].status) {
                             reject(uploadResp);
                         }
@@ -310,13 +309,12 @@ module.exports = class UserCreationHelper {
     * To get request details.
     * @method
     * @name  getDownloadableUrls
-    * @param {String} token - user access token
     * @param {String} requestId - bulk upload request id.
     * @param {String} fileType - success,input or failure csv type
     * @returns {json} Response consists downloadable url
     */
 
-    static getDownloadableUrls(token, requestId, fileType) {
+    static getDownloadableUrls(requestId, fileType) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -333,7 +331,7 @@ module.exports = class UserCreationHelper {
                     } else {
                         fileInfo = requestDoc.inputFile;
                     }
-                    let response = await kendraService.getDownloadableUrls(fileInfo, token);
+                    let response = await kendraService.getDownloadableUrls(fileInfo);
                     resolve(response);
 
                 } else {
@@ -508,12 +506,10 @@ function _checkAccess(token, userId) {
 
     return new Promise(async (resolve, reject) => {
         try {
-            let profileInfo =
+            let profileData =
                 await sunbirdService.getUserProfileInfo(token, userId);
 
             let response;
-            let profileData = JSON.parse(profileInfo);
-
             let roles;
             if (profileData.result
                 && profileData.result.response
@@ -651,8 +647,6 @@ function _bulkUploadEntities(bulkRequestId, fileCompletePath, token, entityType,
             let uploadResponse = await kendraService.uploadFile(ROOT_PATH + process.env.BATCH_FOLDER_PATH + successFile,
                 userId + "/" + successFile, token);
 
-            uploadResponse = JSON.parse(uploadResponse);
-
             if (uploadResponse.status == httpStatusCode["ok"].status) {
 
                 let successFileData = {
@@ -706,8 +700,6 @@ function _entityMapping(bulkRequestId,
                 let successFile = gen.utils.generateUniqueId() + "_success.csv";
                 let uploadResponse = await kendraService.uploadFile(filePath,
                     userId + "/" + successFile, userToken);
-
-                uploadResponse = JSON.parse(uploadResponse);
 
                 if (uploadResponse.status == httpStatusCode["ok"].status) {
 

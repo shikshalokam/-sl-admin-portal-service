@@ -554,7 +554,7 @@ module.exports = class Entities extends Abstract {
    * @apiHeader {String} X-authenticated-user-token Authenticity token
    * @apiSampleRequest /admin-service/api/v1/entities/bulkUploadSampleFile
    * @apiUse successBody
-   * @apiUse errorBodyuser
+   * @apiUse errorBody
    * @apiParamExample {json} Response:
    * {
     "message": "Url's generated successfully",
@@ -578,7 +578,7 @@ module.exports = class Entities extends Abstract {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let sampleCsvFile = await entitiesHelper.bulkUploadSampleFile(req.userDetails.userToken);
+        let sampleCsvFile = await entitiesHelper.bulkUploadSampleFile();
         return resolve(sampleCsvFile);
       } catch (error) {
 
@@ -604,7 +604,7 @@ module.exports = class Entities extends Abstract {
   * @apiHeader {String} X-authenticated-user-token Authenticity token
   * @apiSampleRequest /admin-service/api/v1/entities/bulkEntityMappingSampleFile
   * @apiUse successBody
-  * @apiUse errorBodyuser
+  * @apiUse errorBody
   * @apiParamExample {json} Response:
   * {
    "message": "Url's generated successfully",
@@ -628,7 +628,7 @@ module.exports = class Entities extends Abstract {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let sampleCsvFile = await entitiesHelper.bulkEntityMappingSampleFile(req.userDetails.userToken);
+        let sampleCsvFile = await entitiesHelper.bulkEntityMappingSampleFile();
         return resolve(sampleCsvFile);
 
       } catch (error) {

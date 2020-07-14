@@ -75,7 +75,7 @@ const getUserProfileInfo = function (token, userId) {
                     message: constants.apiResponses.SUNBIRD_SERVICE_DOWN
                 });
             } else {
-                return resolve(data.body);
+                return resolve(JSON.parse(data.body));
             }
         }
     });

@@ -3,13 +3,15 @@ const fs = require('fs');
 
 const https = require('https');
 const request = require('request');
+var path = require('path');
+const appPath = path.join(__dirname, '..');
 
 module.exports = {
   async up(db) {
 
     global.migrationMsg = "Upload bulk entity sample csv to cloud"
    
-    let uploadfileInfo ={ name: "entities.csv", path: process.env.BULK_ENTITIES_SAMPLE_CSV_PATH };
+    let uploadfileInfo ={ name: "entities.csv", path: "/public/bulkUploadSamples/entities.csv" };
 
     let uploadFolderPath = "bulkUploadSamples/";
     
@@ -44,7 +46,7 @@ module.exports = {
           formData: {
             filePath: uploadFolderPath+file.name,
             bucketName: bucketName,
-            file: fs.createReadStream(file.path) 
+            file: fs.createReadStream(appPath+file.path) 
   
           }
         };

@@ -184,7 +184,7 @@ module.exports = class Users extends Abstract {
    * "dateofbirth":"1994-0-01"
    * }
    * @apiUse successBody
-   * @apiUse errorBodyuser
+   * @apiUse errorBody
    * @apiParamExample {json} Response:
    * {
    *  "message": "User created successfully",
@@ -240,7 +240,7 @@ module.exports = class Users extends Abstract {
   * @apiHeader {String} X-authenticated-user-token Authenticity token
   * @apiSampleRequest /admin-service/api/v1/users/update
   * @apiUse successBody
-  * @apiUse errorBodyuser
+  * @apiUse errorBody
   * @apiParamExample {json} Response:
  */
 
@@ -286,7 +286,7 @@ module.exports = class Users extends Abstract {
   * @apiHeader {String} X-authenticated-user-token Authenticity token
   * @apiSampleRequest /admin-service/api/v1/users/activate/a082787f-8f8f-42f2-a706-35457ca6f1fd
   * @apiUse successBody
-  * @apiUse errorBodyuser
+  * @apiUse errorBody
   * @apiParamExample {json} Response:
   * 
   * {
@@ -339,7 +339,7 @@ module.exports = class Users extends Abstract {
 * @apiHeader {String} X-authenticated-user-token Authenticity token
 * @apiSampleRequest /admin-service/api/v1/users/inactivate/a082787f-8f8f-42f2-a706-35457ca6f1fd
 * @apiUse successBody
-* @apiUse errorBodyuser
+* @apiUse errorBody
 * @apiParamExample {json} Response:
 * 
 * {
@@ -392,7 +392,7 @@ module.exports = class Users extends Abstract {
      * @apiHeader {String} X-authenticated-user-token Authenticity token
      * @apiSampleRequest /admin-service/api/v1/users/details/:id
      * @apiUse successBody
-     * @apiUse errorBodyuser
+     * @apiUse errorBody
      * @apiParamExample {json} Response:
      * 
      * {
@@ -488,7 +488,7 @@ module.exports = class Users extends Abstract {
      * @apiHeader {String} X-authenticated-user-token Authenticity token
      * @apiSampleRequest /admin-service/api/v1/users/bulkUploadSampleFile
      * @apiUse successBody
-     * @apiUse errorBodyuser
+     * @apiUse errorBody
     */
 
   /**
@@ -503,7 +503,7 @@ module.exports = class Users extends Abstract {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let sampleCsvFile = await usersHelper.bulkUploadSampleFile(req.userDetails.userToken);
+        let sampleCsvFile = await usersHelper.bulkUploadSampleFile();
         return resolve(sampleCsvFile);
 
       } catch (error) {

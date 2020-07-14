@@ -5,6 +5,9 @@
  * Description : Platform roles related functionality.
  */
 
+
+const sessionHelpers = require(ROOT_PATH + "/generics/helpers/sessions");
+
 /**
    * PlatformRolesHelper
    * @class
@@ -14,14 +17,14 @@ module.exports = class PlatformRolesHelper {
     /**
       * To get all platform roles
       * @method
-      * @name all
+      * @name list
       * @param {Object} [queryParameter = "all"] - Filtered query data.
       * @param {Array} [fieldsArray = {}] - Projected data.   
       * @param {Object} [skipFields = "none" ]
       * @returns {Object} returns a platform roles information
      */
 
-    static all(queryParameter = "all", fieldsArray = "all", skipFields = "none") {
+    static list(queryParameter = "all", fieldsArray = "all", skipFields = "none") {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -53,6 +56,36 @@ module.exports = class PlatformRolesHelper {
                 }
                 return resolve({ message: constants.apiResponses.PLATFORMROLES_FOUND, result: platformRolesDoc });
 
+            } catch (error) {
+                return reject(error);
+            }
+        })
+    }
+
+    /**
+     * To get all platform roles
+     * @method
+     * @name getRoles
+     * @param {Object} [queryParameter = "all"] - Filtered query data.
+     * @param {Array} [fieldsArray = {}] - Projected data.   
+     * @param {Object} [skipFields = "none" ]
+     * @returns {Object} returns a platform roles information
+    */
+   static getRoles() {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                let roles = sessionHelpers.get("customRoles");
+                if (!roles) {
+
+                    let rolesDoc = await this.list({ isDeleted: false,isHidden: false }, ["code", "title"]);
+                    if (rolesDoc && rolesDoc.result) {
+                        roles = rolesDoc.result;
+                        sessionHelpers.set("customRoles", rolesDoc.result);
+                    }
+
+                }
+                resolve({ message : constants.apiResponses.PLATFORMROLES_FOUND, result :roles });
             } catch (error) {
                 return reject(error);
             }

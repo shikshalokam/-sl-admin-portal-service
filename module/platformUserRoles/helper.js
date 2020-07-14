@@ -5,7 +5,7 @@
  * Description : All platform user profile helper related information.
  */
 
-let userManagementService = 
+const userManagementService = 
 require( SERVICES_PATH+"/user-management");
 
 module.exports = class platFormUserProfileHelper {

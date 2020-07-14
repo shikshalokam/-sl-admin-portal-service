@@ -5,13 +5,21 @@
  * Description : Consist of user creation and user related information.
  */
 
-let formsHelper = require(MODULES_BASE_PATH + "/forms/helper");
-let userManagementService =
-    require(SERVICES_PATH+"/user-management");
-let sunbirdService =
-    require(SERVICES_PATH+"/sunbird");
-let kendraService =
-    require(SERVICES_PATH+"/kendra-service");
+const entitiesHelper = require("../entities/helper");
+const { response } = require("express");
+const { constants } = require("fs");
+
+const formsHelper = require(MODULES_BASE_PATH + "/forms/helper");
+const userManagementService =
+    require(SERVICES_PATH + "/user-management");
+const sunbirdService =
+    require(SERVICES_PATH + "/sunbird");
+const kendraService =
+    require(SERVICES_PATH + "/kendra-service");
+const rolesHelper = require(MODULES_BASE_PATH + "/roles/helper");
+const entityTypeHelper = require(MODULES_BASE_PATH + "/entityTypes/helper");
+const platformRolesHelper = require(MODULES_BASE_PATH + "/platformRoles/helper");
+const sessionHelpers = require(ROOT_PATH + "/generics/helpers/sessions");
 
 module.exports = class UsersHelper {
 
@@ -36,104 +44,75 @@ module.exports = class UsersHelper {
                     });
 
                 if (!formData[0]) {
-
                     return resolve({
                         status: httpStatusCode["bad_request"].status,
                         message:
                             constants.apiResponses.USER_CREATE_FORM_NOT_FOUND
                     });
-
                 }
 
-                let stateInfo = await database.models.entities.find(
-                    {
-                        entityType: constants.common.STATE_ENTITY_TYPE
-                    },
-                    {
-                        entityTypeId: 1,
-                        _id: 1,
-                        metaInformation: 1,
-                        groups: 1,
-                        childHierarchyPath: 1
-                    }
-                ).lean();
+                let projection = ["entityTypeId", "metaInformation", "groups", "childHierarchyPath"];
 
+                let stateInfo = await entitiesHelper.entityDocuments({
+                    entityType: constants.common.STATE_ENTITY_TYPE
+                }, projection);
+
+                stateInfo = stateInfo.data;
                 let states = [];
                 let stateListWithSubEntities = [];
                 let stateInfoWithSub = {};
 
-                await Promise.all(stateInfo.map(async function (state) {
-
+                stateInfo.map(async function (state) {
                     if (state.groups) {
-
                         let found =
                             await _checkStateWithSubEntities(
                                 state.groups,
                                 state.entityTypeId
                             );
-
                         if (found && state.groups) {
                             stateInfoWithSub[state._id] = state.childHierarchyPath;
                         }
                     }
-
                     states.push({
                         label: state.metaInformation.name,
                         value: state._id
                     });
-                }));
+                });
+
                 if (states) {
                     states = states.sort(gen.utils.sortArrayOfObjects('label'));
                 }
 
-
-                let profileInfo =
-                    await sunbirdService.getUserProfileInfo(token, userId);
-
-                let organisations = [];
-
-                let userProfileInfo = JSON.parse(profileInfo);
-                organisations = await _getOrganisationlist(userProfileInfo, userId, token);
-                let platformRoles =
-                    await database.models.platformRolesExt.find({ isDeleted: false }, {
-                        code: 1,
-                        title: 1,
-                        isHidden: 1
-                    }).lean();
-
+                let organisations = await _getOrganisationlist(token, userId);
                 let roles = [];
-                let sunBirdRoles =
-                    await cassandraDatabase.models.role.findAsync(
-                        {
-                            status: 1
-                        }, {
-                        select: ["id", "name"], raw: true, allow_filtering: true
-                    });
+                
+                let rolesDoc = await platformRolesHelper.getRoles();
+                let sunbirdRolesDoc = await rolesHelper.list();
 
-                if (sunBirdRoles) {
-                    sunBirdRoles.map(function (sunBirdrole) {
-
-                        if (sunBirdrole.id != constants.common.PUBLIC_ROLE) {
-                            roles.push({
-                                label: sunBirdrole.name,
-                                value: sunBirdrole.id
-                            })
+                if (sunbirdRolesDoc.result) {
+                    sunbirdRolesDoc.result.map(function (sunbirdRole) {
+                        if (sunbirdRole) {
+                            let role = {
+                                label: sunbirdRole.name,
+                                value: sunbirdRole.id
+                            }
+                            roles.push(role);
                         }
-
                     });
                 }
 
-                if (platformRoles.length > 0) {
-
-                    await Promise.all(platformRoles.map(platformRole => {
-                        if (!platformRole.isHidden || platformRole.isHidden != true) {
-                            roles.push({
-                                label: platformRole.title,
-                                value: platformRole.code
-                            })
+                let rolesDocuments = [];
+                if (rolesDoc && rolesDoc.result) {
+                    rolesDocuments = rolesDoc.result;
+                    rolesDocuments.map(function (roleDoc) {
+                        if (roleDoc) {
+                            let role = {
+                                label: roleDoc.title,
+                                value: roleDoc.code
+                            }
+                            roles.push(role);
                         }
-
-                    }));
+                    });
                 }
 
                 if (roles) {
@@ -142,9 +121,7 @@ module.exports = class UsersHelper {
 
 
                 stateListWithSubEntities.push(stateInfoWithSub);
-
                 let forms = [];
-
 
                 formData[0].value.map(
                     async function (fields) {
@@ -301,57 +278,38 @@ module.exports = class UsersHelper {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let profileData =
-                    await sunbirdService.getUserProfileInfo(userToken, userId);
-                profileData = JSON.parse(profileData);
-                let userCustomeRole = await database.models.userExtension.findOne({ userId: orgAdminUserId }, { roles: 1 });
+                let profileData = await sunbirdService.getUserProfileInfo(userToken, userId);
                 if (profileData.responseCode == constants.common.RESPONSE_OK) {
 
+                    let role = await _getUserRoles(orgAdminUserId);
+
                     let orgInfo = [];
-                    let organisationsList = await _getOrganisationlist(profileData, orgAdminUserId, userToken);
-                    let apiAccessUserData =
-                        await sunbirdService.getUserProfileInfo(userToken, orgAdminUserId);
-                    apiAccessUserData = JSON.parse(apiAccessUserData);
-                    if (apiAccessUserData.responseCode != constants.common.RESPONSE_OK) {
-                        reject({
-                            status: httpStatusCode["bad_request"].status,
-                            message: constants.apiResponses.INVALID_ACCESS
+
+                    let organisationsList = await _getOrganisationlist(userToken, orgAdminUserId);
+
+                    let userDocument = await database.models.userExtension.findOne({ userId: userId }, { organisations: 1, organisationRoles: 1 });
+
+                    let usersOrganisations = [];
+                    if (userDocument && userDocument.organisations) {
+                        userDocument.organisations.map(organisations => {
+                            usersOrganisations.push(organisations.value);
                         });
                     }
-                    let orgFound = false;
-                    if (userCustomeRole && userCustomeRole.roles) {
-                        userCustomeRole.roles.map(custRole => {
-                            if (custRole.code == constants.common.PLATFROM_ADMIN_ROLE) {
-                                orgFound = true;
-                            }
-                        })
+
+
+                    let grantAccess = false;
+
+                    if (role.includes(constants.common.PLATFROM_ADMIN_ROLE)) {
+                        grantAccess = true;
                     }
 
-                    let adminUserOrganisation = [];
-                    if (apiAccessUserData.result.response &&
-                        apiAccessUserData.result.response.organisations &&
-                        apiAccessUserData.result.response.organisations.length > 0) {
-                        apiAccessUserData.result.response.organisations.map(data => {
-                            adminUserOrganisation.push(data.organisationId);
-
-                        })
-
-                    }
-                    if (adminUserOrganisation && adminUserOrganisation.length > 0) {
-
-                        if (profileData.result.response &&
-                            profileData.result.response.organisations &&
-                            profileData.result.response.organisations.length > 0) {
-                            profileData.result.response.organisations.map(data => {
-
-                                if (adminUserOrganisation.includes(data.organisationId)) {
-                                    orgFound = true;
-                                }
-                            });
+                    organisationsList.map(orgInfo => {
+                        if (usersOrganisations.includes(orgInfo.value)) {
+                            grantAccess = true;
                         }
-                    }
+                    });
 
-                    if (orgFound == false) {
+                    if (grantAccess == false) {
                         reject({
                             status: httpStatusCode["bad_request"].status,
                             message: constants.apiResponses.INVALID_ACCESS
@@ -359,139 +317,105 @@ module.exports = class UsersHelper {
 
                     } else {
                         let userDetails = {};
-                        if (profileData.result) {
-                            let platformRoles =
-                                await database.models.platformRolesExt.find({ isDeleted: false }, {
-                                    code: 1,
-                                    title: 1,
-                                    isHidden: 1
-                                }).lean();
+                        let roles = [];
+                        
+                        let rolesDoc = await platformRolesHelper.getRoles();
+                        let sunbirdRolesDoc = await rolesHelper.list();
 
-                            let roles = [];
-                            let sunBirdRoles =
-                                await cassandraDatabase.models.role.findAsync(
-                                    {
-                                        status: 1
-                                    }, {
-                                    select: ["id", "name"], raw: true, allow_filtering: true
-                                });
-
-                            if (sunBirdRoles) {
-                                sunBirdRoles.map(function (sunBirdrole) {
-
-                                    roles.push({
-                                        label: sunBirdrole.name,
-                                        value: sunBirdrole.id
-                                    })
- 
-                                });
-                            }
-
-                            if (platformRoles.length > 0) {
-                                await Promise.all(platformRoles.map(platformRole => {
-
-                                    if (!platformRole.isHidden || platformRole.isHidden != true) {
-                                        roles.push({
-                                            label: platformRole.title,
-                                            value: platformRole.code
-                                        })
+                        if (sunbirdRolesDoc.result) {
+                            sunbirdRolesDoc.result.map(function (sunbirdRole) {
+                                if (sunbirdRole) {
+                                    let role = {
+                                        label: sunbirdRole.name,
+                                        value: sunbirdRole.id
                                     }
-                                }));
-                            }
-
-                            if (roles) {
-                                roles = roles.sort(gen.utils.sortArrayOfObjects("label"));
-                            }
-
-                            let userDoc = await database.models.userExtension.findOne({ userId: userId }, { organisationRoles: 1 });
-                            if (profileData.result.response &&
-                                profileData.result.response.organisations &&
-                                profileData.result.response.organisations.length > 0) {
-                                profileData.result.response.organisations.map(data => {
-                                    var results = organisationsList.filter(function (orgData) {
-                                        return orgData.value === data.organisationId
-                                    });
-
-                                    let allRoles = [];
-                                    if (data && data.roles && data.roles.length > 0) {
-                                        data.roles.map(function (sunbirdUserRole) {
-
-                                            if (sunbirdUserRole) {
-                                                let roleInfo = roles.filter(function (roleDetails) {
-                                                    return roleDetails.value === sunbirdUserRole
-                                                });
-                                                allRoles.push(roleInfo[0]);
-                                            }
-                                        })
-                                    }
-
-                                    if (userDoc) {
-                                        if (userDoc.organisationRoles) {
-                                            let orgRolesOfUser = [];
-                                            userDoc.organisationRoles.map(userRoles => {
-                                                if (data.organisationId == userRoles.organisationId) {
-                                                    orgRolesOfUser.push(...userRoles.roles);
-                                                }
-                                            })
-
-                                            orgRolesOfUser.map(element => {
-                                                let roleInfo = roles.filter(function (roleDetails) {
-                                                    return roleDetails.value === element.code
-                                                });
-                                                allRoles.push(roleInfo[0]);
-                                            });
-                                        }
-                                    }
-
-                                    orgInfo.push({
-                                        label: results[0].label,
-                                        value: data.organisationId,
-                                        roles: allRoles
-                                    })
-                                });
-                            }
-
-                            let gender = profileData.result.response.gender == "M" ? "Male" : profileData.result.response.gender == "F" ? "Female" : "";
-
-                            let reponseObj = profileData.result.response;
-
-                            let userDeactiveStatus = await _checkDeactiveAccess(profileData, orgAdminUserId);
-
-                            userDetails = {
-                                canDeactivate: userDeactiveStatus.canDeactivate,
-                                firstName: reponseObj.firstName,
-                                gender: gender,
-                                userName: reponseObj.userName,
-                                lastName: reponseObj.lastName,
-                                email: reponseObj.email,
-                                phoneNumber: reponseObj.phone,
-                                status: reponseObj.status,
-                                dob: reponseObj.dob,
-                                lastLoginTime: reponseObj.lastLoginTime,
-                                createdDate: reponseObj.createdDate,
-                                organisations: orgInfo,
-                                roles: [],
-                                organisationsList: []
-                            }
-
-
-                            userDetails.roles = roles;
-                            userDetails.organisationsList = organisationsList;
-                            resolve({ result: userDetails });
-
-                        } else {
-
-                            reject({ message: profileData.params.errmsg });
+                                    roles.push(role);
+                                }
+                            });
                         }
+
+                        let rolesDocuments = [];
+                        if (rolesDoc && rolesDoc.result) {
+                            rolesDocuments = rolesDoc.result;
+                            rolesDocuments.map(function (roleDoc) {
+                                if (roleDoc) {
+                                    let role = {
+                                        label: roleDoc.title,
+                                        value: roleDoc.code
+                                    }
+                                    roles.push(role);
+                                }
+                            });
+                        }
+
+
+                        if (roles) {
+                            roles = roles.sort(gen.utils.sortArrayOfObjects("label"));
+                        }
+
+                        let usersOrganisationList = [];
+                        if (userDocument.organisations) {
+                            userDocument.organisations.map(userOrg => {
+                                usersOrganisationList.push(userOrg);
+                            });
+                        }
+
+
+                        let orgInfo = [];
+                        if (userDocument.organisationRoles) {
+
+                            userDocument.organisationRoles.map(userOrgRoles => {
+                                let organisationData = usersOrganisationList.filter(function (organisation) {
+                                    return organisation.value === userOrgRoles.organisationId
+                                });
+
+
+                                if (organisationData[0]) {
+                                    orgInfo.push({
+                                        label: organisationData[0].label,
+                                        value: organisationData[0].value,
+                                        roles: userOrgRoles.roles
+                                    })
+                                }
+                            });
+                        }
+
+                        let gender = profileData.result.response.gender == "M" ? "Male" : profileData.result.response.gender == "F" ? "Female" : "";
+                        let reponseObj = profileData.result.response;
+                        let userDeactiveStatus = await _checkDeactiveAccess(profileData, orgAdminUserId);
+
+                        userDetails = {
+                            canDeactivate: userDeactiveStatus.canDeactivate,
+                            firstName: reponseObj.firstName,
+                            gender: gender,
+                            userName: reponseObj.userName,
+                            lastName: reponseObj.lastName,
+                            email: reponseObj.email,
+                            phoneNumber: reponseObj.phone,
+                            status: reponseObj.status,
+                            dob: reponseObj.dob,
+                            lastLoginTime: reponseObj.lastLoginTime,
+                            createdDate: reponseObj.createdDate,
+                            organisations: orgInfo,
+                            roles: [],
+                            organisationsList: []
+                        }
+
+
+                        userDetails.roles = roles;
+                        userDetails.organisationsList = organisationsList;
+                        resolve({ result: userDetails });
 
 
                     }
 
                 } else {
+
                     reject({ message: profileData.params.errmsg });
                 }
+
             } catch (error) {
-               return reject(error);
+                return reject(error);
             }
         })
     }
@@ -500,11 +424,10 @@ module.exports = class UsersHelper {
     * To download bulk upload user sample csv
     * @method
     * @name  bulkUploadSampleFile
-    * @param  {String} userToken  - user access token
     * @returns {json} Response consists sample csv data
     */
 
-    static bulkUploadSampleFile(token) {
+    static bulkUploadSampleFile() {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -514,7 +437,7 @@ module.exports = class UsersHelper {
                     cloudStorage: process.env.CLOUD_STORAGE,
                 }
 
-                let response = await kendraService.getDownloadableUrls(fileInfo, token);
+                let response = await kendraService.getDownloadableUrls(fileInfo);
                 resolve(response);
 
             } catch (error) {
@@ -523,17 +446,17 @@ module.exports = class UsersHelper {
         })
     }
 
-      /**
-      * To get all users
-      * @method
-      * @name all
-      * @param {Object} [queryParameter = "all"] - Filtered query data.
-      * @param {Array} [fieldsArray = {}] - Projected data.   
-      * @param {Object} [skipFields = "none" ]
-      * @returns {Object} returns a entity types list from the filtered data.
-     */
+    /**
+    * To get all users
+    * @method
+    * @name list
+    * @param {Object} [queryParameter = "all"] - Filtered query data.
+    * @param {Array} [fieldsArray = {}] - Projected data.   
+    * @param {Object} [skipFields = "none" ]
+    * @returns {Object} returns a entity types list from the filtered data.
+   */
 
-    static all(queryParameter = "all", fieldsArray = "all", skipFields = "none") {
+    static list(queryParameter = "all", fieldsArray = "all", skipFields = "none") {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -586,10 +509,10 @@ module.exports = class UsersHelper {
 
                 let usersData =
                     await database.models.userExtension.findOneAndUpdate(queryParameter, updateObject).lean();
-                if(usersData){
+                if (usersData) {
                     return resolve({ message: constants.apiResponses.USER_UPDATED, result: usersData });
                 }
-                
+
 
             } catch (error) {
                 return reject(error);
@@ -597,7 +520,68 @@ module.exports = class UsersHelper {
         })
 
     }
-};
+
+    /**
+      * To get all user roles
+      * @method
+      * @name getUserRoles
+      * @param {String} userId - userId.
+      * @returns {Object} returns the roles 
+     */
+    static getUserRoles(userId) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                let roles = _getUserRoles(userId);
+                resolve({ result: roles, message: constants.apiResponses.ROLES_FOUND });
+            } catch (error) {
+                return reject(error);
+            }
+        })
+
+    }
+
+}
+
+/**
+ * To get user roles
+ * @method
+ * @name _getUserRoles
+ * @param {String} userId -  user id
+ * @returns {json} Response consists of user roles
+*/
+function _getUserRoles(userId) {
+
+    return new Promise(async (resolve, reject) => {
+        try {
+            let roles = [];
+            let userData = await this.database.models.userExtension.findOne({ userId: userId },
+                { roles: 1, organisationRoles: 1, });
+            if (userData) {
+                if (userData.roles) {
+                    userData.roles.map(role => {
+                        if (!roles.includes(role.code)) {
+                            roles.push(role.code);
+                        }
+                    });
+                }
+                if (userData && userData.organisationRoles && userData.organisationRoles.length > 0) {
+                    userData.organisationRoles.map(userRole => {
+                        userRole.roles.map(role => {
+                            if (!roles.includes(role.code)) {
+                                roles.push(role.code);
+                            }
+                        })
+                    })
+                }
+            }
+            resolve(roles);
+
+        } catch (error) {
+            return reject(error);
+        }
+    })
+}
 
 /**
   * check state has subEntities
@@ -611,25 +595,30 @@ module.exports = class UsersHelper {
 function _checkStateWithSubEntities(groups, entityTypeId) {
     return new Promise(async (resolve, reject) => {
         try {
-
-
             let entityTypeList = Object.keys(groups);
-            let entityTypeDoc =
-                await database.models.entityTypes.findOne({
-                    _id: entityTypeId
-                }, { immediateChildrenEntityType: 1 }).lean();
-            if (entityTypeDoc && entityTypeDoc.immediateChildrenEntityType &&
-                entityTypeDoc.immediateChildrenEntityType.length > 0) {
+            let projection = ["immediateChildrenEntityType"];
+            let entityTypeDoc = await entityTypeHelper.list({
+                _id: entityTypeId
+            }, projection);
 
-                Promise.all(entityTypeList.map(async function (types) {
-                    if (entityTypeDoc.immediateChildrenEntityType.includes(types)) {
-                        resolve(true);
-                    }
-                }));
-                resolve(false)
+            if (entityTypeDoc.result) {
+                entityTypeDoc = entityTypeDoc.result[0];
+                if (entityTypeDoc && entityTypeDoc.immediateChildrenEntityType &&
+                    entityTypeDoc.immediateChildrenEntityType.length > 0) {
+
+                    Promise.all(entityTypeList.map(async function (types) {
+                        if (entityTypeDoc.immediateChildrenEntityType.includes(types)) {
+                            resolve(true);
+                        }
+                    }));
+                    resolve(false)
+                } else {
+                    resolve(false);
+                }
             } else {
                 resolve(false);
             }
+
         } catch (err) {
             return reject(err);
         }
@@ -647,93 +636,56 @@ function _checkStateWithSubEntities(groups, entityTypeId) {
   * @returns {boolean} return boolen value
   * */
 
-function _getOrganisationlist(userProfileInfo, userId, token) {
+function _getOrganisationlist(token, userId = "") {
     return new Promise(async (resolve, reject) => {
         try {
 
-            let organisations = [];
 
-            let profileRoles;
-            if (userProfileInfo &&
-                userProfileInfo.result &&
-                userProfileInfo.result.response &&
-                userProfileInfo.result.response.roles
-            ) {
-                profileRoles = userProfileInfo.result.response.roles;
-            }
+            let roles = await _getUserRoles(userId);
+            let organisationsList = [];
+            let sessionOrganisationData = sessionHelpers.get(constants.common.ORGANISATIONS_SESSION);
 
-            let userCustomeRole = await database.models.userExtension.findOne({ userId: userId }, { roles: 1 });
+            if (sessionOrganisationData && sessionOrganisationData.length > 0) {
+                organisationsList = sessionOrganisationData;
+            } else {
 
-            if (userCustomeRole && userCustomeRole.roles && userCustomeRole.roles.length > 0) {
-                userCustomeRole.roles.map(customRole => {
-                    if (!profileRoles.includes(customRole.code)) {
-                        profileRoles.push(customRole.code)
-                    }
-                })
-            }
-
-            if (profileRoles.includes(constants.common.PLATFROM_ADMIN_ROLE)) {
                 let request = {
                     "filters": {
                     }
                 }
+
                 let organisationList = await sunbirdService.searchOrganisation(request, token);
                 if (organisationList.responseCode == constants.common.RESPONSE_OK) {
                     if (organisationList.result && organisationList.result.response &&
                         organisationList.result.response && organisationList.result.response.content) {
                         await Promise.all(organisationList.result.response.content.map(async function (orgInfo) {
-
-                            let orgDetails = {
+                            organisationsList.push({
                                 label: orgInfo.orgName,
                                 value: orgInfo.id
-                            }
-                            organisations.push(orgDetails);
-
-                        }))
+                            });
+                        }));
+                        sessionHelpers.set(constants.common.ORGANISATIONS_SESSION, organisationsList);
                     }
                 }
- 
+
             }
-            else if (
-                userProfileInfo &&
-                userProfileInfo.result &&
-                userProfileInfo.result.response &&
-                userProfileInfo.result.response.organisations
-            ) {
+            if (!roles.includes(constants.common.PLATFROM_ADMIN_ROLE)) {
+                let userOrganisations = await database.models.userExtension.findOne({ userId: userId }, { organisations: 1 });
+                let organisations = [];
+                if (userOrganisations && userOrganisations.organisations) {
+                    userOrganisations.organisations.map(organisation => {
+                        organisationsList.map(orgInfo => {
 
-                await Promise.all(
-                    userProfileInfo.result.response.organisations.map(
-                        async function (organisation) {
-
-                            let request = {
-                                "filters": {
-                                    id: organisation.organisationId
-                                }
+                            if (orgInfo.value == organisation.value) {
+                                organisations.push(orgInfo);
                             }
-                            let organisationList = await sunbirdService.searchOrganisation(request, token);
-                            if (organisationList.responseCode == constants.common.RESPONSE_OK) {
-                                if (organisationList.result && organisationList.result.response &&
-                                    organisationList.result.response && organisationList.result.response.content) {
-                                    await Promise.all(organisationList.result.response.content.map(async function (orgInfo) {
-
-                                        organisations.push({
-                                            label: orgInfo.orgName,
-                                            value: orgInfo.id
-                                        });
-
-                                    }))
-                                }
-                            }
-
-                        }));
+                        });
+                    });
+                }
+                resolve(organisations);
+            } else {
+                resolve(organisationsList);
             }
-
-            if (organisations) {
-                organisations = organisations.sort(gen.utils.sortArrayOfObjects('label'));
-            }
-
-            resolve(organisations);
-
         } catch (err) {
             return reject(err);
         }

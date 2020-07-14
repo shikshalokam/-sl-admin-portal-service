@@ -1,9 +1,7 @@
 const moment = require("moment");
 const entityTypesHelper = require(MODULES_BASE_PATH + "/entityTypes/helper");
-
 const kendraService =
     require(SERVICES_PATH + "/kendra-service");
-
 const csv = require('csvtojson');
 
 
@@ -287,7 +285,7 @@ module.exports = class entitiesHelper {
                 ) {
 
                     let getImmediateEntityTypes =
-                        await entityTypesHelper.all({
+                        await entityTypesHelper.list({
                             name: entitiesDocument[0].entityType
                         }, ["immediateChildrenEntityType"]
                         );
@@ -687,11 +685,10 @@ module.exports = class entitiesHelper {
     * To download entities sample Csv
     * @method
     * @name  bulkUploadSampleFile
-    * @param {String} token - user access token
     * @returns {json} Response consists of sample csv file information
     */
 
-    static bulkUploadSampleFile(token) {
+    static bulkUploadSampleFile() {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -702,7 +699,7 @@ module.exports = class entitiesHelper {
                     cloudStorage: process.env.CLOUD_STORAGE,
                 }
 
-                let response = await kendraService.getDownloadableUrls(fileInfo, token);
+                let response = await kendraService.getDownloadableUrls(fileInfo);
                 resolve(response);
             } catch (error) {
                 return reject(error);
@@ -714,11 +711,10 @@ module.exports = class entitiesHelper {
     * To download Entity Mapping Sample Csv
     * @method
     * @name  bulkEntityMappingSampleFile
-    * @param {String} token - user access token
     * @returns {json} Response consists of sample csv file information
     */
 
-    static bulkEntityMappingSampleFile(token) {
+    static bulkEntityMappingSampleFile() {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -728,7 +724,7 @@ module.exports = class entitiesHelper {
                     cloudStorage: process.env.CLOUD_STORAGE,
                 }
 
-                let response = await kendraService.getDownloadableUrls(fileInfo, token);
+                let response = await kendraService.getDownloadableUrls(fileInfo);
 
                 resolve(response);
             } catch (error) {

@@ -82,7 +82,7 @@ module.exports = class BulkUploadRequests extends Abstract {
    * @apiHeader {String} X-authenticated-user-token Authenticity token
    * @apiSampleRequest /admin-service/api/v1/bulkUploadRequests/list
    * @apiUse successBody
-   * @apiUse errorBodyuser
+   * @apiUse errorBody
    * @apiParamExample {json} Response:
    * {
    * "status": 200,
@@ -202,7 +202,7 @@ module.exports = class BulkUploadRequests extends Abstract {
    * @apiHeader {String} X-authenticated-user-token Authenticity token
    * @apiSampleRequest /admin-service/api/v1/bulkUploadRequests/getDownloadableUrls/p0f4n3o1kamjmacu?fileType=input
    * @apiUse successBody
-   * @apiUse errorBodyuser
+   * @apiUse errorBody
    * @apiParamExample {json} Response:
    * {
    * "message": "Url's generated successfully",
@@ -226,7 +226,7 @@ module.exports = class BulkUploadRequests extends Abstract {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let response = await bulkUploadHelper.getDownloadableUrls(req.userDetails.userToken, req.params._id, req.query.fileType);
+        let response = await bulkUploadHelper.getDownloadableUrls(req.params._id, req.query.fileType);
         return resolve(response);
 
       } catch (error) {
@@ -253,7 +253,7 @@ module.exports = class BulkUploadRequests extends Abstract {
   * @apiHeader {String} X-authenticated-user-token Authenticity token
   * @apiSampleRequest /admin-service/api/v1/bulkUploadRequests/statusList
   * @apiUse successBody
-  * @apiUse errorBodyuser
+  * @apiUse errorBody
   * @apiParamExample {json} Response:
   {
    "message": "Status list featched successfully",
@@ -314,7 +314,7 @@ module.exports = class BulkUploadRequests extends Abstract {
    * @apiHeader {String} X-authenticated-user-token Authenticity token
    * @apiSampleRequest /admin-service/api/v1/bulkUploadRequests/types
    * @apiUse successBody
-   * @apiUse errorBodyuser
+   * @apiUse errorBody
    * @apiParamExample {json} Response:
    {
     "message": "Request types featched successfully",

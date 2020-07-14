@@ -6,13 +6,13 @@ module.exports = (req) => {
             req.checkParams('_id').exists().withMessage("required entityType");
         },
         subEntityList: function () {
-            req.checkParams('_id').exists().withMessage("required entityId");
+            req.checkParams('_id').isMongoId().withMessage("Invalid entityId");
         },
         details: function () {
-            req.checkParams('_id').exists().withMessage("required entityId");
+            req.checkParams('_id').isMongoId().withMessage("Invalid entityId");
         },
         relatedEntities: function () {
-            req.checkParams('_id').exists().withMessage("required entityId");
+            req.checkParams('_id').isMongoId().withMessage("required entityId");
         },
         createState: function () {
             req.checkBody('name').exists().withMessage("required name");

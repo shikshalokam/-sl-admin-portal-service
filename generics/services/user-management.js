@@ -56,9 +56,7 @@ const createPlatformUser = function (userDetails, token) {
             let platformUserRolesUrl =
                 apiBaseUrl + constants.endpoints.PLATFORM_USER_CREATE;
             let requestBody = userDetails;
-            console.log(platformUserRolesUrl,"createResponse");
             let createResponse = await httpCall(platformUserRolesUrl, token, requestBody, "POST");
-            console.log(platformUserRolesUrl,"createResponse",createResponse);
             return resolve(createResponse);
 
         } catch (error) {
@@ -84,7 +82,6 @@ const updatePlatFormUser = function (userInfo, token) {
                 apiBaseUrl + constants.endpoints.PLATFORM_USER_UPDATE;
             let requestBody = userInfo;
             let response = await httpCall(platformUserUpdateUrl, token, requestBody, "POST");
-            console.log("response",response);
             return resolve(response);
 
         } catch (error) {
@@ -205,8 +202,7 @@ function httpCall(url, token, requestBody= "", type = "") {
                         message: constants.apiResponses.USER_MANAGEMENT_SERVICE_DOWN
                     });
                 } else {
-                    console.log("data.body---",data.body);
-                    return resolve(data.body);
+                   return resolve(data.body);
                 }
             }
         } catch (error) {

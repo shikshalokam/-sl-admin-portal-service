@@ -20,16 +20,14 @@ const fs = require('fs');
  * @name uploadFile
  * @param {String} filePath filePath of the file to upload
  * @param {String} uploadPath - location of bucket where to upload
- * @param {String} token - logged in user token
  * @returns {json} - upload file details
  */
-function uploadFile(filePath, uploadPath,token) {
+function uploadFile(filePath, uploadPath) {
     return new Promise(async (resolve, reject) => {
         try {
             let options = {
                 "headers": {
                     'Content-Type': "application/json",
-                    "X-authenticated-user-token": token,
                     "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN
                 },
                 formData: {
@@ -62,11 +60,11 @@ function uploadFile(filePath, uploadPath,token) {
                         message: constants.apiResponses.KENDRA_SERVICE_DOWN
                     });
                 } else {
-                    return resolve(data.body);
+                    return resolve(JSON.parse(data.body));
                 }
             }
         } catch (error) {
-            return reject(error);
+            reject(error);
         }
     })
 }
@@ -75,10 +73,9 @@ function uploadFile(filePath, uploadPath,token) {
  * To downloadable Urls for cloud files 
  * @name getDownloadableUrls
  * @param {Json} inputData - cloud storage details
- * @param {String} token - logged in user token
  * @returns {Json} -  api is to get downloadable Urls of files
  */
-function getDownloadableUrls(inputData, token) {
+function getDownloadableUrls(inputData) {
     return new Promise(async function (resolve, reject) {
         try {
             let requestBody = {
@@ -100,7 +97,7 @@ function getDownloadableUrls(inputData, token) {
             let options = {
                 "headers": {
                     'Content-Type': "application/json",
-                    "X-authenticated-user-token": token
+                    "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN
                 },
                 json: requestBody
             };
@@ -115,8 +112,8 @@ function getDownloadableUrls(inputData, token) {
                     return resolve(data.body);
                 }
             }
-        } catch (ex) {
-            reject({ status: "failed", mesage: ex });
+        } catch (error) {
+            reject(error);
         }
     });
 }

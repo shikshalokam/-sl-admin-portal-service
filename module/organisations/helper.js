@@ -5,14 +5,14 @@
  * Description : All platform organisation related information.
  */
 
-let sunbirdService =
+const sunbirdService =
     require(SERVICES_PATH + "/sunbird");
+const formsHelper = require(MODULES_BASE_PATH + "/forms/helper");
+const platformRolesHelper = require(MODULES_BASE_PATH + "/platformRoles/helper");
+const sessionHelpers = require(ROOT_PATH + "/generics/helpers/sessions");
+const rolesHelper = require(MODULES_BASE_PATH + "/roles/helper");
+const usersHelper = require(MODULES_BASE_PATH + "/users/helper");
 
-let formsHelper = require(MODULES_BASE_PATH + "/forms/helper");
-let usersHelper = require(MODULES_BASE_PATH + "/users/helper");
-
-let platformRolesHelper = require(MODULES_BASE_PATH + "/platformRoles/helper");
-let sessionHelpers = require(ROOT_PATH+"/generics/helpers/sessions");
 
 module.exports = class OrganisationsHelper {
 
@@ -22,100 +22,44 @@ module.exports = class OrganisationsHelper {
        * @name list
        * @param {String} token - user access token
        * @param {String} userId - user id
-       * @param {String} pageSize - maximum limit 
-       * @param {String} pageNo - page number
        * @returns {json} Response consists of organisations.
       */
 
-    static list(token, userId, pageSize, pageNo) {
+    static list(token, userId) {
         return new Promise(async (resolve, reject) => {
             try {
-                let profileData = await _getProfileData(token, userId);
-                if (profileData) {
-                    let organisationsList = [];
+                let organisationsList = [];
+                let roles = await _getUserRoles(userId);
+                if (roles.includes(constants.common.PLATFROM_ADMIN_ROLE)) {
+                    organisationsList = await _getOrganisationsDetails(token);
+                } else if (roles.includes(constants.common.ORG_ADMIN_ROLE)) {
 
-                    let roles = profileData.result.response.roles;
+                    let profileData = await _getProfileData(token, userId);
+                    let orgList = profileData.result.response.organisations;
+                    let organisationsIds = [];
 
-                    const fieldsArray = ["roles"];
-                    const queryObject = { userId: userId };
+                    orgList.map(orgInfo => {
+                        organisationsIds.push(orgInfo.organisationId);
+                    });
 
-                    let userData = await usersHelper.all(queryObject, fieldsArray);
-                    if (userData && userData.result && userData.result.length > 0) {
-                        let userCustomeRole = userData.result[0];
-                        if (userCustomeRole && userCustomeRole.roles && userCustomeRole.roles.length > 0) {
-                            userCustomeRole.roles.map(customRole => {
-                                if (!roles.includes(customRole.code)) {
-                                    roles.push(customRole.code)
-                                }
-                            })
+                    organisationsList = await _getOrganisationsDetails(token);
+                    let modifiedOrganisations = [];
+                    organisationsList.map(organisation => {
+                        if (organisationsIds.includes(organisation.value)) {
+                            modifiedOrganisations.push(organisation);
                         }
-                    }
-                    if (roles.includes(constants.common.PLATFROM_ADMIN_ROLE)) {
+                    });
+                    organisationsList = modifiedOrganisations;
+                }
+                if (organisationsList.length > 0) {
 
-                        let  sessionOrganisationData = sessionHelpers.get(constants.common.ORGANISATIONS_SESSION);
-                        if(sessionOrganisationData){
-                             organisationsList =  sessionOrganisationData;
-                        }else{
-                            let request = {
-                              "filters": {
-                            }
-                            }
-                        let organisationList = await sunbirdService.searchOrganisation(request, token);
-                        if (organisationList.responseCode == constants.common.RESPONSE_OK) {
-                            if (organisationList.result && organisationList.result.response &&
-                                organisationList.result.response && organisationList.result.response.content) {
-                                await Promise.all(organisationList.result.response.content.map(async function (orgInfo) {
-                                    organisationsList.push({
-                                        label: orgInfo.orgName,
-                                        value: orgInfo.id
-                                    });
+                    let sortedOrganisations = organisationsList.sort(gen.utils.sortArrayOfObjects('label'));
+                    return resolve({ result: sortedOrganisations, message: constants.apiResponses.ORG_INFO_FETCHED });
 
-                                }))
-                                sessionHelpers.set(constants.common.ORGANISATIONS_SESSION,organisationsList);
-                            }
-                        }
-                      }
-
-                    } else if (profileData.result.response.organisations) {
-                        let orgList = profileData.result.response.organisations;
-                        await Promise.all(orgList.map(async function (orgInfo) {
-                            if (roles.includes(constants.common.ORG_ADMIN_ROLE) ||
-                                orgInfo.roles.includes(constants.common.ORG_ADMIN_ROLE)) {
-                                        
-                                    let sessionOrganisationData = sessionHelpers.get(constants.common.ORGANISATIONS_SESSION);
-                                    if(sessionOrganisationData){
-
-                                        let orgData = sessionOrganisationData.filter(orgDetails=>{
-                                            return orgDetails.value == orgInfo.organisationId;
-                                        });
-                                        organisationsList.push(orgData);
-
-                                    }else{
-                                        let result = await _getOrganisationDetailsById(orgInfo.organisationId, token);
-                                        let orgDetails = { value: orgInfo.organisationId, label: result.orgName };
-                                        organisationsList.push(orgDetails);
-                                    }
-                            }
-                        }));
-
-                    }
-                    if (organisationsList.length > 0) {
-                        organisationsList = organisationsList.slice((pageNo - 1) * pageSize, pageNo * pageSize);
-
-                        let sortedOrganisations = organisationsList.sort(gen.utils.sortArrayOfObjects('label'));
-
-                        return resolve({ result: sortedOrganisations, message: constants.apiResponses.ORG_INFO_FETCHED });
-
-                    } else {
-                        return resolve({
-                            status: httpStatusCode["bad_request"].status,
-                            message: constants.apiResponses.NO_ORG_FOUND
-                        });
-                    }
                 } else {
                     return resolve({
                         status: httpStatusCode["bad_request"].status,
-                        message: constants.apiResponses.INVALID_ACCESS
+                        message: constants.apiResponses.NO_ORG_FOUND
                     });
                 }
             } catch (error) {
@@ -144,10 +88,9 @@ module.exports = class OrganisationsHelper {
             try {
 
                 let response;
-                let profileData = await _checkUserAdminAccess(token, userId, organisationId);
-
+                let userRoles = await _getUserRoles(userId, organisationId);
                 let offset = pageSize * (pageNo - 1);
-                if (profileData && profileData.allowed) {
+                if (userRoles.includes(constants.common.PLATFROM_ADMIN_ROLE) || userRoles.includes(constants.common.ORG_ADMIN_ROLE)) {
 
                     let bodyOfRequest = {
                         "request": {
@@ -176,92 +119,50 @@ module.exports = class OrganisationsHelper {
                     let usersList =
                         await sunbirdService.users(token, bodyOfRequest);
 
-
-                    const projection = ["code", "title"];
-                    let rolesDoc = await platformRolesHelper.all("all", projection);
-
-                    let platformRoles = [];
-                    if (rolesDoc && rolesDoc.result) {
-                        platformRoles = rolesDoc.result;
-                    }
-
-                    let sunBirdRoles =
-                        await cassandraDatabase.models.role.findAsync(
-                            {
-                                status: 1
-                            }, {
-                            select: ["id", "name"], raw: true, allow_filtering: true
-                        });
                     if (usersList.responseCode == constants.common.RESPONSE_OK) {
 
-                        let allRoles = {};
-                        if (sunBirdRoles) {
-                            sunBirdRoles.map(function (sunBirdrole) {
-                                allRoles[sunBirdrole.id] = sunBirdrole.name;
-
-                            });
-                        }
-
-                        if (platformRoles) {
-                            platformRoles.map(function (customRoles) {
-                                allRoles[customRoles.code] = customRoles.title;
-                            });
-                        }
                         let userInfo = [];
+                        let userIds = []
+                        await Promise.all(usersList.result.response.content.map(async function (userItem) {
+                            userIds.push(userItem.id);
+                        }));
+
+                        const fieldsArray = ["roles", "organisationRoles", "userId"];
+                        const queryObject = { userId: { $in: userIds } };
+
+                        let usersData = await usersHelper.list(queryObject, fieldsArray);
+
                         await Promise.all(usersList.result.response.content.map(async function (userItem) {
 
                             let rolesOfUser = "";
-
-                            const fieldsArray = ["roles", "organisationRoles"];
-                            const queryObject = { userId: userItem.id };
-
-                            let userData = await usersHelper.all(queryObject, fieldsArray);
-                            if (userData && userData.result && userData.result.length > 0) {
-                                let customRoles = userData.result[0];
-                                if (customRoles.organisationRoles) {
-                                    let orgRolesOfUser = [];
-                                    customRoles.organisationRoles.map(userRoles => {
-                                        if (organisationId == userRoles.organisationId) {
-                                            orgRolesOfUser.push(...userRoles.roles);
-                                        }
-                                    })
-
-                                    let disctinctRoles = [];
-                                    orgRolesOfUser.map(element => {
-                                        if (!disctinctRoles.includes(element.code)) {
-                                            disctinctRoles.push(element.code);
-                                            if (rolesOfUser == "") {
-                                                rolesOfUser = allRoles[element.code];
-                                            } else {
-                                                rolesOfUser = rolesOfUser + "," + allRoles[element.code]
-                                            }
-
-                                        }
-                                    });
+                            let userData = usersData.result.filter(user => {
+                                if (user.userId == userItem.id) {
+                                    return user;
                                 }
-                            }
+                            });
 
-                            await Promise.all(userItem.organisations.map(async orgInfo => {
-                                if (orgInfo.organisationId == organisationId) {
-
-
-                                    let orgRoles = [];
-                                    orgInfo.roles.map(roleItem => {
-                                        if (allRoles[roleItem]) {
-                                            orgRoles.push(allRoles[roleItem]);
-                                        }
-                                    });
-
-                                    orgRoles = (orgRoles).toString();
-                                    if (orgRoles) {
-                                        if (rolesOfUser == "") {
-                                            rolesOfUser = orgRoles;
-                                        } else {
-                                            rolesOfUser = rolesOfUser + "," + orgRoles
-                                        }
+                            let customRoles = userData[0];
+                            if (customRoles && customRoles.organisationRoles) {
+                                let orgRolesOfUser = [];
+                                customRoles.organisationRoles.map(userRoles => {
+                                    if (organisationId == userRoles.organisationId) {
+                                        orgRolesOfUser.push(...userRoles.roles);
                                     }
-                                }
-                            }));
+                                })
+
+                                let disctinctRoles = [];
+                                orgRolesOfUser.map(element => {
+                                    if (!disctinctRoles.includes(element.name)) {
+                                        disctinctRoles.push(element.name);
+                                        if (rolesOfUser == "") {
+                                            rolesOfUser = element.name;
+                                        } else {
+                                            rolesOfUser = rolesOfUser + "," + element.name;
+                                        }
+
+                                    }
+                                });
+                            }
 
                             let gender = userItem.gender == "M" ? "Male" : userItem.gender == "F" ? "Female" : "";
                             let status = userItem.status == 1 ? "Active" : "Inactive";
@@ -311,22 +212,22 @@ module.exports = class OrganisationsHelper {
   * Get download userList
   * @method
   * @name list
-  * @param {Json} downloadDetails -download users details
+  * @param {Json} organisationUserDownloadFilters -download users filters
   * @param {String} token - user access token
   * @param {String} userId - user id
   * @returns {json} Response consists of users list.
   */
 
-    static downloadUsers(downloadDetails, token, userId) {
+    static downloadUsers(organisationUserDownloadFilters, token, userId) {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let csvData = await this.users(token, userId, downloadDetails.organisationId,
-                    downloadDetails.limit, downloadDetails.page, downloadDetails.searchText,
-                    downloadDetails.status, downloadDetails.usersList);
+                let users = await this.users(token, userId, organisationUserDownloadFilters.organisationId,
+                    organisationUserDownloadFilters.limit, organisationUserDownloadFilters.page, organisationUserDownloadFilters.searchText,
+                    organisationUserDownloadFilters.status, organisationUserDownloadFilters.usersList);
                 let responseData = [];
-                if (csvData.result && csvData.result.data) {
-                    await Promise.all(csvData.result.data.map(fields => {
+                if (users.result && users.result.data) {
+                    await Promise.all(users.result.data.map(fields => {
                         if (fields.id) {
                             delete fields.id;
                         }
@@ -349,58 +250,54 @@ module.exports = class OrganisationsHelper {
     * To add user to organisation
     * @method
     * @name  addUser
-    * @param  {orgnisationInfo,token}  - organisation object and token
+    * @param  {organisationInfo,token}  - organisation object and token
     * @returns {json} Response consists of success or failure of the api.
     */
-    static addUser(orgnaisationInfo, token) {
+    static addUser(organisationInfo, token) {
 
         return new Promise(async (resolve, reject) => {
             try {
 
 
                 let plaformRoles = [];
-                let rolesId = [];
+                
+                let rolesDoc = await platformRolesHelper.getRoles();
+                let sunbirdRolesDoc = await rolesHelper.list();
+                let userRoles = [];
+                let allRoles = {};
+                if (sunbirdRolesDoc.result) {
+                    sunbirdRolesDoc.result.map(function (sunbirdRole) {
+                        allRoles[sunbirdRole.id] = sunbirdRole.name;
+                    });
+                }
 
-                const projection = ["code", "title"];
-                let rolesDoc = await platformRolesHelper.all("all", projection);
-
+                let customRoles = [];
                 let rolesDocuments = [];
                 if (rolesDoc && rolesDoc.result) {
                     rolesDocuments = rolesDoc.result;
+                    rolesDocuments.map(function (roleDoc) {
+                        customRoles[roleDoc.code] = roleDoc.title;
+
+                    });
                 }
-                plaformRoles.push(constants.common.PUBLIC_ROLE);
+                // organisationInfo/
 
-                await Promise.all(orgnaisationInfo.roles.map(async function (roleInfo) {
-                    let found = false;
-                    if (rolesDocuments) {
-                        await Promise.all(rolesDocuments.map(roleDoc => {
-                            if (roleDoc.code === roleInfo) {
-                                found = true;
-                                let roleObj = {
-                                    roleId: roleDoc._id,
-                                    code: roleDoc.code,
-                                    name: roleDoc.title
-                                }
-                                rolesId.push(roleObj);
-                            }
-                        }));
-                    }
-
-                    if (!found) {
-                        if (roleInfo) {
-                            plaformRoles.push(roleInfo);
-                        }
+                await Promise.all(organisationInfo.roles.map(async function (roleInfo) {
+                    if (customRoles[roleInfo]) {
+                        userRoles.push({ code: roleInfo, name: customRoles[roleInfo] });
+                    } else if (allRoles[roleInfo]) {
+                        userRoles.push({ code: roleInfo, name: allRoles[roleInfo] });
+                        plaformRoles.push(roleInfo);
                     }
                 }));
-
 
                 if (plaformRoles.length == 0) {
                     plaformRoles.push(constants.common.PUBLIC_ROLE);
                 }
                 let orgCreateRequest = {
-                    organisationId: orgnaisationInfo.organisation.value,
+                    organisationId: organisationInfo.organisation.value,
                     roles: plaformRoles,
-                    userId: orgnaisationInfo.userId
+                    userId: organisationInfo.userId
                 }
 
                 let response = await sunbirdService.addUser(orgCreateRequest, token);
@@ -408,19 +305,30 @@ module.exports = class OrganisationsHelper {
                 if (response && response.responseCode == constants.common.RESPONSE_OK) {
                     if (response.result.response == constants.common.SUCCESS_RESPONSE) {
                         let organisationsRoles = [];
-                        organisationsRoles.push({ organisationId: orgnaisationInfo.organisation.value, roles: rolesId });
+                        organisationsRoles.push({ organisationId: organisationInfo.organisation.value, roles: userRoles });
 
-                        let queryObject = { userId: orgnaisationInfo.userId };
-                        let updateData = { $push: { organisations: orgnaisationInfo.organisation, organisationRoles: organisationsRoles } };
+                        let queryObject = { userId: organisationInfo.userId };
+                        let updateData = { $push: { organisations: organisationInfo.organisation, organisationRoles: organisationsRoles } };
 
                         let update = await usersHelper.update(queryObject, updateData);
                         resolve({ result: response.result, message: constants.apiResponses.USER_ADDED_TO_ORG });
                     } else {
 
-                        reject({
-                            result: response.result, status: httpStatusCode["bad_request"].status,
-                            message: constants.apiResponses.FAILED_TO_ADD_USER_TO_ORG
-                        });
+                        if (response.result.response) {
+                            reject({
+                                result: response.result, status: httpStatusCode["bad_request"].status,
+                                message: response.result.response
+                            });
+                        } else {
+
+                            reject({
+                                result: response.result, status: httpStatusCode["bad_request"].status,
+                                message: constants.apiResponses.FAILED_TO_ADD_USER_TO_ORG
+                            });
+
+                        }
+
+
                     }
 
                 } else {
@@ -447,35 +355,35 @@ module.exports = class OrganisationsHelper {
         return new Promise(async (resolve, reject) => {
             try {
                 let plaformRoles = [];
-                let rolesId = [];
-
-                const projection = ["code", "title"];
-                let rolesDoc = await platformRolesHelper.all("all", projection);
-
-                let rolesDocuments = [];
-                if (rolesDoc && rolesDoc.result) {
-                    rolesDocuments = rolesDoc.result;
-                }
-
+               let userRoles = [];
                 if (orgnisationInfo.roles) {
-                    await Promise.all(orgnisationInfo.roles.map(async function (roleInfo) {
-                        let found = false;
-                        await Promise.all(rolesDocuments.map(roleDoc => {
-                            if (roleDoc.code === roleInfo) {
-                                found = true;
-                                let roleObj = {
-                                    roleId: roleDoc._id,
-                                    code: roleDoc.code,
-                                    name: roleDoc.title
-                                }
-                                rolesId.push(roleObj);
-                            }
-                        }));
 
-                        if (!found) {
-                            if (roleInfo) {
-                                plaformRoles.push(roleInfo);
-                            }
+                    let rolesDoc = await platformRolesHelper.getRoles();
+                    let sunbirdRolesDoc = await rolesHelper.list();
+
+                    let allRoles = {};
+                    if (sunbirdRolesDoc.result) {
+                        sunbirdRolesDoc.result.map(function (sunbirdRole) {
+                            allRoles[sunbirdRole.id] = sunbirdRole.name;
+                        });
+                    }
+
+                    let customRoles = [];
+                    let rolesDocuments = [];
+                    if (rolesDoc && rolesDoc.result) {
+                        rolesDocuments = rolesDoc.result;
+                        rolesDocuments.map(function (roleDoc) {
+                            customRoles[roleDoc.code] = roleDoc.title;
+
+                        });
+                    }
+
+                    await Promise.all(orgnisationInfo.roles.map(async function (roleInfo) {
+                        if (customRoles[roleInfo]) {
+                            userRoles.push({ code: roleInfo, name: customRoles[roleInfo] });
+                        } else if (allRoles[roleInfo]) {
+                            userRoles.push({ code: roleInfo, name: allRoles[roleInfo] });
+                            plaformRoles.push(roleInfo);
                         }
                     }));
                 }
@@ -492,11 +400,10 @@ module.exports = class OrganisationsHelper {
                         let queryObject = {
                             userId: orgnisationInfo.userId, "organisationRoles.organisationId": orgnisationInfo.organisationId
                         };
-                        let updateData = {
-                            $set: { "organisationRoles.$.roles": rolesId }
-                        }
-                        let updateUserDetails = await usersHelper.update(queryObject, updateData)
+                        let updateData =
+                            { "organisationRoles.$.roles": userRoles };
 
+                        let updateUserDetails = await usersHelper.update(queryObject, updateData);
                     }
 
                     let message = constants.apiResponses.ASSIGNED_ROLE_SUCCESSFULLY;
@@ -523,105 +430,80 @@ module.exports = class OrganisationsHelper {
     static detailList(inputData) {
         return new Promise(async (resolve, reject) => {
             try {
-                let profileData = await _getProfileData(inputData.userToken, inputData.userId);
-                if (profileData) {
+                let roles = await _getUserRoles(inputData.userId);
+                let offset = inputData.pageSize * (inputData.pageNo - 1);
+                if (roles.includes(constants.common.PLATFROM_ADMIN_ROLE)) {
+                    let request = {
+                        "filters": {
+                        },
+                        "limit": inputData.pageSize,
+                        "offset": offset
+                    }
 
-                    let organisationsList = [];
-                    let roles = profileData.result.response.roles;
+                    if (inputData.searchText) {
+                        request['query'] = inputData.searchText;
+                    }
+                    if (inputData.status) {
+                        request['filters']['status'] = inputData.status;
+                    }
 
-                    const fieldsArray = ["roles"];
-                    const queryObject = { userId: inputData.userId };
+                    let organisationInfo = [];
+                    let organisationList = await sunbirdService.searchOrganisation(request, inputData.userToken);
+                    if (organisationList.responseCode == constants.common.RESPONSE_OK) {
+                        if (organisationList.result && organisationList.result.response &&
+                            organisationList.result.response && organisationList.result.response.content) {
+                            await Promise.all(organisationList.result.response.content.map(async function (orgInfo) {
 
-                    let userData = await usersHelper.all(queryObject, fieldsArray);
-                    if (userData && userData.result && userData.result.length > 0) {
-                        let userCustomeRole = userData.result[0];
-                        if (userCustomeRole && userCustomeRole.roles && userCustomeRole.roles.length > 0) {
-                            userCustomeRole.roles.map(customRole => {
-                                if (!roles.includes(customRole.code)) {
-                                    roles.push(customRole.code)
+                                let address = "";
+                                if (orgInfo.address && orgInfo.address.addressLine1) {
+                                    address = orgInfo.address.addressLine1
                                 }
+                                let orgDetails = {
+                                    name: orgInfo.orgName,
+                                    description: orgInfo.description,
+                                    email: orgInfo.email,
+                                    _id: orgInfo.id,
+                                    noOfMembers: orgInfo.noOfMembers,
+                                    externalId: orgInfo.externalId,
+                                    status: orgInfo.status == 0 ? "Inactive" : "Active",
+                                    provider: orgInfo.provider,
+                                    address: address,
+                                }
+                                organisationInfo.push(orgDetails);
+                            }));
+                        }
+
+                        let orgColumns = _organisationColumn();
+                        if (organisationInfo.length > 0) {
+
+                            let sortedOrganisations = organisationInfo.sort(gen.utils.sortArrayOfObjects('organisationName'));
+
+                            resolve({
+                                result: {
+                                    count: organisationList.result.response.count,
+                                    columns: orgColumns,
+                                    data: sortedOrganisations
+                                },
+                                message: constants.apiResponses.ORG_INFO_FETCHED
+                            });
+                        } else {
+                            resolve({
+                                result: {
+                                    count: 0,
+                                    columns: orgColumns,
+                                    data: []
+                                }, message: constants.apiResponses.NO_ORG_FOUND
                             })
                         }
-                    }
-                    let offset = inputData.pageSize * (inputData.pageNo - 1);
-                    if (roles.includes(constants.common.PLATFROM_ADMIN_ROLE)) {
-                        let request = {
-                            "filters": {
-                            },
-                            "limit": inputData.pageSize,
-                            "offset": offset
-                        }
 
-                        if (inputData.searchText) {
-                            request['query'] = inputData.searchText;
-                        }
-                        if (inputData.status) {
-                            request['filters']['status'] = inputData.status;
-                        }
-
-                        let organisationInfo = [];
-                        let organisationList = await sunbirdService.searchOrganisation(request, inputData.userToken);
-                        if (organisationList.responseCode == constants.common.RESPONSE_OK) {
-                            if (organisationList.result && organisationList.result.response &&
-                                organisationList.result.response && organisationList.result.response.content) {
-                                await Promise.all(organisationList.result.response.content.map(async function (orgInfo) {
-
-                                    let address = "";
-                                    if (orgInfo.address && orgInfo.address.addressLine1) {
-                                        address = orgInfo.address.addressLine1
-                                    }
-                                    let orgDetails = {
-                                        name: orgInfo.orgName,
-                                        description: orgInfo.description,
-                                        email: orgInfo.email,
-                                        _id: orgInfo.id,
-                                        noOfMembers: orgInfo.noOfMembers,
-                                        externalId: orgInfo.externalId,
-                                        status: orgInfo.status == 0 ? "Inactive" : "Active",
-                                        provider: orgInfo.provider,
-                                        address: address,
-                                    }
-                                    organisationInfo.push(orgDetails);
-                                }));
-                            }
-
-                            let orgColumns = _organisationColumn();
-                            if (organisationInfo.length > 0) {
-
-                                let sortedOrganisations = organisationInfo.sort(gen.utils.sortArrayOfObjects('organisationName'));
-
-                                resolve({
-                                    result: {
-                                        count: organisationList.result.response.count,
-                                        columns: orgColumns,
-                                        data: sortedOrganisations
-                                    },
-                                    message: constants.apiResponses.ORG_INFO_FETCHED
-                                });
-                            } else {
-                                resolve({
-                                    result: {
-                                        count: 0,
-                                        columns: orgColumns,
-                                        data: []
-                                    }, message: constants.apiResponses.NO_ORG_FOUND
-                                })
-                            }
-
-                        } else {
-                            resolve({ result: organisationList, message: constants.apiResponses.NO_ORG_FOUND })
-                        }
                     } else {
-                        reject({
-                            status: httpStatusCode["bad_request"].status,
-                            message: constants.apiResponses.INVALID_ACCESS
-                        })
+                        resolve({ result: organisationList, message: constants.apiResponses.NO_ORG_FOUND })
                     }
                 } else {
-                    return resolve({
+                    reject({
                         status: httpStatusCode["bad_request"].status,
                         message: constants.apiResponses.INVALID_ACCESS
-                    });
+                    })
                 }
             } catch (error) {
                 return reject(error)
@@ -659,9 +541,9 @@ module.exports = class OrganisationsHelper {
                 if (createOrg && createOrg.responseCode == constants.common.RESPONSE_OK) {
 
                     let sessionOrganisationData = sessionHelpers.get(constants.common.ORGANISATIONS_SESSION);
-                    if(sessionOrganisationData){
-                         sessionOrganisationData.push({ label :inputData.name,value: createOrg.result.organisationId });
-                         sessionHelpers.set(constants.common.ORGANISATIONS_SESSION,sessionOrganisationData);
+                    if (sessionOrganisationData) {
+                        sessionOrganisationData.push({ label: inputData.name, value: createOrg.result.organisationId });
+                        sessionHelpers.set(constants.common.ORGANISATIONS_SESSION, sessionOrganisationData);
                     }
 
                     resolve({ result: createOrg.result, message: constants.apiResponses.ORG_CREATED });
@@ -855,7 +737,6 @@ module.exports = class OrganisationsHelper {
                         }
                         let updateUserDetails = await usersHelper.update(queryObject, updateData);
 
-
                     }
                     resolve({ result: removeUser.result, message: constants.apiResponses.USER_REMOVED });
                 } else {
@@ -868,98 +749,35 @@ module.exports = class OrganisationsHelper {
         });
     }
 
-
-
-
 };
 
 
 /**
    * check the user has permission for Org odmin or user admin
    * @method
-   * @name _checkUserAdminAccess
+   * @name _getUserRoles
    * @param {String} userId -  user id
-   * @param  {String} token  - user access token
    * @param  {String} organisationId  - organisation id 
-   * @returns {json} Response consists of profile data and user permission as boolean.
+   * @returns {json} Response consists of user roles
 */
-function _checkUserAdminAccess(token, userId, organisationId) {
+function _getUserRoles(userId, organisationId = "") {
 
     return new Promise(async (resolve, reject) => {
         try {
-            let profileInfo =
-                await sunbirdService.getUserProfileInfo(token, userId);
 
-            let response;
-
-            let profileData = JSON.parse(profileInfo);
-
-            let roles;
-            if (profileData.result
-                && profileData.result.response
-                && profileData.result.response.roles) {
-                roles = profileData.result.response.roles;
+            let  roles = await usersHelper.getUserRoles(userId, organisationId);
+            if(roles && roles.result){
+                resolve(roles.result);
+            }else{
+                roles = [];
+                resolve(roles);
             }
-
-            const queryObject = { userId: userId };
-            const fieldsArray = ["roles"];
-
-            let userData = await usersHelper.all(queryObject, fieldsArray);
-            if (userData && userData.result && userData.result.length > 0) {
-                let userCustomeRole = userData.result[0];
-
-                if (userCustomeRole && userCustomeRole.roles && userCustomeRole.roles.length > 0) {
-                    userCustomeRole.roles.map(customRole => {
-                        if (!roles.includes(customRole.code)) {
-                            roles.push(customRole.code)
-                        }
-                    })
-                }
-            }
-
-            if (profileData.responseCode == constants.common.RESPONSE_OK) {
-
-                if (profileData.result && profileData.result.response) {
-
-                    profileData['allowed'] = false;
-                    await Promise.all(roles.map(async function (role) {
-                        if (role == constants.common.ORG_ADMIN_ROLE ||
-                            role == constants.common.PLATFROM_ADMIN_ROLE) {
-                            profileData['allowed'] = true;
-                            return resolve(profileData);
-                        } else {
-                            if (profileData.result.response.organisations) {
-                                await Promise.all(profileData.result.response.organisations.map(async org => {
-                                    if (org.organisationId == organisationId
-                                        && org.roles.includes(constants.common.ORG_ADMIN_ROLE)) {
-                                        profileData['allowed'] = true;
-                                    }
-                                }))
-                            }
-                            return resolve(profileData);
-                        }
-                    }));
-                    response = profileData;
-                } else {
-
-                    response = {
-                        status: httpStatusCode["bad_request"].status,
-                        message: constants.apiResponses.INVALID_ACCESS
-                    };
-                }
-
-            } else {
-                response = {
-                    status: httpStatusCode["bad_request"].status,
-                    message: constants.apiResponses.USER_INFO_NOT_FOUND
-                };
-            }
-
-            return resolve(response);
         } catch (error) {
             return reject(error);
         }
     })
+
+
 
 
 
@@ -1040,30 +858,43 @@ function _actions() {
 /**
    * To get Organisation Details By Id.
    * @method
-   * @name _getOrganisationDetailsById 
-   * @param {String} orgId - organisation id 
+   * @name _getOrganisationsDetails
    * @param {String} token - user access token
    * @returns {json} - returns organisational details
 */
 
-function _getOrganisationDetailsById(orgId, token) {
+function _getOrganisationsDetails(token) {
 
     return new Promise(async (resolve, reject) => {
 
-        let request = {
-            "filters": {
-                id: orgId
-            }
-        }
+        let organisationsList = [];
+        let sessionOrganisationData = sessionHelpers.get(constants.common.ORGANISATIONS_SESSION);
 
-        let organisationList = await sunbirdService.searchOrganisation(request, token);
-        if (organisationList.responseCode == constants.common.RESPONSE_OK) {
-            if (organisationList.result && organisationList.result.response &&
-                organisationList.result.response && organisationList.result.response.content) {
-                resolve(organisationList.result.response.content[0]);
-            }
-        }
+        if (sessionOrganisationData && sessionOrganisationData.length > 0) {
+            organisationsList = sessionOrganisationData;
+        } else {
 
+            let request = {
+                "filters": {
+                }
+            }
+
+            let organisationList = await sunbirdService.searchOrganisation(request, token);
+            if (organisationList.responseCode == constants.common.RESPONSE_OK) {
+                if (organisationList.result && organisationList.result.response &&
+                    organisationList.result.response && organisationList.result.response.content) {
+                    await Promise.all(organisationList.result.response.content.map(async function (orgInfo) {
+                        organisationsList.push({
+                            label: orgInfo.orgName,
+                            value: orgInfo.id
+                        });
+                    }));
+                    sessionHelpers.set(constants.common.ORGANISATIONS_SESSION, organisationsList);
+                }
+            }
+
+        }
+        resolve(organisationsList);
     });
 
 }
@@ -1074,16 +905,15 @@ function _getOrganisationDetailsById(orgId, token) {
  * @name _getProfileData
  * @param {String} userId - user id 
  * @param {String} token - user access token
- * @returns {json} Response consists of profile data a
+ * @returns {json} Response consists of profile data
 */
 
 function _getProfileData(token, userId) {
     return new Promise(async (resolve, reject) => {
         try {
-            let profileInfo =
+            let profileData =
                 await sunbirdService.getUserProfileInfo(token, userId);
 
-            let profileData = JSON.parse(profileInfo);
             return resolve(profileData);
 
         } catch (error) {

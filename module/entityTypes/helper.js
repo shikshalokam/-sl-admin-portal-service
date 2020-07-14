@@ -14,14 +14,14 @@ module.exports = class EntityTypesHelper {
     /**
       * To get all entityTypes
       * @method
-      * @name all
+      * @name list
       * @param {Object} [queryParameter = "all"] - Filtered query data.
       * @param {Array} [fieldsArray = {}] - Projected data.   
       * @param {Object} [skipFields = "none" ]
       * @returns {Object} returns a entity types list from the filtered data.
      */
 
-    static all(queryParameter = "all", fieldsArray = "all", skipFields = "none") {
+    static list(queryParameter = "all", fieldsArray = "all", skipFields = "none") {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -66,12 +66,12 @@ module.exports = class EntityTypesHelper {
     /**
     * List of all entity types.
     * @method
-    * @name list
+    * @name entityList
     * @param {Object} [queryParameter = "all"] - Filtered query data.
     * @param {Array} [fieldsArray = {}] - Projected data.   
    */
 
-    static list(queryObject, fieldsArray) {
+    static getList(queryObject, fieldsArray) {
         return new Promise(async (resolve, reject) => {
             try {
 

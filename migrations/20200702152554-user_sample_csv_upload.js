@@ -1,15 +1,16 @@
 
 const fs = require('fs');
-
 const https = require('https');
 const request = require('request');
+var path = require('path');
+const appPath = path.join(__dirname, '..');
 
 module.exports = {
   async up(db) {
 
     global.migrationMsg = "Upload bulk user sample csv to cloud"
    
-    let uploadfileInfo = { name: "users.csv", path: process.env.BULK_USER_SAMPLE_CSV_PATH };
+    let uploadfileInfo = { name: "users.csv", path: "/public/bulkUploadSamples/users.csv" };
 
     let uploadFolderPath = "bulkUploadSamples/";
     
@@ -31,7 +32,7 @@ module.exports = {
       process.env.URL_PREFIX;
 
     let response = await apiCall(kendraBaseUrl+endPoint,uploadfileInfo);
-
+    
     function apiCall(apiUrl,file) {
       return new Promise(async function (resolve, reject) {
 
@@ -44,11 +45,11 @@ module.exports = {
           formData: {
             filePath: uploadFolderPath+file.name,
             bucketName: bucketName,
-            file: fs.createReadStream(file.path) 
+            file: fs.createReadStream(appPath+file.path) 
   
           }
         };
-  
+
         request.post(apiUrl, options, callback);
         function callback(err, data) {
           if (err) {

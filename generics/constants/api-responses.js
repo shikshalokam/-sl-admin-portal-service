@@ -53,4 +53,6 @@ module.exports = {
     USERS_NOT_FOUND: "Users not found",
     PLATFORMROLES_FOUND: "Platform roles fetched successfully",
     PLATFORMROLES_NOT_FOUND: "Platform roles not found",
+    ROLES_FOUND: "Roles found successfully",
+    ROLES_NOT_FOUND: "Roles not found"
 };

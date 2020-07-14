@@ -1,8 +1,8 @@
 /**
- * name : Role.js
+ * name : Roles.js
  * author : Rakesh Kumar
  * created-date : 13-April-2020
- * Description : All Role related information.
+ * Description : All Roles related information.
  */
 
 
@@ -13,11 +13,11 @@
 
 
 /**
-    * Role
+    * Roles
     * @class
 */
 
-module.exports = class Role extends Abstract {
+module.exports = class Roles extends Abstract {
 
     constructor() {
         super(schemas["role"]);
@@ -37,7 +37,7 @@ module.exports = class Role extends Abstract {
 
 
     static get name() {
-        return "role";
+        return "roles";
     }
 
 }
