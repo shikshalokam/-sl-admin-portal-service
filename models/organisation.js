@@ -19,6 +19,10 @@ module.exports = {
             isapproved : "boolean",
             isdefault : "boolean",
             isrootorg : "boolean",
+            isssoenabled: "boolean",
+            keys :  {
+                type: 'frozen'
+            },
             locationid   : "text",
             locationids : {
                 type: "list",
