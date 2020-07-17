@@ -16,7 +16,6 @@ const csvFileStream = require(ROOT_PATH + "/generics/file-stream");
 module.exports = class Organisations extends Abstract {
 
   constructor() {
-    super(schemas["organisation"]);
   }
 
   static get name() {
