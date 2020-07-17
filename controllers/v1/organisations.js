@@ -13,10 +13,7 @@ const csvFileStream = require(ROOT_PATH + "/generics/file-stream");
     * @class
 */
 
-module.exports = class Organisations extends Abstract {
-
-  constructor() {
-  }
+module.exports = class Organisations {
 
   static get name() {
     return "organisations";
