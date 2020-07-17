@@ -117,7 +117,7 @@ var getUserInfo = function (token, userId) {
                   thumbnail: null,
                   updatedBy: null,
                   updatedDate: null,
-                  userId: jwtInfo.sub,
+                  userId: jwtInfo.sub.split(":").pop(),
                   userName: (jwtInfo.email && jwtInfo.email != "") ? 
                   jwtInfo.email.split("@").shift() : (jwtInfo.preferred_username && jwtInfo.preferred_username != "") ? 
                   jwtInfo.preferred_username.split("@").shift() : "",
