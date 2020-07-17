@@ -21,7 +21,8 @@ module.exports = {
             isrootorg : "boolean",
             isssoenabled: "boolean",
             keys :  {
-                type: 'frozen'
+                type: "frozen",
+                typeDef: "<map<text, list<text>>>"
             },
             locationid   : "text",
             locationids : {
