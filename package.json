@@ -40,7 +40,7 @@
     "gulp-apidoc": "^0.2.8",
     "jwt-decode": "^2.2.0",
     "keycloak-auth-utils": "^3.3.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "log": "^1.4.0",
     "mongoose": "^5.9.4",
     "mongoose-autopopulate": "^0.12.0",
