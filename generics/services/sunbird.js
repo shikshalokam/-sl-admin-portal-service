@@ -26,7 +26,7 @@ const organisationList = async function (token) {
         let options = {
             "headers": {
                 "content-type": "application/json",
-                "authorization": process.env.AUTHORIZATION,
+                "authorization": process.env.SUNBIRD_API_AUTHORIZATION,
                 "x-authenticated-user-token": token
             }
         };
@@ -62,7 +62,7 @@ const getUserProfileInfo = function (token, userId) {
         let options = {
             "headers": {
                 "content-type": "application/json",
-                "authorization": process.env.AUTHORIZATION,
+                "authorization": process.env.SUNBIRD_API_AUTHORIZATION,
                 "x-authenticated-user-token": token
             }
 
@@ -98,7 +98,7 @@ const users = function (token, body) {
         let options = {
             "headers": {
                 "content-type": "application/json",
-                "authorization": process.env.AUTHORIZATION,
+                "authorization": process.env.SUNBIRD_API_AUTHORIZATION,
                 "x-authenticated-user-token": token,
             },
             json: body
@@ -175,7 +175,7 @@ function callToSunbird(token, requestBody, url, type = "") {
         let options = {
             "headers": {
                 "content-type": "application/json",
-                "authorization": process.env.AUTHORIZATION,
+                "authorization": process.env.SUNBIRD_API_AUTHORIZATION,
                 "x-authenticated-user-token": token
             },
             json: { request: requestBody }

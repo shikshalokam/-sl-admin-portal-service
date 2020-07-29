@@ -31,6 +31,10 @@ let enviromentVariables = {
   "message" : "Required Server authorization code",
   "optional" : false
 },
+"SUNBIRD_API_AUTHORIZATION" : {
+  "message" : "Required Server authorization code for api",
+  "optional" : false
+},
 "APPLICATION_BASE_HOST" : {
   "message" : "Required Base host",
   "optional" : false
