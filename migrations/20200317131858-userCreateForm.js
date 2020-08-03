@@ -50,7 +50,7 @@ module.exports = {
          
           inputObj.validation.push({
             "name": "pattern",
-            "validator": "^([a-zA-Z0-9@*#]{8,15})$",
+            "validator": "^(?=.{8,})(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+*!=]).*$",
             "message": "Minimum eight charaters required"
           });
 

@@ -175,7 +175,7 @@ function callToSunbird(token, requestBody, url, type = "") {
         let options = {
             "headers": {
                 "content-type": "application/json",
-                "authorization": process.env.SUNBIRD_API_AUTHORIZATION,
+                "authorization": process.env.AUTHORIZATION,
                 "x-authenticated-user-token": token
             },
             json: { request: requestBody }
@@ -193,6 +193,7 @@ function callToSunbird(token, requestBody, url, type = "") {
                     message: constants.apiResponses.SUNBIRD_SERVICE_DOWN
                 });
             } else {
+                console.log("data.body",data.body);
                 return resolve(data.body);
             }
         }

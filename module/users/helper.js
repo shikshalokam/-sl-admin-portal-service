@@ -369,10 +369,15 @@ module.exports = class UsersHelper {
 
 
                                 if (organisationData[0]) {
+
+                                    let orgnisationRoles = [];
+                                    userOrgRoles.roles.map(organisationRoles=>{
+                                        orgnisationRoles.push({ label : organisationRoles.name, code :organisationRoles.code })
+                                    });
                                     orgInfo.push({
                                         label: organisationData[0].label,
                                         value: organisationData[0].value,
-                                        roles: userOrgRoles.roles
+                                        roles: orgnisationRoles
                                     })
                                 }
                             });

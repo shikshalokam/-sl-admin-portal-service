@@ -613,7 +613,7 @@ module.exports = class Entities extends Abstract {
        "filePath": "bulkUploadSamples/users.csv",
        "url": "https://storage.googleapis.com/download/storage/v1/b/sl-dev-storage/o/bulkUploadSamples%2Fusers.csv?generation=1591340672710362&alt=media"
    }
-}
+  }
  */
 
   /**

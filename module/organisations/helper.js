@@ -609,7 +609,8 @@ module.exports = class OrganisationsHelper {
                     description: inputData.description ? inputData.description : "",
                     organisationId: inputData.organisationId,
                     address: {
-                        addressLine1: inputData.address
+                        addressLine1: inputData.address,
+                        city: inputData.address
                     }
                 }
                 if (inputData.externalId) {
