@@ -7,7 +7,6 @@
 
 
 module.exports = {
-
     USER_CREATE_FORM: "userCreateForm",
     STATE_ENTITY_TYPE: "state",
     RESPONSE_OK: "OK",
@@ -27,5 +26,4 @@ module.exports = {
     BULK_UPLOAD_COMPLETE: "completed",
     BULK_UPLOAD_FAILURE: "failed",
     ORGANISATIONS_SESSION: "organisations"
-
 };

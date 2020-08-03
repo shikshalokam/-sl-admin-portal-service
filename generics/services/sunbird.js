@@ -58,7 +58,7 @@ const getUserProfileInfo = function (token, userId) {
 
         const createUserUrl =
             process.env.SUNBIRD_URL + constants.endpoints.SUNBIRD_USER_READ + "/"
-            + userId;
+            + userId+"?fields=completeness,missingFields,lastLoginTime";
         let options = {
             "headers": {
                 "content-type": "application/json",
@@ -193,7 +193,6 @@ function callToSunbird(token, requestBody, url, type = "") {
                     message: constants.apiResponses.SUNBIRD_SERVICE_DOWN
                 });
             } else {
-                console.log("data.body",data.body);
                 return resolve(data.body);
             }
         }

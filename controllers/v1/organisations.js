@@ -23,11 +23,12 @@ module.exports = class Organisations {
 * @apiDefine errorBody
 * @apiError {String} status 4XX,5XX
 * @apiError {String} message Error
-*/ /**
-          * @apiDefine successBody
-          * @apiSuccess {String} status 200
-          * @apiSuccess {String} result Data
-          */
+*/
+  /**
+    * @apiDefine successBody
+    * @apiSuccess {String} status 200
+    * @apiSuccess {String} result Data
+ */
 
   /**
     * @api {get} /admin-service/api/v1/organisations/list 
@@ -115,7 +116,7 @@ module.exports = class Organisations {
   /**
   * Get platform users list for organisation.
   * @method
-  * @name list
+  * @name users
   * @param  {req}  - requested data.
   * @returns {json} Response consists of platform organisation list
   */
@@ -166,7 +167,7 @@ module.exports = class Organisations {
   /**
   * Get Download users list for organisation.
   * @method
-  * @name list
+  * @name downloadUsers
   * @param  {req}  - requested data.
   * @returns {json} Response consists of csv downladable file
   */
@@ -213,20 +214,18 @@ module.exports = class Organisations {
 
 
   /**
- * @api {get} /admin-service/api/v1/organisations/addUser 
+ * @api {post} /admin-service/api/v1/organisations/addUser 
  * To add User to the organisation.
  * @apiVersion 1.0.0
  * @apiGroup Organisations
  * @apiHeader {String} X-authenticated-user-token Authenticity token
  * @apiSampleRequest /admin-service/api/v1/organisations/addUser
+ * @apiParamExample {json} Request:
  * {
  *   "userId":"",
  *   "organisationId":"",
  *   "roles":["ASSESSOR"]
  * }
- * 
- * 
- * 
  * @apiUse successBody
  * @apiUse errorBody
  * @apiParamExample {json} Response:
@@ -278,12 +277,13 @@ module.exports = class Organisations {
 
 
   /**
- * @api {get} /admin-service/api/v1/organisations/assignRoles 
+ * @api {post} /admin-service/api/v1/organisations/assignRoles 
  * To assign Roles to the organisation for the user
  * @apiVersion 1.0.0
  * @apiGroup Organisations
  * @apiHeader {String} X-authenticated-user-token Authenticity token
  * @apiSampleRequest /admin-service/api/v1/organisations/assignRoles
+ * @apiParamExample {json} Request:
  * {
  *   "userId":"",
  *   "organisationId":"0125747659358699520",
@@ -309,7 +309,7 @@ module.exports = class Organisations {
   /**
   * To assign Roles to the organisation for the user
   * @method
-  * @name addUser
+  * @name assignRoles
   * @param  {req}  - requested data.
   * @returns {json} Response consists of success or failure of the request
   * 
@@ -415,12 +415,21 @@ module.exports = class Organisations {
 
 
   /**
-   * @api {get} /admin-service/api/v1/organisations/create 
+   * @api {post} /admin-service/api/v1/organisations/create 
    * To create the organisation
    * @apiVersion 1.0.0
    * @apiGroup Organisations
    * @apiHeader {String} X-authenticated-user-token Authenticity token
    * @apiSampleRequest /admin-service/api/v1/organisations/create
+   * @apiParamExample {json} Request:
+   * {
+      "description": "for test",
+      "externalId": "ext1332sdddda2ww22",
+      "provider": "string",
+      "name": "testing",
+      "email2": "abc@gmail.com",
+      "address": "iiii"
+    }
    * @apiUse successBody
    * @apiUse errorBody
    * @apiParamExample {json} Response:
@@ -547,18 +556,19 @@ module.exports = class Organisations {
   }
 
   /**
-     * @api {get} /admin-service/api/v1/organisations/update 
+     * @api {post} /admin-service/api/v1/organisations/update 
      * To update organisation details
      * @apiVersion 1.0.0
      * @apiGroup Organisations
      * @apiHeader {String} X-authenticated-user-token Authenticity token
      * @apiSampleRequest /admin-service/api/v1/organisations/update
+     * @apiParamExample {json} Request:
      * {
-     *  name:"",
-     *  email:"",
-     *  description:"",
-     *  externalId:"",
-     *  organisationId:""
+     *  name:"organisation name",
+     *  email:"abc@gmail.com",
+     *  description:"new organisation",
+     *  externalId:"external123",
+     *  organisationId:"XXXXXXXXXXXX"
      * }
      * @apiUse successBody
      * @apiUse errorBody
@@ -574,9 +584,9 @@ module.exports = class Organisations {
      * 
    */
   /**
-   * to update organisation data
+   * To update organisation data
    * @method
-   * @name getForm
+   * @name update
    * @param  {req}  - requested data.
    * @returns {json} Response consists of organisation create form
    */
@@ -654,12 +664,13 @@ module.exports = class Organisations {
   }
 
   /**
-     * @api {get} /admin-service/api/v1/organisations/updateStatus 
+     * @api {post} /admin-service/api/v1/organisations/updateStatus 
      * To update organisation status
      * @apiVersion 1.0.0
      * @apiGroup Organisations
      * @apiHeader {String} X-authenticated-user-token Authenticity token
      * @apiSampleRequest /admin-service/api/v1/organisations/updateStatus
+     * @apiParamExample {json} Request:
      * {
      *   "organisationId": "013014480583598080574",
      *   "status":"0"
@@ -677,7 +688,7 @@ module.exports = class Organisations {
      * 
    */
   /**
-   * to update organisation status
+   * To update organisation status
    * @method
    * @name updateStatus
    * @param  {req}  - requested data.

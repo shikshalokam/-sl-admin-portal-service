@@ -250,17 +250,15 @@ module.exports = class OrganisationsHelper {
     * To add user to organisation
     * @method
     * @name  addUser
-    * @param  {organisationInfo,token}  - organisation object and token
+    * @param {Object} organisationInfo  - organisation info
+    * @param {String}  token - user access token
     * @returns {json} Response consists of success or failure of the api.
     */
     static addUser(organisationInfo, token) {
 
         return new Promise(async (resolve, reject) => {
             try {
-
-
                 let plaformRoles = [];
-                
                 let rolesDoc = await platformRolesHelper.getRoles();
                 let sunbirdRolesDoc = await rolesHelper.list();
                 let userRoles = [];
@@ -270,7 +268,6 @@ module.exports = class OrganisationsHelper {
                         allRoles[sunbirdRole.id] = sunbirdRole.name;
                     });
                 }
-
                 let customRoles = [];
                 let rolesDocuments = [];
                 if (rolesDoc && rolesDoc.result) {
@@ -280,8 +277,6 @@ module.exports = class OrganisationsHelper {
 
                     });
                 }
-                // organisationInfo/
-
                 await Promise.all(organisationInfo.roles.map(async function (roleInfo) {
                     if (customRoles[roleInfo]) {
                         userRoles.push({ code: roleInfo, name: customRoles[roleInfo] });
@@ -325,12 +320,8 @@ module.exports = class OrganisationsHelper {
                                 result: response.result, status: httpStatusCode["bad_request"].status,
                                 message: constants.apiResponses.FAILED_TO_ADD_USER_TO_ORG
                             });
-
                         }
-
-
                     }
-
                 } else {
                     reject({ message: response.params.errmsg, status: httpStatusCode["bad_request"].status });
                 }

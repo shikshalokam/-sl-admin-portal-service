@@ -36,5 +36,4 @@ module.exports = {
     DOWNLOAD_AZURE_URL: "/cloud-services/azure/getDownloadableUrl",
     BULK_ENTITY: "/entities/bulkCreate?type=",
     BULK_ENTITY_MAPPING: "/entities/mappingUpload"
-
 }

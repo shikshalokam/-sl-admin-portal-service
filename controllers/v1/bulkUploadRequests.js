@@ -217,7 +217,7 @@ module.exports = class BulkUploadRequests extends Abstract {
   /**
    * To get getDownloadable url
    * @method
-   * @name details
+   * @name getDownloadableUrls
    * @param  {req}  - requested data.
    * @returns {json} Response consists of getDownloadable Url
   */

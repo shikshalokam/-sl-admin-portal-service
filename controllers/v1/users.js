@@ -6,7 +6,6 @@
  */
 
 const usersHelper = require(MODULES_BASE_PATH + "/users/helper.js");
-const csvFileStream = require(ROOT_PATH + "/generics/file-stream");
 
 /**
     * Users
@@ -161,6 +160,7 @@ module.exports = class Users extends Abstract {
    * @apiGroup Users
    * @apiHeader {String} X-authenticated-user-token Authenticity token
    * @apiSampleRequest /admin-service/api/v1/users/create
+   * @apiParamExample {json} Request:
    * {
    *   "firstName":"test",
    *   "lastName":"test",
@@ -197,7 +197,7 @@ module.exports = class Users extends Abstract {
   */
 
   /**
-   * create User
+   * To create the user
    * @method
    * @name create
    * @param  {req}  - requested data.
@@ -445,9 +445,9 @@ module.exports = class Users extends Abstract {
 
 
   /**
-    * details  
-    * @method details
-    * @name create
+    * To get the details  of the user 
+    * @method 
+    * @name details
     * @param  {req}  - requested data.
     * @returns {json} Response consists updated user details
    */

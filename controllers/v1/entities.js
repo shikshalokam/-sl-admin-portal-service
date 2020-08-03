@@ -504,11 +504,18 @@ module.exports = class Entities extends Abstract {
 
 
   /**
- * @api {POST} /admin-service/api/v1/entities/createState
+ * @api {post} /admin-service/api/v1/entities/createState
  * To create state entity
  * @apiVersion 1.0.0
  * @apiGroup Entities
  * @apiSampleRequest /admin-service/api/v1/entities/createState
+ * @apiParamExample {json} Request:
+ * {
+ *  "name":"karnataka",
+ *  "externalId":"KA15",
+ *  "capital":"shmg",
+ *	"region":"malnad"
+ * }
  * @apiUse successBody
  * @apiUse errorBody
  * @apiParamExample {json} Response:
