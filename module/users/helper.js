@@ -372,7 +372,7 @@ module.exports = class UsersHelper {
 
                                     let orgnisationRoles = [];
                                     userOrgRoles.roles.map(organisationRoles=>{
-                                        orgnisationRoles.push({ label : organisationRoles.name, code :organisationRoles.code })
+                                        orgnisationRoles.push({ label : organisationRoles.name, value :organisationRoles.code })
                                     });
                                     orgInfo.push({
                                         label: organisationData[0].label,
