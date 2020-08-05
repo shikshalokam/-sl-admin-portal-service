@@ -21,7 +21,7 @@ const organisationList = async function (token) {
     return new Promise(async (resolve, reject) => {
 
         const createUserUrl =
-            process.env.SUNBIRD_URL + constants.endpoints.SUNBIRD_ORGANISATION_LIST;
+            process.env.SUNBIRD_URL + CONSTANTS.endpoints.SUNBIRD_ORGANISATION_LIST;
 
         let options = {
             "headers": {
@@ -35,7 +35,7 @@ const organisationList = async function (token) {
         function callback(err, data) {
             if (err) {
                 return reject({
-                    message: constants.apiResponses.SUNBIRD_SERVICE_DOWN
+                    message: CONSTANTS.apiResponses.SUNBIRD_SERVICE_DOWN
                 });
             } else {
                 return resolve(data.body);
@@ -57,8 +57,8 @@ const getUserProfileInfo = function (token, userId) {
     return new Promise(async (resolve, reject) => {
 
         const createUserUrl =
-            process.env.SUNBIRD_URL + constants.endpoints.SUNBIRD_USER_READ + "/"
-            + userId+"?fields=completeness,missingFields,lastLoginTime";
+            process.env.SUNBIRD_URL + CONSTANTS.endpoints.SUNBIRD_USER_READ + "/"
+            + userId + "?fields=completeness,missingFields,lastLoginTime";
         let options = {
             "headers": {
                 "content-type": "application/json",
@@ -72,7 +72,7 @@ const getUserProfileInfo = function (token, userId) {
         function callback(err, data) {
             if (err) {
                 return reject({
-                    message: constants.apiResponses.SUNBIRD_SERVICE_DOWN
+                    message: CONSTANTS.apiResponses.SUNBIRD_SERVICE_DOWN
                 });
             } else {
                 return resolve(JSON.parse(data.body));
@@ -85,35 +85,17 @@ const getUserProfileInfo = function (token, userId) {
   * Get users.
   * @function
   * @name users
-  * @param body - body data.
+  * @param userInfo - user search api request.
   * @param token - Logged in user token.
   * @returns {JSON} - All users data.
 */
 
-const users = function (token, body) {
+const users = function (token, userInfo) {
     return new Promise(async (resolve, reject) => {
 
-        const userSearchAPI =
-            process.env.SUNBIRD_URL + constants.endpoints.SUNBIRD_SEARCH_USER;
-        let options = {
-            "headers": {
-                "content-type": "application/json",
-                "authorization": process.env.AUTHORIZATION,
-                "x-authenticated-user-token": token,
-            },
-            json: body
-        };
-
-        request.post(userSearchAPI, options, callback);
-        function callback(err, data) {
-            if (err) {
-                return reject({
-                    message: constants.apiResponses.SUNBIRD_SERVICE_DOWN
-                });
-            } else {
-                return resolve(data.body);
-            }
-        }
+        const userSearchAPI = CONSTANTS.endpoints.SUNBIRD_SEARCH_USER + "?limit=" + userInfo.limit + "&page=" + userInfo.offset;
+        let response = await callToSunbird(token, userInfo, userSearchAPI);
+        return resolve(response);
     })
 }
 
@@ -129,8 +111,7 @@ const users = function (token, body) {
 const addUser = function (userInfo, token) {
     return new Promise(async (resolve, reject) => {
 
-        const adduserToOrgUrl =
-            process.env.SUNBIRD_URL + constants.endpoints.SUNBIRD_ADD_USER_TO_ORG;
+        const adduserToOrgUrl = CONSTANTS.endpoints.SUNBIRD_ADD_USER_TO_ORG;
         let response = await callToSunbird(token, userInfo, adduserToOrgUrl);
         return resolve(response);
 
@@ -149,8 +130,7 @@ const addUser = function (userInfo, token) {
 const assignRoles = function (rolesInfo, token) {
     return new Promise(async (resolve, reject) => {
 
-        const assignRolesToOrgApiUrl =
-            process.env.SUNBIRD_URL + constants.endpoints.SUNBIRD_ASSIGN_ROLES_TO_ORG;
+        const assignRolesToOrgApiUrl = CONSTANTS.endpoints.SUNBIRD_ASSIGN_ROLES_TO_ORG;
 
         let response = await callToSunbird(token, rolesInfo, assignRolesToOrgApiUrl);
         return resolve(response);
@@ -170,27 +150,29 @@ const assignRoles = function (rolesInfo, token) {
   * @returns {JSON} - return response from the sunbird api.
 */
 
-function callToSunbird(token, requestBody, url, type = "") {
+function callToSunbird(token, requestBody, url, type = "POST") {
     return new Promise(async (resolve, reject) => {
         let options = {
             "headers": {
                 "content-type": "application/json",
-                "authorization": process.env.AUTHORIZATION,
-                "x-authenticated-user-token": token
+                "x-authenticated-user-token": token,
+                "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN
             },
-            json: { request: requestBody }
+            json: requestBody
         };
 
+        url = process.env.SUNBIRD_SERIVCE_HOST + process.env.SUNBIRD_SERIVCE_BASE_URL + url;
         if (type == "PATCH") {
             request.patch(url, options, callback);
         } else {
             request.post(url, options, callback);
         }
 
+
         function callback(err, data) {
             if (err) {
                 return reject({
-                    message: constants.apiResponses.SUNBIRD_SERVICE_DOWN
+                    message: CONSTANTS.apiResponses.SUNBIRD_SERVICE_DOWN
                 });
             } else {
                 return resolve(data.body);
@@ -212,9 +194,7 @@ function callToSunbird(token, requestBody, url, type = "") {
 
 const searchOrganisation = function (searchDetails, token) {
     return new Promise(async (resolve, reject) => {
-
-        const searchOrgUrl =
-            process.env.SUNBIRD_URL + constants.endpoints.SUNBIRD_SEARCH_ORG;
+        const searchOrgUrl = CONSTANTS.endpoints.SUNBIRD_SEARCH_ORG;
         let response = await callToSunbird(token, searchDetails, searchOrgUrl);
         return resolve(response);
 
@@ -233,8 +213,7 @@ const searchOrganisation = function (searchDetails, token) {
 const createOrganisation = function (organisationDetails, token) {
     return new Promise(async (resolve, reject) => {
 
-        const searchOrgUrl =
-            process.env.SUNBIRD_URL + constants.endpoints.SUNBIRD_CREATE_ORG;
+        const searchOrgUrl = CONSTANTS.endpoints.SUNBIRD_CREATE_ORG;
         let response = await callToSunbird(token, organisationDetails, searchOrgUrl);
         return resolve(response);
 
@@ -253,8 +232,7 @@ const createOrganisation = function (organisationDetails, token) {
 const updateOrganisationDetails = function (organisationDetails, token) {
     return new Promise(async (resolve, reject) => {
 
-        const updateOrgDetails =
-            process.env.SUNBIRD_URL + constants.endpoints.SUNBIRD_UPDATE_ORG;
+        const updateOrgDetails = CONSTANTS.endpoints.SUNBIRD_UPDATE_ORG;
         let response = await callToSunbird(token, organisationDetails, updateOrgDetails, "PATCH");
         return resolve(response);
 
@@ -272,8 +250,7 @@ const updateOrganisationDetails = function (organisationDetails, token) {
 const getOrganisationDetails = function (requestBody, token) {
     return new Promise(async (resolve, reject) => {
 
-        const OrgDetails =
-            process.env.SUNBIRD_URL + constants.endpoints.SUNBIRD_READ_ORG;
+        const OrgDetails = CONSTANTS.endpoints.SUNBIRD_READ_ORG;
         let response = await callToSunbird(token, requestBody, OrgDetails);
         return resolve(response);
 
@@ -292,8 +269,7 @@ const getOrganisationDetails = function (requestBody, token) {
 const updateOrgStatus = function (organisationDetails, token) {
     return new Promise(async (resolve, reject) => {
 
-        const OrgDetails =
-            process.env.SUNBIRD_URL + constants.endpoints.SUNBIRD_ORG_STATUS_UPDATE;
+        const OrgDetails = CONSTANTS.endpoints.SUNBIRD_ORG_STATUS_UPDATE;
         let response = await callToSunbird(token, organisationDetails, OrgDetails, "PATCH");
         return resolve(response);
     });
@@ -310,12 +286,35 @@ const updateOrgStatus = function (organisationDetails, token) {
 const removeUser = function (userDetails, token) {
     return new Promise(async (resolve, reject) => {
 
-        const userRemoveApi =
-            process.env.SUNBIRD_URL + constants.endpoints.SUNBIRD_REMOVE_USER_FROM_ORG;
+        const userRemoveApi = CONSTANTS.endpoints.SUNBIRD_REMOVE_USER_FROM_ORG;
         let response = await callToSunbird(token, userDetails, userRemoveApi);
         return resolve(response);
 
     });
+}
+
+/**
+  * to Varify token is valid or not
+  * @function
+  * @name verifyToken
+  * @param token - user token for verification 
+  * @returns {JSON} - consist of token verification details
+*/
+const verifyToken = function (token) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const verifyTokenEndpoint = CONSTANTS.endpoints.VERIFY_TOKEN;
+
+            let requestBody = {
+                token: token
+            }
+            let response = await callToSunbird(token, requestBody, verifyTokenEndpoint, "POST");
+            return resolve(response);
+        } catch (error) {
+
+            reject({ message: CONSTANTS.apiResponses.SUNBIRD_SERVICE_DOWN });
+        }
+    })
 }
 
 module.exports = {
@@ -329,5 +328,6 @@ module.exports = {
     updateOrganisationDetails: updateOrganisationDetails,
     getOrganisationDetails: getOrganisationDetails,
     updateOrgStatus: updateOrgStatus,
-    removeUser: removeUser
+    removeUser: removeUser,
+    verifyToken: verifyToken
 };

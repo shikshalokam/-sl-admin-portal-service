@@ -5,7 +5,7 @@
  * Description : sunbird roles related functionality.
  */
 
-const sessionHelpers = require(ROOT_PATH + "/generics/helpers/sessions");
+const sessionHelpers = require(GENERIC_HELPERS_PATH + "/sessions");
 
 /**
    * RolesHelper
@@ -38,12 +38,12 @@ module.exports = class RolesHelper {
 
                     if (!rolesDoc) {
                         return resolve({
-                            message: constants.apiResponses.ROLES_NOT_FOUND,
+                            message: CONSTANTS.apiResponses.ROLES_NOT_FOUND,
                         });
                     }
                     roles = rolesDoc;
                 }
-                return resolve({ message: constants.apiResponses.ROLES_FOUND, result: roles });
+                return resolve({ message: CONSTANTS.apiResponses.ROLES_FOUND, result: roles });
                 
             } catch (error) {
                 return reject(error);

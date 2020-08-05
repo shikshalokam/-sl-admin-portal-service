@@ -6,12 +6,12 @@
  */
 
 const sunbirdService =
-    require(SERVICES_PATH+"/sunbird");
+    require(GENERIC_SERVICES_PATH+"/sunbird");
 const kendraService =
-    require(SERVICES_PATH+"/kendra-service");
+    require(GENERIC_SERVICES_PATH+"/kendra-service");
 
 const samikshaService =
-    require(SERVICES_PATH+"/samiksha-service");
+    require(GENERIC_SERVICES_PATH+"/samiksha-service");
 
 
 const csv = require('csvtojson');
@@ -45,13 +45,13 @@ module.exports = class UserCreationHelper {
                     let status = "";
                     if (req.query.requestType == "entityMapping") {
 
-                        status = constants.common.BULK_ENTITY_MAPPING_TYPE;
+                        status = CONSTANTS.common.BULK_ENTITY_MAPPING_TYPE;
 
                         let validateMapping = await _validateEntityMapping(uploadFileData);
                         if (validateMapping == false) {
                             reject({
-                                status: httpStatusCode["bad_request"].status,
-                                message: constants.apiResponses.VALIDATION_FAILED
+                                status: HTTP_STATUS_CODE["bad_request"].status,
+                                message: CONSTANTS.apiResponses.VALIDATION_FAILED
                             })
                         }
 
@@ -59,42 +59,42 @@ module.exports = class UserCreationHelper {
                     }
                     else if (req.query.requestType == "entityCreation") {
 
-                        status = constants.common.BULK_ENTITY_CREATION_TYPE;
+                        status = CONSTANTS.common.BULK_ENTITY_CREATION_TYPE;
                         if (!req.query.entityType) {
                             reject({
-                                status: httpStatusCode["bad_request"].status,
-                                message: constants.apiResponses.VALIDATION_FAILED
+                                status: HTTP_STATUS_CODE["bad_request"].status,
+                                message: CONSTANTS.apiResponses.VALIDATION_FAILED
                             })
                         }
 
                         let validateEntityRequest = await _validateEntityUploadRequest(uploadFileData);
                         if (validateEntityRequest == false) {
                             reject({
-                                status: httpStatusCode["bad_request"].status,
-                                message: constants.apiResponses.VALIDATION_FAILED
+                                status: HTTP_STATUS_CODE["bad_request"].status,
+                                message: CONSTANTS.apiResponses.VALIDATION_FAILED
                             })
                         }
 
 
                     } else if (req.query.requestType == "userCreation") {
 
-                        status = constants.common.BULK_USER_CREATION_TYPE;
+                        status = CONSTANTS.common.BULK_USER_CREATION_TYPE;
                         let validateUser = await _validateUsers(uploadFileData);
                         if (validateUser == false) {
                             reject({
-                                status: httpStatusCode["bad_request"].status,
-                                message: constants.apiResponses.VALIDATION_FAILED
+                                status: HTTP_STATUS_CODE["bad_request"].status,
+                                message: CONSTANTS.apiResponses.VALIDATION_FAILED
                             })
                         }
 
                     } else {
                         reject({
-                            status: httpStatusCode["bad_request"].status,
-                            message: httpStatusCode["bad_request"].message
+                            status: HTTP_STATUS_CODE["bad_request"].status,
+                            message: HTTP_STATUS_CODE["bad_request"].message
                         })
                     }
-                    let fileName = gen.utils.generateUniqueId() + ".csv";
-                    var dir = ROOT_PATH + process.env.BATCH_FOLDER_PATH;
+                    let fileName = UTILS.generateUniqueId() + ".csv";
+                    var dir = PROJECT_ROOT_DIRECTORY + process.env.BATCH_FOLDER_PATH;
                     if (!fs.existsSync(dir)) {
                         fs.mkdirSync(dir);
                     }
@@ -103,7 +103,7 @@ module.exports = class UserCreationHelper {
                     files.push(userId + "/" + fileName);
                     let fileInfo = {};
 
-                    let fileCompletePath = ROOT_PATH + process.env.BATCH_FOLDER_PATH + fileName;
+                    let fileCompletePath = PROJECT_ROOT_DIRECTORY + process.env.BATCH_FOLDER_PATH + fileName;
                     let data = fs.writeFileSync(fileCompletePath, req.files.uploadFile.data);
                     let requestBody = {
                         fileNames: files,
@@ -115,7 +115,7 @@ module.exports = class UserCreationHelper {
                     await Promise.all(files.map(async function (fileData) {
                         let uploadResp = await kendraService.uploadFile(fileCompletePath,
                             fileData, req.userDetails.userToken);
-                        if (uploadResp.status != httpStatusCode["ok"].status) {
+                        if (uploadResp.status != HTTP_STATUS_CODE["ok"].status) {
                             reject(uploadResp);
                         }
                         if (uploadResp.result) {
@@ -160,12 +160,12 @@ module.exports = class UserCreationHelper {
                             req.query.programId,
                             req.query.solutionId);
                     }
-                    resolve({ result: { requestId: request.requestId }, message: constants.apiResponses.REQUEST_SUBMITTED });
+                    resolve({ result: { requestId: request.requestId }, message: CONSTANTS.apiResponses.REQUEST_SUBMITTED });
 
                 } else {
                     resolve({
-                        status: httpStatusCode["bad_request"].status,
-                        message: constants.apiResponses.INVALID_ACCESS
+                        status: HTTP_STATUS_CODE["bad_request"].status,
+                        message: CONSTANTS.apiResponses.INVALID_ACCESS
                     });
                 }
             } catch (error) {
@@ -259,8 +259,8 @@ module.exports = class UserCreationHelper {
 
                 } else {
                     resolve({
-                        status: httpStatusCode["bad_request"].status,
-                        message: constants.apiResponses.INVALID_ACCESS
+                        status: HTTP_STATUS_CODE["bad_request"].status,
+                        message: CONSTANTS.apiResponses.INVALID_ACCESS
                     });
                 }
             } catch (error) {
@@ -290,12 +290,12 @@ module.exports = class UserCreationHelper {
                     if (requestDoc) {
                         resolve({ result: { data: { requestDoc } } });
                     } else {
-                        reject({ status: httpStatusCode["bad_request"].status, message: httpStatusCode["bad_request"].message });
+                        reject({ status: HTTP_STATUS_CODE["bad_request"].status, message: HTTP_STATUS_CODE["bad_request"].message });
                     }
                 } else {
                     resolve({
-                        status: httpStatusCode["bad_request"].status,
-                        message: constants.apiResponses.INVALID_ACCESS
+                        status: HTTP_STATUS_CODE["bad_request"].status,
+                        message: CONSTANTS.apiResponses.INVALID_ACCESS
                     });
                 }
 
@@ -336,7 +336,7 @@ module.exports = class UserCreationHelper {
 
                 } else {
                     resolve({
-                        status: httpStatusCode["bad_request"].status
+                        status: HTTP_STATUS_CODE["bad_request"].status
                     });
                 }
 
@@ -361,18 +361,18 @@ module.exports = class UserCreationHelper {
                 let status = [];
                 if (bulkRequestDocument && bulkRequestDocument.length == 0) {
                     reject({
-                        message: constants.apiResponses.STATUS_LIST_NOT_FOUND,
+                        message: CONSTANTS.apiResponses.STATUS_LIST_NOT_FOUND,
                     });
                 }
                 bulkRequestDocument.map(item => {
-                    status.push({ label: gen.utils.camelCaseToCapitalizeCase(item), value: item });
+                    status.push({ label: UTILS.camelCaseToCapitalizeCase(item), value: item });
                 });
 
-                status = status.sort(gen.utils.sortArrayOfObjects('label'));
+                status = status.sort(UTILS.sortArrayOfObjects('label'));
                 let allField = _getAllField();
                 status.unshift(allField);
                 resolve({
-                    message: constants.apiResponses.STATUS_LIST,
+                    message: CONSTANTS.apiResponses.STATUS_LIST,
                     result: status
                 });
 
@@ -397,22 +397,22 @@ module.exports = class UserCreationHelper {
                 let requestTypes = [];
                 if (bulkRequestDocument && bulkRequestDocument.length == 0) {
                     reject({
-                        message: constants.apiResponses.BULK_REQUEST_TYPE_NOT_FOUND,
+                        message: CONSTANTS.apiResponses.BULK_REQUEST_TYPE_NOT_FOUND,
                     });
                 }
 
                 bulkRequestDocument.map(item => {
-                    requestTypes.push({ label: gen.utils.camelCaseToCapitalizeCase(item), value: item });
+                    requestTypes.push({ label: UTILS.camelCaseToCapitalizeCase(item), value: item });
                 });
 
 
-                requestTypes = requestTypes.sort(gen.utils.sortArrayOfObjects('label'));
+                requestTypes = requestTypes.sort(UTILS.sortArrayOfObjects('label'));
 
                 let allField = _getAllField();
                 requestTypes.unshift(allField);
 
                 resolve({
-                    message: constants.apiResponses.BULK_REQUEST_TYPE,
+                    message: CONSTANTS.apiResponses.BULK_REQUEST_TYPE,
                     result: requestTypes
                 });
 
@@ -440,7 +440,7 @@ function _actions() {
     for (let action = 0; action < actions.length; action++) {
         actionsColumn.push({
             key: actions[action],
-            label: gen.utils.camelCaseToCapitalizeCase(actions[action]),
+            label: UTILS.camelCaseToCapitalizeCase(actions[action]),
             visible: true,
             icon: actions[action]
         })
@@ -478,7 +478,7 @@ function _bulkRequestList() {
         let obj = { ...defaultColumn };
         let field = columns[column];
 
-        obj["label"] = gen.utils.camelCaseToCapitalizeCase(field);
+        obj["label"] = UTILS.camelCaseToCapitalizeCase(field);
         obj["key"] = field
 
         if (field === "files") {
@@ -527,20 +527,20 @@ function _checkAccess(token, userId) {
                 })
             }
 
-            if (profileData.responseCode == constants.common.RESPONSE_OK) {
+            if (profileData.responseCode == CONSTANTS.common.RESPONSE_OK) {
 
                 if (profileData.result && profileData.result.response) {
 
                     profileData['allowed'] = false;
                     await Promise.all(roles.map(async function (role) {
-                        if (role == constants.common.ORG_ADMIN_ROLE ||
-                            role == constants.common.PLATFROM_ADMIN_ROLE) {
+                        if (role == CONSTANTS.common.ORG_ADMIN_ROLE ||
+                            role == CONSTANTS.common.PLATFROM_ADMIN_ROLE) {
                             profileData['allowed'] = true;
                             return resolve(profileData);
                         } else {
                             if (profileData.result.response.organisations) {
                                 await Promise.all(profileData.result.response.organisations.map(async org => {
-                                    if (org.roles.includes(constants.common.ORG_ADMIN_ROLE)) {
+                                    if (org.roles.includes(CONSTANTS.common.ORG_ADMIN_ROLE)) {
                                         profileData['allowed'] = true;
                                     }
                                 }))
@@ -552,15 +552,15 @@ function _checkAccess(token, userId) {
                 } else {
 
                     response = {
-                        status: httpStatusCode["bad_request"].status,
-                        message: constants.apiResponses.INVALID_ACCESS
+                        status: HTTP_STATUS_CODE["bad_request"].status,
+                        message: CONSTANTS.apiResponses.INVALID_ACCESS
                     };
                 }
 
             } else {
                 response = {
-                    status: httpStatusCode["bad_request"].status,
-                    message: constants.apiResponses.USER_INFO_NOT_FOUND
+                    status: HTTP_STATUS_CODE["bad_request"].status,
+                    message: CONSTANTS.apiResponses.USER_INFO_NOT_FOUND
                 };
             }
 
@@ -636,25 +636,25 @@ function _bulkUploadEntities(bulkRequestId, fileCompletePath, token, entityType,
     return new Promise(async (resolve, reject) => {
 
         let samikshaResponse = await samikshaService.bulkUploadEntities(fileCompletePath, token, entityType);
-        if (samikshaResponse && samikshaResponse.statusCode == httpStatusCode["ok"].status) {
+        if (samikshaResponse && samikshaResponse.statusCode == HTTP_STATUS_CODE["ok"].status) {
             let responseData = await csv().fromString(samikshaResponse.body.toString());
             let files = [];
             let cv = new ObjectsToCsv(responseData);
-            let successFile = gen.utils.generateUniqueId() + "_success.csv";
-            await cv.toDisk(ROOT_PATH + process.env.BATCH_FOLDER_PATH + successFile);
+            let successFile = UTILS.generateUniqueId() + "_success.csv";
+            await cv.toDisk(PROJECT_ROOT_DIRECTORY + process.env.BATCH_FOLDER_PATH + successFile);
             files.push(userId + "/" + successFile);
 
-            let uploadResponse = await kendraService.uploadFile(ROOT_PATH + process.env.BATCH_FOLDER_PATH + successFile,
+            let uploadResponse = await kendraService.uploadFile(PROJECT_ROOT_DIRECTORY + process.env.BATCH_FOLDER_PATH + successFile,
                 userId + "/" + successFile, token);
 
-            if (uploadResponse.status == httpStatusCode["ok"].status) {
+            if (uploadResponse.status == HTTP_STATUS_CODE["ok"].status) {
 
                 let successFileData = {
                     sourcePath: uploadResponse.result.name
                 }
                 let update = await database.models.bulkUploadRequests.findOneAndUpdate(
                     { requestId: bulkRequestId },
-                    { $set: { "successFile": successFileData, status: constants.common.BULK_UPLOAD_COMPLETE } }
+                    { $set: { "successFile": successFileData, status: CONSTANTS.common.BULK_UPLOAD_COMPLETE } }
                 )
                 resolve(update);
 
@@ -662,7 +662,7 @@ function _bulkUploadEntities(bulkRequestId, fileCompletePath, token, entityType,
 
                 let update = await database.models.bulkUploadRequests.findOneAndUpdate(
                     { requestId: bulkRequestId },
-                    { $set: { status: constants.common.BULK_UPLOAD_FAILURE } }
+                    { $set: { status: CONSTANTS.common.BULK_UPLOAD_FAILURE } }
                 )
                 resolve(update);
 
@@ -694,14 +694,14 @@ function _entityMapping(bulkRequestId,
 
         try {
             let samikshaResponse = await samikshaService.entityMapping(filePath, userToken, programId, solutionId);
-            if (samikshaResponse && samikshaResponse.statusCode == httpStatusCode["ok"].status) {
+            if (samikshaResponse && samikshaResponse.statusCode == HTTP_STATUS_CODE["ok"].status) {
 
 
-                let successFile = gen.utils.generateUniqueId() + "_success.csv";
+                let successFile = UTILS.generateUniqueId() + "_success.csv";
                 let uploadResponse = await kendraService.uploadFile(filePath,
                     userId + "/" + successFile, userToken);
 
-                if (uploadResponse.status == httpStatusCode["ok"].status) {
+                if (uploadResponse.status == HTTP_STATUS_CODE["ok"].status) {
 
                     let successFileData = {
                         sourcePath: uploadResponse.result.name
@@ -709,14 +709,14 @@ function _entityMapping(bulkRequestId,
 
                     let update = await database.models.bulkUploadRequests.findOneAndUpdate(
                         { requestId: bulkRequestId },
-                        { $set: { status: constants.common.BULK_UPLOAD_COMPLETE, "successFile": successFileData } }
+                        { $set: { status: CONSTANTS.common.BULK_UPLOAD_COMPLETE, "successFile": successFileData } }
                     );
                     resolve(update);
                 }
             } else {
                 let update = await database.models.bulkUploadRequests.findOneAndUpdate(
                     { requestId: bulkRequestId },
-                    { $set: { status: constants.common.BULK_UPLOAD_FAILURE } }
+                    { $set: { status: CONSTANTS.common.BULK_UPLOAD_FAILURE } }
                 )
                 resolve(update);
             }

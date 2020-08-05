@@ -6,7 +6,7 @@
  */
 
 const organisationsHelper = require(MODULES_BASE_PATH + "/organisations/helper.js");
-const csvFileStream = require(ROOT_PATH + "/generics/file-stream");
+const csvFileStream = require(GENERICS_FILES_PATH + "/file-stream");
 
 /**
     * Organisations
@@ -70,16 +70,16 @@ module.exports = class Organisations {
           (req.params._id && req.params._id != "") ? req.params._id : req.userDetails.userId,
           req.pageSize,
           req.pageNo);
-        return resolve(organisationList);
+        return resolve({ result:organisationList.data,message: organisationList.message });
 
       } catch (error) {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
       }
     });
@@ -134,16 +134,16 @@ module.exports = class Organisations {
           req.searchText,
           req.query.status ? req.query.status : ""
         );
-        return resolve(organisationList);
+        return resolve({ result:organisationList.data,message: organisationList.message });
 
       } catch (error) {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
       }
     });
@@ -203,10 +203,10 @@ module.exports = class Organisations {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
       }
     });
@@ -260,16 +260,16 @@ module.exports = class Organisations {
           organisation: req.body.organisation
         }
         let response = await organisationsHelper.addUser(orgDetails, req.userDetails.userToken);
-        return resolve(response);
+        return resolve({ result:response.data,message: response.message });
 
       } catch (error) {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
       }
     });
@@ -326,16 +326,16 @@ module.exports = class Organisations {
           removeRoles: req.body.removeRoles ? req.body.removeRoles : false
         }
         let response = await organisationsHelper.assignRoles(orgDetails, req.userDetails.userToken);
-        return resolve(response);
+        return resolve({ result:response.data,message: response.message });
 
       } catch (error) {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
       }
     });
@@ -397,16 +397,16 @@ module.exports = class Organisations {
           status: req.query.status ? req.query.status : ""
         }
         let response = await organisationsHelper.detailList(query);
-        return resolve(response);
+        return resolve({ result:response.data,message: response.message });
 
       } catch (error) {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
       }
     });
@@ -470,16 +470,16 @@ module.exports = class Organisations {
       try {
 
         let response = await organisationsHelper.create(req.body, req.userDetails.userToken);
-        return resolve(response);
+        return resolve({ result:response.data,message: response.message });
 
       } catch (error) {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
       }
     });
@@ -538,17 +538,17 @@ module.exports = class Organisations {
       try {
 
         let response = await organisationsHelper.getForm();
-        return resolve(response);
+        return resolve({ result:response.data,message: response.message });
 
       } catch (error) {
 
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
 
       }
@@ -596,16 +596,16 @@ module.exports = class Organisations {
       try {
 
         let response = await organisationsHelper.update(req.body, req.userDetails.userToken);
-        return resolve(response);
+        return resolve({ result:response.data,message: response.message });
 
       } catch (error) {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
       }
     });
@@ -648,16 +648,16 @@ module.exports = class Organisations {
       try {
 
         let response = await organisationsHelper.details(req.params._id, req.userDetails.userToken);
-        return resolve(response);
+        return resolve({ result:response.data,message: response.message });
 
       } catch (error) {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
       }
     });
@@ -700,16 +700,16 @@ module.exports = class Organisations {
       try {
 
         let response = await organisationsHelper.updateStatus(req.body, req.userDetails.userToken);
-        return resolve(response);
+        return resolve({ result:response.data,message: response.message });
 
       } catch (error) {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
       }
     });
@@ -752,16 +752,16 @@ module.exports = class Organisations {
       try {
 
         let response = await organisationsHelper.removeUser(req.body, req.userDetails.userToken);
-        return resolve(response);
+        return resolve({ result:response.data,message: response.message });
 
       } catch (error) {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
       }
     });

@@ -27,7 +27,7 @@ module.exports = class PlatformUserRoles extends Abstract {
    */
 
   constructor() {
-    super(schemas["platformUserRolesExt"]);
+    super("platformUserRolesExt");
   }
 
   static get name() {
@@ -81,11 +81,11 @@ module.exports = class PlatformUserRoles extends Abstract {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
 
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
       }
     });

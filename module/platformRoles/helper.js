@@ -6,7 +6,7 @@
  */
 
 
-const sessionHelpers = require(ROOT_PATH + "/generics/helpers/sessions");
+const sessionHelpers = require(GENERIC_HELPERS_PATH + "/sessions");
 
 /**
    * PlatformRolesHelper
@@ -51,10 +51,10 @@ module.exports = class PlatformRolesHelper {
 
                 if (!platformRolesDoc) {
                     return resolve({
-                        message: constants.apiResponses.PLATFORMROLES_NOT_FOUND,
+                        message: CONSTANTS.apiResponses.PLATFORMROLES_NOT_FOUND,
                     });
                 }
-                return resolve({ message: constants.apiResponses.PLATFORMROLES_FOUND, result: platformRolesDoc });
+                return resolve({ message: CONSTANTS.apiResponses.PLATFORMROLES_FOUND, result: platformRolesDoc });
 
             } catch (error) {
                 return reject(error);
@@ -85,7 +85,7 @@ module.exports = class PlatformRolesHelper {
                     }
 
                 }
-                resolve({ message : constants.apiResponses.PLATFORMROLES_FOUND, result :roles });
+                resolve({ message : CONSTANTS.apiResponses.PLATFORMROLES_FOUND, result :roles });
             } catch (error) {
                 return reject(error);
             }

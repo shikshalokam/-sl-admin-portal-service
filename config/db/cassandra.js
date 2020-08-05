@@ -1,6 +1,20 @@
-var ExpressCassandra = require('express-cassandra');
+/**
+ * name : cassandra.js.
+ * author : Aman Karki.
+ * created-date : 20-July-2020.
+ * Description : cassandra configurations.
+ */
 
-var DB = function (config) {
+const ExpressCassandra = require('express-cassandra');
+
+/**
+ * Cassandra DB setup.
+ * @method
+ * @name DB
+ * @param  {Object} config - cassandra configurations information.
+*/
+
+const DB = function (config) {
     var models = ExpressCassandra.createClient({
         clientOptions: {
             contactPoints: [config.host],
@@ -17,18 +31,11 @@ var DB = function (config) {
         }
     });
 
-    let connection =false;
     var createModel = function (opts) {
-        
         var MyModel = models.loadSchema(opts.name, opts.schema);
         MyModel.syncDB(function (err, result) {
             if (err) throw err;
-        
-            if(!connection){
-                connection = true;
-                log.debug("Connected to Cassandra DB");
-            }
-            
+            LOGGER.info("Connected to cassandra database!");
         });
         return models.instance;
     }
@@ -37,4 +44,5 @@ var DB = function (config) {
         createModel: createModel,
     };
 };
+
 module.exports = DB;

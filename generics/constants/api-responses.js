@@ -54,5 +54,13 @@ module.exports = {
     PLATFORMROLES_FOUND: "Platform roles fetched successfully",
     PLATFORMROLES_NOT_FOUND: "Platform roles not found",
     ROLES_FOUND: "Roles found successfully",
-    ROLES_NOT_FOUND: "Roles not found"
+    ROLES_NOT_FOUND: "Roles not found",
+    TOKEN_MISSING_CODE: 'ERR_TOKEN_FIELD_MISSING',
+    TOKEN_MISSING_MESSAGE: 'Required field token is missing',
+    TOKEN_INVALID_CODE: 'ERR_TOKEN_INVALID',
+    TOKEN_INVALID_MESSAGE: 'Access denied',
+    MISSING_TOKEN_AND_INTERNAL_ACCESS_TOKEN_CODE: "ERR_REQUEST_FIELDS_MISSING",
+    MISSING_TOKEN_AND_INTERNAL_ACCESS_TOKEN_MESSAGE: "Token and Internal access token both are required field",
+    MISSING_TOKEN_OR_INTERNAL_ACCESS_TOKEN_CODE: "ERR_REQUEST_ANY_ONE_FIELD_MISSING",
+    MISSING_TOKEN_OR_INTERNAL_ACCESS_TOKEN_MESSAGE: "Token or Internal access token either one is required"
 };

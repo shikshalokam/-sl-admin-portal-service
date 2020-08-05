@@ -41,12 +41,12 @@ function uploadFile(filePath, uploadPath) {
              let endpoint = "";
 
             let cloudStorage = process.env.CLOUD_STORAGE;
-            if (cloudStorage == constants.common.AWS_SERVICE) {
-                endpoint = constants.endpoints.UPLOAD_TO_AWS;
-            } else if (cloudStorage == constants.common.GOOGLE_CLOUD_SERVICE) {
-                endpoint = constants.endpoints.UPLOAD_TO_GCP;
-            } else if (cloudStorage == constants.common.AZURE_SERVICE) {
-                endpoint = constants.endpoints.UPLOAD_TO_AZURE;
+            if (cloudStorage == CONSTANTS.common.AWS_SERVICE) {
+                endpoint = CONSTANTS.endpoints.UPLOAD_TO_AWS;
+            } else if (cloudStorage == CONSTANTS.common.GOOGLE_CLOUD_SERVICE) {
+                endpoint = CONSTANTS.endpoints.UPLOAD_TO_GCP;
+            } else if (cloudStorage == CONSTANTS.common.AZURE_SERVICE) {
+                endpoint = CONSTANTS.endpoints.UPLOAD_TO_AZURE;
             }
 
             let apiUrl =
@@ -57,7 +57,7 @@ function uploadFile(filePath, uploadPath) {
 
                 if (err) {
                     return reject({
-                        message: constants.apiResponses.KENDRA_SERVICE_DOWN
+                        message: CONSTANTS.apiResponses.KENDRA_SERVICE_DOWN
                     });
                 } else {
                     return resolve(JSON.parse(data.body));
@@ -84,12 +84,12 @@ function getDownloadableUrls(inputData) {
             }
             let endpoint = "";
             let cloudStorage = process.env.CLOUD_STORAGE;
-            if (cloudStorage == constants.common.AWS_SERVICE) {
-                endpoint = constants.endpoints.DOWNLOAD_AWS_URL;
-            } else if (cloudStorage == constants.common.GOOGLE_CLOUD_SERVICE) {
-                endpoint = constants.endpoints.DOWNLOAD_GCP_URL;
-            } else if (cloudStorage == constants.common.AZURE_SERVICE) {
-                endpoint = constants.endpoints.DOWNLOAD_AZURE_URL;
+            if (cloudStorage == CONSTANTS.common.AWS_SERVICE) {
+                endpoint = CONSTANTS.endpoints.DOWNLOAD_AWS_URL;
+            } else if (cloudStorage == CONSTANTS.common.GOOGLE_CLOUD_SERVICE) {
+                endpoint = CONSTANTS.endpoints.DOWNLOAD_GCP_URL;
+            } else if (cloudStorage == CONSTANTS.common.AZURE_SERVICE) {
+                endpoint = CONSTANTS.endpoints.DOWNLOAD_AZURE_URL;
             }
             const apiUrl =
                 apiBaseUrl + endpoint;
@@ -106,7 +106,7 @@ function getDownloadableUrls(inputData) {
             function callback(err, data) {
                 if (err) {
                     return reject({
-                        message: constants.apiResponses.KENDRA_SERVICE_DOWN
+                        message: CONSTANTS.apiResponses.KENDRA_SERVICE_DOWN
                     });
                 } else {
                     return resolve(data.body);

@@ -28,7 +28,7 @@ const platformUserProfile = function (userId, token) {
         try {
 
             let platformUserRolesUrl =
-                apiBaseUrl + constants.endpoints.PLATFORM_USER_PROFILE + "/" + userId;
+                apiBaseUrl + CONSTANTS.endpoints.PLATFORM_USER_PROFILE + "/" + userId;
             let requestBody = {}
             let userManagementData = await httpCall(platformUserRolesUrl, token, requestBody, "GET");
             userManagementData = JSON.parse(userManagementData);
@@ -54,7 +54,7 @@ const createPlatformUser = function (userDetails, token) {
         try {
 
             let platformUserRolesUrl =
-                apiBaseUrl + constants.endpoints.PLATFORM_USER_CREATE;
+                apiBaseUrl + CONSTANTS.endpoints.PLATFORM_USER_CREATE;
             let requestBody = userDetails;
             let createResponse = await httpCall(platformUserRolesUrl, token, requestBody, "POST");
             return resolve(createResponse);
@@ -79,7 +79,7 @@ const updatePlatFormUser = function (userInfo, token) {
         try {
 
             let platformUserUpdateUrl =
-                apiBaseUrl + constants.endpoints.PLATFORM_USER_UPDATE;
+                apiBaseUrl + CONSTANTS.endpoints.PLATFORM_USER_UPDATE;
             let requestBody = userInfo;
             let response = await httpCall(platformUserUpdateUrl, token, requestBody, "POST");
             return resolve(response);
@@ -104,7 +104,7 @@ const activate = function (userId, token) {
         try {
 
             let platformUserStatusUpdateUrl =
-                apiBaseUrl + constants.endpoints.ACTIVATE_USER;
+                apiBaseUrl + CONSTANTS.endpoints.ACTIVATE_USER;
             let requestBody = { userId: userId };
             let response = await httpCall(platformUserStatusUpdateUrl, token, requestBody, "POST");
             return resolve(response);
@@ -129,7 +129,7 @@ const inactivate = function (userId, token) {
         try {
 
             let platformUserStatusUpdateUrl =
-                apiBaseUrl + constants.endpoints.INACTIVATE_USER;
+                apiBaseUrl + CONSTANTS.endpoints.INACTIVATE_USER;
             let requestBody = { userId: userId };
             let response = await httpCall(platformUserStatusUpdateUrl, token, requestBody, "POST");
             return resolve(response);
@@ -155,7 +155,7 @@ const userDetails = function (userId, token) {
         try {
 
             const userDetailsAPIUrl =
-                apiBaseUrl + constants.endpoints.USER_DETAILS;
+                apiBaseUrl + CONSTANTS.endpoints.USER_DETAILS;
             let requestBody = { userId: userId };
             let userDetails = await httpCall(userDetailsAPIUrl, token, requestBody, "POST");
             return resolve(userDetails);
@@ -199,7 +199,7 @@ function httpCall(url, token, requestBody= "", type = "") {
             function callback(err, data) {
                 if (err) {
                     return reject({
-                        message: constants.apiResponses.USER_MANAGEMENT_SERVICE_DOWN
+                        message: CONSTANTS.apiResponses.USER_MANAGEMENT_SERVICE_DOWN
                     });
                 } else {
                    return resolve(data.body);

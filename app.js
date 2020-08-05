@@ -1,161 +1,107 @@
+/**
+ * name : app.js.
+ * author : Aman Karki.
+ * created-date : 20-July-2020.
+ * Description : Root file.
+ */
+
 require("dotenv").config();
 
-global.config = require("./config");
+// Setup application config, establish DB connections and set global constants.
+global.config = require("./config/connections");
 require("./config/globals")();
 
-let environmentData = require("./envVariables")();
+// Check if all environment variables are provided.
+const environmentData = require("./envVariables")();
 
 if (!environmentData.success) {
-  log.warning("Server could not start . Not all environment variable is provided");
+  LOGGER.error("Server could not start . Not all environment variable is provided");
   process.exit();
 }
 
-let router = require("./routes");
-
-//express
+// express
 const express = require("express");
-let app = express();
+const app = express();
 
 //required modules
 const fileUpload = require("express-fileupload");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-var fs = require("fs");
-var path = require("path");
-var expressValidator = require('express-validator');
+const fs = require("fs");
+const path = require("path");
+const expressValidator = require('express-validator');
 
 //To enable cors
 app.use(cors());
 app.use(expressValidator())
 
-
 //health check
-app.get("/ping", (req, res) => {
+app.get(process.env.HEALTH_CHECK_URL, (req, res) => {
   res.send("pong!");
 });
 
 app.use(fileUpload());
-app.use(bodyParser.json({ limit: '50MB' }));
-app.use(bodyParser.urlencoded({ limit: '50MB', extended: false }));
+app.use(bodyParser.json({ limit: process.env.BODY_PARSER_LIMIT }));
+app.use(bodyParser.urlencoded({ 
+  limit: process.env.BODY_PARSER_LIMIT, 
+  extended: false 
+}));
+
 app.use(express.static("public"));
 
-fs.existsSync("logs") || fs.mkdirSync("logs");
-
-const serviceBaseUrl = process.env.APPLICATION_BASE_URL;
-
-// //API documentation (apidoc)
-// if (process.env.NODE_ENV == "development" || process.env.NODE_ENV == "local") {
-//   app.use(express.static("apidoc"));
-//   if(process.env.NODE_ENV == "local") {
-//     app.get("/apidoc", (req, res) => {
-//       res.sendFile(path.join(__dirname, "/public/apidoc/index.html"));
-//     });
-//   } else {
-//     app.get(serviceBaseUrl+"apidoc/*", (req, res) => {
-//       let urlArray = req.path.split("/")
-//       urlArray.splice(0,3)
-//       res.sendFile(path.join(__dirname, "/public/apidoc/"+urlArray.join("/")));
-//     });
-//   }
-// }
-
+fs.existsSync(process.env.LOGGER_DIRECTORY) || 
+fs.mkdirSync(process.env.LOGGER_DIRECTORY);
 
 //API documentation (apidoc)
-// if (process.env.NODE_ENV == "development" || process.env.NODE_ENV == "local") {
-//   app.use(express.static("apidoc"));
+if (process.env.APPLICATION_ENV == "development") {
+  app.use(express.static("apidoc"));
+  
+  app.get(process.env.APIDOC_URL, (req, res) => {
+    let urlArray = req.path.split("/");
+    urlArray.splice(0, 3);
+    let apidocPath = process.env.APIDOC_PATH + urlArray.join("/");
+    res.sendFile(path.join(__dirname, apidocPath));
+  });
+}
 
-//   if (process.env.NODE_ENV == "local") {
-//     app.get(process.env.APIDOC_URL, (req, res) => {
-//       let apidocPath = process.env.APIDOC_PATH + "/index.html";
-
-//       res.sendFile(path.join(__dirname, apidocPath));
-//     });
-//   } else {
-//     app.get(process.env.APIDOC_URL, (req, res) => {
-//       let urlArray = req.path.split("/");
-//       urlArray.splice(0, 3);
-//       let apidocPath = process.env.APIDOC_PATH + urlArray.join("/");
-
-//       res.sendFile(path.join(__dirname, apidocPath));
-//     });
-//   }
-// }
-
-// app.get(serviceBaseUrl+"web/*", function(req, res) {
-//   res.sendFile(path.join(__dirname, "/public/assessment/web/index.html"));
-// });
-
-// app.get(serviceBaseUrl + "web2/*", function (req, res) {
-//   res.sendFile(path.join(__dirname, "/public" + serviceBaseUrl + "web2/index.html"));
-// });
-
-var bunyan = require("bunyan");
-
-global.loggerObj = bunyan.createLogger({
-  name: "foo",
-  streams: [
-    {
-      type: "rotating-file",
-      path: path.join(__dirname + "/logs/" + process.pid + "-all.log"),
-      period: "1d", // daily rotation
-      count: 3 // keep 3 back copies
-    }
-  ]
-});
-
-global.loggerExceptionObj = bunyan.createLogger({
-  name: "exceptionLogs",
-  streams: [
-    {
-      type: "rotating-file",
-      path: path.join(__dirname + "/logs/" + process.pid + "-exception.log"),
-      period: "1d", // daily rotation
-      count: 3 // keep 3 back copies
-    }
-  ]
-});
-
-app.all("*", (req, res, next) => {
-  if (ENABLE_BUNYAN_LOGGING === "ON") {
-    loggerObj.info({
+app.all('*', (req, res, next) => {
+  
+  if(ENABLE_FILE_LOGGING === "ON") {
+    LOGGER.info("Requests:", {
       method: req.method,
       url: req.url,
       headers: req.headers,
       body: req.body
-    });
+    })
   }
 
-  if (ENABLE_DEBUG_LOGGING === "ON") {
-    log.info("-------Request log starts here------------------");
-    log.info(
-      "%s %s on %s from ",
-      req.method,
-      req.url,
-      new Date(),
-      req.headers["user-agent"]
-    );
-    log.info("Request Headers: ", req.headers);
-    log.info("Request Body: ", req.body);
-    log.info("Request Files: ", req.files);
-    log.info("-------Request log ends here------------------");
+
+  if(process.env.ENABLE_CONSOLE_LOGGING === "ON") {
+    console.log("-------Request log starts here------------------");
+    console.log("Request URL: ", req.url);
+    console.log("Request Headers: ", req.headers);
+    console.log("Request Body: ", req.body);
+    console.log("Request Files: ", req.files);
+    console.log("-------Request log ends here------------------");
   }
 
   next();
 });
 
 
+// Router module
+const router = require("./routes");
+
 //add routing
 router(app);
 
 //listen to given port
-app.listen(config.port, () => {
+app.listen(process.env.APPLICATION_PORT, () => {
 
-  log.info(
-    "Environment: " +
-    (process.env.NODE_ENV ? process.env.NODE_ENV : "development")
-  );
+  console.log("Environment : " + process.env.APPLICATION_ENV);
 
-  log.info("Application is running on the port:" + config.port);
+  console.log("Application is running on the port : " + process.env.APPLICATION_PORT);
 
 });
 
+module.exports = app;

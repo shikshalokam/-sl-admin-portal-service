@@ -1,35 +1,47 @@
-//dependencies
+/**
+ * name : mongodb.js.
+ * author : Aman Karki.
+ * created-date : 20-July-2020.
+ * Description : mongodb configurations.
+ */
+
+// dependencies
 const mongoose = require("mongoose");
 const mongoose_delete = require("mongoose-delete");
 const mongoose_autopopulate = require("mongoose-autopopulate");
 const mongoose_timestamp = require("mongoose-timestamp");
 const mongoose_ttl = require("mongoose-ttl");
-let ObjectId = mongoose.Types.ObjectId;
+const ObjectId = mongoose.Types.ObjectId;
 
-var DB = function(config) {
+/**
+ * Mongodb setup.
+ * @method
+ * @name DB
+ * @param  {Object} config - mongodb configurations information.
+*/
 
+const DB = function(config) {
   mongoose.set('useCreateIndex', true)
   mongoose.set('useFindAndModify', false)
   mongoose.set('useUnifiedTopology', true)
   
-  var db = mongoose.createConnection(
-    config.host + "/" + config.database,
+  const db = mongoose.createConnection(
+    config.host + ":" + config.port + "/" + config.database,
     config.options
   );
+  
   db.on("error", console.error.bind(console, "connection error:"));
   db.once("open", function() {
-    log.debug("Connected to DB");
+    LOGGER.debug("Connected to DB");
   });
 
-  var createModel = function(opts) {  
-
-    
+  const createModel = function(opts) {
     if (typeof opts.schema.__proto__.instanceOfSchema === "undefined") {
       var schema = mongoose.Schema(opts.schema, opts.options);
     } else {
       var schema = opts.schema;
     }
-
+  
     // apply Plugins
     schema.plugin(mongoose_timestamp, {
       createdAt: "createdAt",

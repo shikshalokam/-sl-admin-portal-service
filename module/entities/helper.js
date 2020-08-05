@@ -1,7 +1,7 @@
 const moment = require("moment");
 const entityTypesHelper = require(MODULES_BASE_PATH + "/entityTypes/helper");
 const kendraService =
-    require(SERVICES_PATH + "/kendra-service");
+    require(GENERIC_SERVICES_PATH + "/kendra-service");
 const csv = require('csvtojson');
 
 
@@ -134,8 +134,8 @@ module.exports = class entitiesHelper {
 
                 if (entityDocuments.length < 1) {
                     throw {
-                        status: httpStatusCode.not_found.status,
-                        message: constants.apiResponses.ENTITY_NOT_FOUND
+                        status: HTTP_STATUS_CODE.not_found.status,
+                        message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND
                     };
                 }
                 entityDocuments = entityDocuments.map(entityDocument => {
@@ -151,7 +151,7 @@ module.exports = class entitiesHelper {
 
                 let columns = _entityListColumns();
                 return resolve({
-                    message: constants.apiResponses.ENTITIES_FETCHED,
+                    message: CONSTANTS.apiResponses.ENTITIES_FETCHED,
                     result: {
                         count: entityDocs.count,
                         columns: columns,
@@ -212,7 +212,7 @@ module.exports = class entitiesHelper {
 
                 let columns = _subEntityListColumns();
                 resolve({
-                    message: constants.apiResponses.ENTITIES_FETCHED,
+                    message: CONSTANTS.apiResponses.ENTITIES_FETCHED,
                     result: {
                         count: result.count ? result.count : 0,
                         columns: columns,
@@ -323,7 +323,7 @@ module.exports = class entitiesHelper {
                 }
                 if (immediateEntities && immediateEntities.length == 0) {
 
-                    return resolve({ message: constants.apiResponses.SUB_ENTITIES_NOT_FOUND, status: httpStatusCode.not_found.status });
+                    return resolve({ message: CONSTANTS.apiResponses.SUB_ENTITIES_NOT_FOUND, status: HTTP_STATUS_CODE.not_found.status });
                 } else {
                     return resolve(immediateEntities);
                 }
@@ -472,7 +472,7 @@ module.exports = class entitiesHelper {
 
                 if (entityDocument && entityDocument.data && entityDocument.data.length == 0) {
                     reject({
-                        message: constants.apiResponses.ENTITY_NOT_FOUND,
+                        message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
                         result: result
                     });
                 }
@@ -486,13 +486,13 @@ module.exports = class entitiesHelper {
 
                 if (!entityDocument.data) {
                     return resolve({
-                        status: httpStatusCode.bad_request.status,
-                        message: constants.apiResponses.ENTITY_NOT_FOUND
+                        status: HTTP_STATUS_CODE.bad_request.status,
+                        message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND
                     })
                 }
 
                 resolve({
-                    message: constants.apiResponses.ENTITY_INFORMATION_FETCHED,
+                    message: CONSTANTS.apiResponses.ENTITY_INFORMATION_FETCHED,
                     result: result
                 });
 
@@ -532,8 +532,8 @@ module.exports = class entitiesHelper {
                 let entityDocument = entityDocs.data;
                 if (entityDocument.length < 1) {
                     throw {
-                        status: httpStatusCode.not_found.status,
-                        message: constants.apiResponses.ENTITY_NOT_FOUND
+                        status: HTTP_STATUS_CODE.not_found.status,
+                        message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND
                     };
                 }
 
@@ -543,12 +543,12 @@ module.exports = class entitiesHelper {
 
                 _.merge(result, entityDocument[0])
                 result["relatedEntities"] = relatedEntities;
-                resolve({ message: constants.apiResponses.ENTITY_INFORMATION_FETCHED, result: result });
+                resolve({ message: CONSTANTS.apiResponses.ENTITY_INFORMATION_FETCHED, result: result });
 
             } catch (error) {
                 return reject({
-                    status: error.status || httpStatusCode.internal_server_error.status,
-                    message: error.message || httpStatusCode.internal_server_error.message
+                    status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+                    message: error.message || HTTP_STATUS_CODE.internal_server_error.message
                 });
             }
         })
@@ -579,8 +579,8 @@ module.exports = class entitiesHelper {
                     relatedEntitiesQuery["entityTypeId"]["$ne"] = entityTypeId;
                 } else {
                     throw {
-                        status: httpStatusCode.bad_request.status,
-                        message: constants.apiResponses.MISSING_ENTITYID_ENTITYTYPE_ENTITYTYPEID
+                        status: HTTP_STATUS_CODE.bad_request.status,
+                        message: CONSTANTS.apiResponses.MISSING_ENTITYID_ENTITYTYPE_ENTITYTYPEID
                     };
                 }
 
@@ -596,8 +596,8 @@ module.exports = class entitiesHelper {
 
             } catch (error) {
                 return reject({
-                    status: error.status || httpStatusCode.internal_server_error.status,
-                    message: error.message || httpStatusCode.internal_server_error.message
+                    status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+                    message: error.message || HTTP_STATUS_CODE.internal_server_error.message
                 });
             }
         })
@@ -618,20 +618,20 @@ module.exports = class entitiesHelper {
 
                 if (!stateCreationForm) {
                     reject({
-                        status: httpStatusCode.not_found.status,
-                        message: constants.apiResponses.STATE_CREATE_FORM_NOT_FOUND
+                        status: HTTP_STATUS_CODE.not_found.status,
+                        message: CONSTANTS.apiResponses.STATE_CREATE_FORM_NOT_FOUND
 
                     });
                 }
                 resolve({
-                    message: constants.apiResponses.STATE_CREATE_FORM,
+                    message: CONSTANTS.apiResponses.STATE_CREATE_FORM,
                     result: stateCreationForm.value
                 })
 
             } catch (error) {
                 return reject({
-                    status: error.status || httpStatusCode.internal_server_error.status,
-                    message: error.message || httpStatusCode.internal_server_error.message
+                    status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+                    message: error.message || HTTP_STATUS_CODE.internal_server_error.message
                 });
             }
         });
@@ -647,7 +647,7 @@ module.exports = class entitiesHelper {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let entityType = await database.models.entityTypes.findOne({ name: constants.common.STATE_ENTITY_TYPE });
+                let entityType = await database.models.entityTypes.findOne({ name: CONSTANTS.common.STATE_ENTITY_TYPE });
 
                 let stateEntityDocument = {
                     entityTypeId: entityType._id,
@@ -664,18 +664,18 @@ module.exports = class entitiesHelper {
 
                 if (!entityDoc) {
                     reject({
-                        status: httpStatusCode.bad_request.status,
-                        message: constants.apiResponses.FAILED_TO_CREATED_ENTITY
+                        status: HTTP_STATUS_CODE.bad_request.status,
+                        message: CONSTANTS.apiResponses.FAILED_TO_CREATED_ENTITY
                     });
                 }
                 resolve({
-                    message: constants.apiResponses.ENTITY_CREATED
+                    message: CONSTANTS.apiResponses.ENTITY_CREATED
                 })
 
             } catch (error) {
                 return reject({
-                    status: error.status || httpStatusCode.internal_server_error.status,
-                    message: error.message || httpStatusCode.internal_server_error.message
+                    status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+                    message: error.message || HTTP_STATUS_CODE.internal_server_error.message
                 });
             }
         });
@@ -694,7 +694,7 @@ module.exports = class entitiesHelper {
 
 
                 let fileInfo = {
-                    sourcePath: constants.common.SAMPLE_ENTITIES_CSV,
+                    sourcePath: CONSTANTS.common.SAMPLE_ENTITIES_CSV,
                     bucket: process.env.STORAGE_BUCKET,
                     cloudStorage: process.env.CLOUD_STORAGE,
                 }
@@ -719,7 +719,7 @@ module.exports = class entitiesHelper {
             try {
 
                 let fileInfo = {
-                    sourcePath: constants.common.SAMPLE_ENTITY_MAPPING_CSV,
+                    sourcePath: CONSTANTS.common.SAMPLE_ENTITY_MAPPING_CSV,
                     bucket: process.env.STORAGE_BUCKET,
                     cloudStorage: process.env.CLOUD_STORAGE,
                 }
@@ -745,7 +745,7 @@ module.exports = class entitiesHelper {
         return new Promise(async (resolve, reject) => {
             try {
 
-                const queryObject = { entityType: constants.common.STATE_ENTITY_TYPE };
+                const queryObject = { entityType: CONSTANTS.common.STATE_ENTITY_TYPE };
                 const projection = [
                     "metaInformation.name"
                 ]
@@ -754,8 +754,8 @@ module.exports = class entitiesHelper {
 
                 if (!stateData && !stateData.data) {
                     reject({
-                        message: constants.apiResponses.STATES_NOT_FOUND,
-                        status: httpStatusCode.bad_request.status
+                        message: CONSTANTS.apiResponses.STATES_NOT_FOUND,
+                        status: HTTP_STATUS_CODE.bad_request.status
                     });
                 }
 
@@ -769,9 +769,9 @@ module.exports = class entitiesHelper {
                 }));
 
                 if (states) {
-                    states = states.sort(gen.utils.sortArrayOfObjects('label'));
+                    states = states.sort(UTILS.sortArrayOfObjects('label'));
                 }
-                resolve({ message: constants.apiResponses.STATE_LIST_FETCHED, result: states });
+                resolve({ message: CONSTANTS.apiResponses.STATE_LIST_FETCHED, result: states });
 
             } catch (error) {
                 return reject(error);
@@ -808,7 +808,7 @@ function _subEntityListColumns() {
         let obj = { ...defaultColumn };
         let field = columns[column];
 
-        obj["label"] = gen.utils.camelCaseToCapitalizeCase(field);
+        obj["label"] = UTILS.camelCaseToCapitalizeCase(field);
         obj["key"] = field
 
         if (field === "actions") {
@@ -849,7 +849,7 @@ function _entityListColumns() {
         let obj = { ...defaultColumn };
         let field = columns[column];
 
-        obj["label"] = gen.utils.camelCaseToCapitalizeCase(field);
+        obj["label"] = UTILS.camelCaseToCapitalizeCase(field);
         obj["key"] = field
 
         if (field === "actions") {
@@ -878,7 +878,7 @@ function _actions() {
     for (let action = 0; action < actions.length; action++) {
         actionsColumn.push({
             key: actions[action],
-            label: gen.utils.camelCaseToCapitalizeCase(actions[action]),
+            label: UTILS.camelCaseToCapitalizeCase(actions[action]),
             visible: true,
             icon: actions[action]
         })

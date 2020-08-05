@@ -9,15 +9,15 @@ const entitiesHelper = require("../entities/helper");
 
 const formsHelper = require(MODULES_BASE_PATH + "/forms/helper");
 const userManagementService =
-    require(SERVICES_PATH + "/user-management");
+    require(GENERIC_SERVICES_PATH + "/user-management");
 const sunbirdService =
-    require(SERVICES_PATH + "/sunbird");
+    require(GENERIC_SERVICES_PATH + "/sunbird");
 const kendraService =
-    require(SERVICES_PATH + "/kendra-service");
+    require(GENERIC_SERVICES_PATH + "/kendra-service");
 const rolesHelper = require(MODULES_BASE_PATH + "/roles/helper");
 const entityTypeHelper = require(MODULES_BASE_PATH + "/entityTypes/helper");
 const platformRolesHelper = require(MODULES_BASE_PATH + "/platformRoles/helper");
-const sessionHelpers = require(ROOT_PATH + "/generics/helpers/sessions");
+const sessionHelpers = require(GENERIC_HELPERS_PATH + "/sessions");
 
 module.exports = class UsersHelper {
 
@@ -36,23 +36,23 @@ module.exports = class UsersHelper {
 
                 let formData =
                     await formsHelper.list({
-                        name: constants.common.USER_CREATE_FORM
+                        name: CONSTANTS.common.USER_CREATE_FORM
                     }, {
                         value: 1
                     });
 
                 if (!formData[0]) {
                     return resolve({
-                        status: httpStatusCode["bad_request"].status,
+                        status: HTTP_STATUS_CODE["bad_request"].status,
                         message:
-                            constants.apiResponses.USER_CREATE_FORM_NOT_FOUND
+                            CONSTANTS.apiResponses.USER_CREATE_FORM_NOT_FOUND
                     });
                 }
 
                 let projection = ["entityTypeId", "metaInformation", "groups", "childHierarchyPath"];
 
                 let stateInfo = await entitiesHelper.entityDocuments({
-                    entityType: constants.common.STATE_ENTITY_TYPE
+                    entityType: CONSTANTS.common.STATE_ENTITY_TYPE
                 }, projection);
 
                 stateInfo = stateInfo.data;
@@ -78,12 +78,12 @@ module.exports = class UsersHelper {
                 });
 
                 if (states) {
-                    states = states.sort(gen.utils.sortArrayOfObjects('label'));
+                    states = states.sort(UTILS.sortArrayOfObjects('label'));
                 }
 
                 let organisations = await _getOrganisationlist(token, userId);
                 let roles = [];
-                
+
                 let rolesDoc = await platformRolesHelper.getRoles();
                 let sunbirdRolesDoc = await rolesHelper.list();
 
@@ -114,7 +114,7 @@ module.exports = class UsersHelper {
                 }
 
                 if (roles) {
-                    roles = roles.sort(gen.utils.sortArrayOfObjects("label"));
+                    roles = roles.sort(UTILS.sortArrayOfObjects("label"));
                 }
 
 
@@ -137,7 +137,7 @@ module.exports = class UsersHelper {
                     });
 
                 return resolve({
-                    message: constants.apiResponses.FETCH_USER_CREATION_FORM,
+                    message: CONSTANTS.apiResponses.FETCH_USER_CREATION_FORM,
                     result: {
                         form: forms,
                         stateListWithSubEntities: stateListWithSubEntities
@@ -169,7 +169,6 @@ module.exports = class UsersHelper {
                         requestedBodyData,
                         userToken
                     );
-
                 return resolve(userProfileCreationData);
             } catch (error) {
                 return reject(error);
@@ -277,7 +276,7 @@ module.exports = class UsersHelper {
             try {
 
                 let profileData = await sunbirdService.getUserProfileInfo(userToken, userId);
-                if (profileData.responseCode == constants.common.RESPONSE_OK) {
+                if (profileData.responseCode == CONSTANTS.common.RESPONSE_OK) {
 
                     let role = await _getUserRoles(orgAdminUserId);
 
@@ -297,7 +296,7 @@ module.exports = class UsersHelper {
 
                     let grantAccess = false;
 
-                    if (role.includes(constants.common.PLATFROM_ADMIN_ROLE)) {
+                    if (role.includes(CONSTANTS.common.PLATFROM_ADMIN_ROLE)) {
                         grantAccess = true;
                     }
 
@@ -309,14 +308,14 @@ module.exports = class UsersHelper {
 
                     if (grantAccess == false) {
                         reject({
-                            status: httpStatusCode["bad_request"].status,
-                            message: constants.apiResponses.INVALID_ACCESS
+                            status: HTTP_STATUS_CODE["bad_request"].status,
+                            message: CONSTANTS.apiResponses.INVALID_ACCESS
                         });
 
                     } else {
                         let userDetails = {};
                         let roles = [];
-                        
+
                         let rolesDoc = await platformRolesHelper.getRoles();
                         let sunbirdRolesDoc = await rolesHelper.list();
 
@@ -348,7 +347,7 @@ module.exports = class UsersHelper {
 
 
                         if (roles) {
-                            roles = roles.sort(gen.utils.sortArrayOfObjects("label"));
+                            roles = roles.sort(UTILS.sortArrayOfObjects("label"));
                         }
 
                         let usersOrganisationList = [];
@@ -371,8 +370,8 @@ module.exports = class UsersHelper {
                                 if (organisationData[0]) {
 
                                     let orgnisationRoles = [];
-                                    userOrgRoles.roles.map(organisationRoles=>{
-                                        orgnisationRoles.push({ label : organisationRoles.name, value :organisationRoles.code })
+                                    userOrgRoles.roles.map(organisationRoles => {
+                                        orgnisationRoles.push({ label: organisationRoles.name, value: organisationRoles.code })
                                     });
                                     orgInfo.push({
                                         label: organisationData[0].label,
@@ -414,7 +413,7 @@ module.exports = class UsersHelper {
 
                 } else {
 
-                    reject({ message: profileData.params.errmsg });
+                    reject({ message: profileData.message });
                 }
 
             } catch (error) {
@@ -435,7 +434,7 @@ module.exports = class UsersHelper {
             try {
 
                 let fileInfo = {
-                    sourcePath: constants.common.SAMPLE_USERS_CSV,
+                    sourcePath: CONSTANTS.common.SAMPLE_USERS_CSV,
                     bucket: process.env.STORAGE_BUCKET,
                     cloudStorage: process.env.CLOUD_STORAGE,
                 }
@@ -485,10 +484,10 @@ module.exports = class UsersHelper {
 
                 if (!usersData) {
                     return resolve({
-                        message: constants.apiResponses.USERS_NOT_FOUND,
+                        message: CONSTANTS.apiResponses.USERS_NOT_FOUND,
                     });
                 }
-                return resolve({ message: constants.apiResponses.USERS_FOUND, result: usersData });
+                return resolve({ message: CONSTANTS.apiResponses.USERS_FOUND, result: usersData });
 
             } catch (error) {
                 return reject(error);
@@ -513,7 +512,7 @@ module.exports = class UsersHelper {
                 let usersData =
                     await database.models.userExtension.findOneAndUpdate(queryParameter, updateObject).lean();
                 if (usersData) {
-                    return resolve({ message: constants.apiResponses.USER_UPDATED, result: usersData });
+                    return resolve({ message: CONSTANTS.apiResponses.USER_UPDATED, result: usersData });
                 }
 
 
@@ -536,7 +535,7 @@ module.exports = class UsersHelper {
             try {
 
                 let roles = _getUserRoles(userId);
-                resolve({ result: roles, message: constants.apiResponses.ROLES_FOUND });
+                resolve({ result: roles, message: CONSTANTS.apiResponses.ROLES_FOUND });
             } catch (error) {
                 return reject(error);
             }
@@ -646,7 +645,7 @@ function _getOrganisationlist(token, userId = "") {
 
             let roles = await _getUserRoles(userId);
             let organisationsList = [];
-            let sessionOrganisationData = sessionHelpers.get(constants.common.ORGANISATIONS_SESSION);
+            let sessionOrganisationData = sessionHelpers.get(CONSTANTS.common.ORGANISATIONS_SESSION);
 
             if (sessionOrganisationData && sessionOrganisationData.length > 0) {
                 organisationsList = sessionOrganisationData;
@@ -658,7 +657,7 @@ function _getOrganisationlist(token, userId = "") {
                 }
 
                 let organisationList = await sunbirdService.searchOrganisation(request, token);
-                if (organisationList.responseCode == constants.common.RESPONSE_OK) {
+                if (organisationList && organisationList.status && organisationList.status == HTTP_STATUS_CODE.ok.status) {
                     if (organisationList.result && organisationList.result.response &&
                         organisationList.result.response && organisationList.result.response.content) {
                         await Promise.all(organisationList.result.response.content.map(async function (orgInfo) {
@@ -667,12 +666,12 @@ function _getOrganisationlist(token, userId = "") {
                                 value: orgInfo.id
                             });
                         }));
-                        sessionHelpers.set(constants.common.ORGANISATIONS_SESSION, organisationsList);
+                        sessionHelpers.set(CONSTANTS.common.ORGANISATIONS_SESSION, organisationsList);
                     }
                 }
 
             }
-            if (!roles.includes(constants.common.PLATFROM_ADMIN_ROLE)) {
+            if (!roles.includes(CONSTANTS.common.PLATFROM_ADMIN_ROLE)) {
                 let userOrganisations = await database.models.userExtension.findOne({ userId: userId }, { organisations: 1 });
                 let organisations = [];
                 if (userOrganisations && userOrganisations.organisations) {
@@ -726,7 +725,7 @@ function _checkDeactiveAccess(userProfileInfo, userId) {
                 })
             }
 
-            if (profileRoles.includes(constants.common.PLATFROM_ADMIN_ROLE)) {
+            if (profileRoles.includes(CONSTANTS.common.PLATFROM_ADMIN_ROLE)) {
                 resolve({ canDeactivate: true })
             } else if (
                 userProfileInfo &&
@@ -740,7 +739,7 @@ function _checkDeactiveAccess(userProfileInfo, userId) {
                 if (orgInfo.length > 0) {
                     let count = 0;
                     await Promise.all(orgInfo.map(function (element) {
-                        if (element.roles.includes(constants.common.ORG_ADMIN_ROLE)) {
+                        if (element.roles.includes(CONSTANTS.common.ORG_ADMIN_ROLE)) {
                             count = count + 1;
                         }
                     }));

@@ -13,7 +13,7 @@ const bulkUploadHelper = require(MODULES_BASE_PATH + "/bulkUploadRequests/helper
 */
 module.exports = class BulkUploadRequests extends Abstract {
   constructor() {
-    super(schemas["bulkUploadRequests"]);
+    super("bulkUploadRequests");
   }
 
   static get name() {
@@ -50,8 +50,8 @@ module.exports = class BulkUploadRequests extends Abstract {
       try {
         if (!req.files || !req.files.uploadFile) {
           throw {
-            status: httpStatusCode["bad_request"].status,
-            message: httpStatusCode["bad_request"].message
+            status: HTTP_STATUS_CODE["bad_request"].status,
+            message: HTTP_STATUS_CODE["bad_request"].message
           };
         }
         let uploadRequest = await bulkUploadHelper.create(req, req.userDetails.userId);
@@ -62,11 +62,11 @@ module.exports = class BulkUploadRequests extends Abstract {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
 
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
       }
     });
@@ -184,11 +184,11 @@ module.exports = class BulkUploadRequests extends Abstract {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
 
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
       }
     });
@@ -234,11 +234,11 @@ module.exports = class BulkUploadRequests extends Abstract {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
 
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
       }
     });
@@ -295,11 +295,11 @@ module.exports = class BulkUploadRequests extends Abstract {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
 
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
       }
     });
@@ -360,11 +360,11 @@ module.exports = class BulkUploadRequests extends Abstract {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
 
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
       }
     });

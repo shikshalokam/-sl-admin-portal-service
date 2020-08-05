@@ -12,7 +12,7 @@
 */
 module.exports = class PlatformRolesExt extends Abstract {
   constructor() {
-    super(schemas["platformRolesExt"]);
+    super("platformRolesExt");
   }
 
   static get name() {

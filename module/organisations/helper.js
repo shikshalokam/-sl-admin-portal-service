@@ -6,10 +6,10 @@
  */
 
 const sunbirdService =
-    require(SERVICES_PATH + "/sunbird");
+    require(GENERIC_SERVICES_PATH + "/sunbird");
 const formsHelper = require(MODULES_BASE_PATH + "/forms/helper");
 const platformRolesHelper = require(MODULES_BASE_PATH + "/platformRoles/helper");
-const sessionHelpers = require(ROOT_PATH + "/generics/helpers/sessions");
+const sessionHelpers = require(GENERIC_HELPERS_PATH + "/sessions");
 const rolesHelper = require(MODULES_BASE_PATH + "/roles/helper");
 const usersHelper = require(MODULES_BASE_PATH + "/users/helper");
 
@@ -30,9 +30,9 @@ module.exports = class OrganisationsHelper {
             try {
                 let organisationsList = [];
                 let roles = await _getUserRoles(userId);
-                if (roles.includes(constants.common.PLATFROM_ADMIN_ROLE)) {
+                if (roles.includes(CONSTANTS.common.PLATFROM_ADMIN_ROLE)) {
                     organisationsList = await _getOrganisationsDetails(token);
-                } else if (roles.includes(constants.common.ORG_ADMIN_ROLE)) {
+                } else if (roles.includes(CONSTANTS.common.ORG_ADMIN_ROLE)) {
 
                     let profileData = await _getProfileData(token, userId);
                     let orgList = profileData.result.response.organisations;
@@ -53,13 +53,13 @@ module.exports = class OrganisationsHelper {
                 }
                 if (organisationsList.length > 0) {
 
-                    let sortedOrganisations = organisationsList.sort(gen.utils.sortArrayOfObjects('label'));
-                    return resolve({ result: sortedOrganisations, message: constants.apiResponses.ORG_INFO_FETCHED });
+                    let sortedOrganisations = organisationsList.sort(UTILS.sortArrayOfObjects('label'));
+                    return resolve({ data: sortedOrganisations, message: CONSTANTS.apiResponses.ORG_INFO_FETCHED });
 
                 } else {
                     return resolve({
-                        status: httpStatusCode["bad_request"].status,
-                        message: constants.apiResponses.NO_ORG_FOUND
+                        status: HTTP_STATUS_CODE["bad_request"].status,
+                        message: CONSTANTS.apiResponses.NO_ORG_FOUND
                     });
                 }
             } catch (error) {
@@ -90,40 +90,35 @@ module.exports = class OrganisationsHelper {
                 let response;
                 let userRoles = await _getUserRoles(userId, organisationId);
                 let offset = pageSize * (pageNo - 1);
-                if (userRoles.includes(constants.common.PLATFROM_ADMIN_ROLE) || userRoles.includes(constants.common.ORG_ADMIN_ROLE)) {
+                if (userRoles.includes(CONSTANTS.common.PLATFROM_ADMIN_ROLE) || userRoles.includes(CONSTANTS.common.ORG_ADMIN_ROLE)) {
 
                     let bodyOfRequest = {
-                        "request": {
-                            "filters": {
-                                "organisations.organisationId": organisationId,
-                            }
-                        }
+                        organisationId: organisationId,
                     }
-
                     if (pageNo) {
-                        bodyOfRequest.request['offset'] = offset;
+                        bodyOfRequest['offset'] = pageNo;
                     }
                     if (pageSize) {
-                        bodyOfRequest.request['limit'] = pageSize;
+                        bodyOfRequest['limit'] = pageSize;
                     }
                     if (searchText) {
-                        bodyOfRequest.request['query'] = searchText;
+                        bodyOfRequest['query'] = searchText;
                     }
                     if (requestedUsers.length > 0) {
-                        bodyOfRequest.request['filters']["id"] = requestedUsers;
+                        bodyOfRequest["id"] = requestedUsers;
                     }
                     if (status) {
-                        bodyOfRequest.request['filters']['status'] = status;
+                        bodyOfRequest['status'] = status;
                     }
 
                     let usersList =
                         await sunbirdService.users(token, bodyOfRequest);
 
-                    if (usersList.responseCode == constants.common.RESPONSE_OK) {
+                    if (usersList.status == HTTP_STATUS_CODE.ok.status) {
 
                         let userInfo = [];
                         let userIds = []
-                        await Promise.all(usersList.result.response.content.map(async function (userItem) {
+                        await Promise.all(usersList.result.content.map(async function (userItem) {
                             userIds.push(userItem.id);
                         }));
 
@@ -132,7 +127,7 @@ module.exports = class OrganisationsHelper {
 
                         let usersData = await usersHelper.list(queryObject, fieldsArray);
 
-                        await Promise.all(usersList.result.response.content.map(async function (userItem) {
+                        await Promise.all(usersList.result.content.map(async function (userItem) {
 
                             let rolesOfUser = "";
                             let userData = usersData.result.filter(user => {
@@ -180,30 +175,29 @@ module.exports = class OrganisationsHelper {
 
                         let columns = _userColumn();
                         response = {
-                            "result": {
-                                count: usersList.result.response.count,
+                            "data": {
+                                count: usersList.result.count,
                                 columns: columns,
                                 data: userInfo
                             },
-                            message: constants.apiResponses.USERS_LIST_FETCHED
+                            message: CONSTANTS.apiResponses.USERS_LIST_FETCHED,
+                            success: true
                         }
                     } else {
-                        response = {
-                            status: httpStatusCode["bad_request"].status,
-                            message: constants.apiResponses.USER_LIST_NOT_FOUND
-                        };
+                        throw new Error(CONSTANTS.apiResponses.USER_LIST_NOT_FOUND);
                     }
 
                 } else {
-                    response = {
-                        status: httpStatusCode["bad_request"].status,
-                        message: constants.apiResponses.INVALID_ACCESS
-                    }
+                    throw new Error(CONSTANTS.apiResponses.INVALID_ACCESS);
                 }
                 return resolve(response);
 
             } catch (error) {
-                return reject(error);
+                return reject({
+                    success: false,
+                    message: error.message ? error.message : HTTP_STATUS_CODE["internal_server_error"].message,
+                    data: false
+                });
             }
         })
     }
@@ -232,14 +226,18 @@ module.exports = class OrganisationsHelper {
                             delete fields.id;
                         }
 
-                        let userInfo = Object.keys(fields).reduce((c, k) => (c[gen.utils.camelCaseToCapitalizeCase(k)] = fields[k], c), {})
+                        let userInfo = Object.keys(fields).reduce((c, k) => (c[UTILS.camelCaseToCapitalizeCase(k)] = fields[k], c), {})
                         responseData.push(userInfo);
                     }))
                 }
                 resolve(responseData);
             }
             catch (error) {
-                return reject(error);
+                return reject({
+                    success: false,
+                    message: error.message ? error.message : HTTP_STATUS_CODE["internal_server_error"].message,
+                    data: false
+                });
             }
         });
     }
@@ -287,7 +285,7 @@ module.exports = class OrganisationsHelper {
                 }));
 
                 if (plaformRoles.length == 0) {
-                    plaformRoles.push(constants.common.PUBLIC_ROLE);
+                    plaformRoles.push(CONSTANTS.common.PUBLIC_ROLE);
                 }
                 let orgCreateRequest = {
                     organisationId: organisationInfo.organisation.value,
@@ -297,37 +295,25 @@ module.exports = class OrganisationsHelper {
 
                 let response = await sunbirdService.addUser(orgCreateRequest, token);
 
-                if (response && response.responseCode == constants.common.RESPONSE_OK) {
-                    if (response.result.response == constants.common.SUCCESS_RESPONSE) {
-                        let organisationsRoles = [];
-                        organisationsRoles.push({ organisationId: organisationInfo.organisation.value, roles: userRoles });
+                if (response && response.status == HTTP_STATUS_CODE.ok.status) {
+                    let organisationsRoles = [];
+                    organisationsRoles.push({ organisationId: organisationInfo.organisation.value, roles: userRoles });
+                    let queryObject = { userId: organisationInfo.userId };
+                    let updateData = { $push: { organisations: organisationInfo.organisation, organisationRoles: organisationsRoles } };
 
-                        let queryObject = { userId: organisationInfo.userId };
-                        let updateData = { $push: { organisations: organisationInfo.organisation, organisationRoles: organisationsRoles } };
+                    let update = await usersHelper.update(queryObject, updateData);
+                    resolve({ result: response.result, message: CONSTANTS.apiResponses.USER_ADDED_TO_ORG });
 
-                        let update = await usersHelper.update(queryObject, updateData);
-                        resolve({ result: response.result, message: constants.apiResponses.USER_ADDED_TO_ORG });
-                    } else {
-
-                        if (response.result.response) {
-                            reject({
-                                result: response.result, status: httpStatusCode["bad_request"].status,
-                                message: response.result.response
-                            });
-                        } else {
-
-                            reject({
-                                result: response.result, status: httpStatusCode["bad_request"].status,
-                                message: constants.apiResponses.FAILED_TO_ADD_USER_TO_ORG
-                            });
-                        }
-                    }
                 } else {
-                    reject({ message: response.params.errmsg, status: httpStatusCode["bad_request"].status });
+                    throw new Error(response.message);
                 }
 
             } catch (error) {
-                return reject(error)
+                return reject({
+                    success: false,
+                    message: error.message ? error.message : HTTP_STATUS_CODE["internal_server_error"].message,
+                    data: false
+                });
             }
 
         });
@@ -346,7 +332,7 @@ module.exports = class OrganisationsHelper {
         return new Promise(async (resolve, reject) => {
             try {
                 let plaformRoles = [];
-               let userRoles = [];
+                let userRoles = [];
                 if (orgnisationInfo.roles) {
 
                     let rolesDoc = await platformRolesHelper.getRoles();
@@ -380,13 +366,13 @@ module.exports = class OrganisationsHelper {
                 }
 
                 if (plaformRoles.length == 0) {
-                    plaformRoles.push(constants.common.PUBLIC_ROLE);
+                    plaformRoles.push(CONSTANTS.common.PUBLIC_ROLE);
                 }
                 orgnisationInfo.roles = plaformRoles;
 
                 let response = await sunbirdService.assignRoles(orgnisationInfo, token);
-                if (response && response.responseCode == constants.common.RESPONSE_OK) {
-                    if (response.result.response == constants.common.SUCCESS_RESPONSE) {
+                if (response && response.status == HTTP_STATUS_CODE.ok.status) {
+                    if (response.result.response == CONSTANTS.common.SUCCESS_RESPONSE) {
 
                         let queryObject = {
                             userId: orgnisationInfo.userId, "organisationRoles.organisationId": orgnisationInfo.organisationId
@@ -397,16 +383,20 @@ module.exports = class OrganisationsHelper {
                         let updateUserDetails = await usersHelper.update(queryObject, updateData);
                     }
 
-                    let message = constants.apiResponses.ASSIGNED_ROLE_SUCCESSFULLY;
+                    let message = CONSTANTS.apiResponses.ASSIGNED_ROLE_SUCCESSFULLY;
                     if (orgnisationInfo && orgnisationInfo.removeRoles) {
-                        message = constants.apiResponses.ROLES_REMOVED;
+                        message = CONSTANTS.apiResponses.ROLES_REMOVED;
                     }
-                    resolve({ result: response.result, message: message });
+                    resolve({ data: response.result, message: message, success: true });
                 } else {
-                    reject({ message: response.params.errmsg });
+                    throw new Error(response.message);
                 }
             } catch (error) {
-                return reject(error)
+                return reject({
+                    success: false,
+                    message: error.message ? error.message : HTTP_STATUS_CODE["internal_server_error"].message,
+                    data: false
+                });
             }
         });
     }
@@ -423,7 +413,7 @@ module.exports = class OrganisationsHelper {
             try {
                 let roles = await _getUserRoles(inputData.userId);
                 let offset = inputData.pageSize * (inputData.pageNo - 1);
-                if (roles.includes(constants.common.PLATFROM_ADMIN_ROLE)) {
+                if (roles.includes(CONSTANTS.common.PLATFROM_ADMIN_ROLE)) {
                     let request = {
                         "filters": {
                         },
@@ -440,7 +430,7 @@ module.exports = class OrganisationsHelper {
 
                     let organisationInfo = [];
                     let organisationList = await sunbirdService.searchOrganisation(request, inputData.userToken);
-                    if (organisationList.responseCode == constants.common.RESPONSE_OK) {
+                    if (organisationList && organisationList.status && organisationList.status == HTTP_STATUS_CODE.ok.status) {
                         if (organisationList.result && organisationList.result.response &&
                             organisationList.result.response && organisationList.result.response.content) {
                             await Promise.all(organisationList.result.response.content.map(async function (orgInfo) {
@@ -467,7 +457,7 @@ module.exports = class OrganisationsHelper {
                         let orgColumns = _organisationColumn();
                         if (organisationInfo.length > 0) {
 
-                            let sortedOrganisations = organisationInfo.sort(gen.utils.sortArrayOfObjects('organisationName'));
+                            let sortedOrganisations = organisationInfo.sort(UTILS.sortArrayOfObjects('organisationName'));
 
                             resolve({
                                 result: {
@@ -475,7 +465,7 @@ module.exports = class OrganisationsHelper {
                                     columns: orgColumns,
                                     data: sortedOrganisations
                                 },
-                                message: constants.apiResponses.ORG_INFO_FETCHED
+                                message: CONSTANTS.apiResponses.ORG_INFO_FETCHED
                             });
                         } else {
                             resolve({
@@ -483,21 +473,22 @@ module.exports = class OrganisationsHelper {
                                     count: 0,
                                     columns: orgColumns,
                                     data: []
-                                }, message: constants.apiResponses.NO_ORG_FOUND
+                                }, message: CONSTANTS.apiResponses.NO_ORG_FOUND
                             })
                         }
 
                     } else {
-                        resolve({ result: organisationList, message: constants.apiResponses.NO_ORG_FOUND })
+                        resolve({ data: organisationList, message: CONSTANTS.apiResponses.NO_ORG_FOUND, succes: true })
                     }
                 } else {
-                    reject({
-                        status: httpStatusCode["bad_request"].status,
-                        message: constants.apiResponses.INVALID_ACCESS
-                    })
+                    throw new Error(CONSTANTS.apiResponses.INVALID_ACCESS);
                 }
             } catch (error) {
-                return reject(error)
+                return reject({
+                    success: false,
+                    message: error.message ? error.message : HTTP_STATUS_CODE["internal_server_error"].message,
+                    data: false
+                });
             }
         });
     }
@@ -517,33 +508,32 @@ module.exports = class OrganisationsHelper {
             try {
 
                 let requestBody = {
-                    "channel": process.env.SUNBIRD_CHANNEL,
                     "description": inputData.description,
                     "externalId": inputData.externalId,
-                    "provider": process.env.SUNBIRD_PROVIDER,
-                    "orgName": inputData.name,
-                    "address": {
-                        addressLine1: inputData.address,
-                        city: inputData.address
-                    },
+                    "name": inputData.name,
+                    "address": inputData.address,
                     "email": inputData.email,
                 }
                 let createOrg = await sunbirdService.createOrganisation(requestBody, token);
-                if (createOrg && createOrg.responseCode == constants.common.RESPONSE_OK) {
+                if (createOrg && createOrg.status == HTTP_STATUS_CODE.ok.status) {
 
-                    let sessionOrganisationData = sessionHelpers.get(constants.common.ORGANISATIONS_SESSION);
+                    let sessionOrganisationData = sessionHelpers.get(CONSTANTS.common.ORGANISATIONS_SESSION);
                     if (sessionOrganisationData) {
                         sessionOrganisationData.push({ label: inputData.name, value: createOrg.result.organisationId });
-                        sessionHelpers.set(constants.common.ORGANISATIONS_SESSION, sessionOrganisationData);
+                        sessionHelpers.set(CONSTANTS.common.ORGANISATIONS_SESSION, sessionOrganisationData);
                     }
 
-                    resolve({ result: createOrg.result, message: constants.apiResponses.ORG_CREATED });
+                    resolve({ data: createOrg.result, message: CONSTANTS.apiResponses.ORG_CREATED, success: true });
                 } else {
-                    reject({ message: createOrg.params.errmsg });
+                    throw new Error(createOrg.message);
                 }
 
             } catch (error) {
-                return reject(error)
+                return reject({
+                    success: false,
+                    message: error.message ? error.message : HTTP_STATUS_CODE["internal_server_error"].message,
+                    data: false
+                });
             }
         });
     }
@@ -568,17 +558,17 @@ module.exports = class OrganisationsHelper {
                     });
 
                 if (!formData[0]) {
-                    return resolve({
-                        status: httpStatusCode["bad_request"].status,
-                        message:
-                            constants.apiResponses.ORG_FORM_NOT_FOUND
-                    });
+                    throw new Error(CONSTANTS.apiResponses.ORG_FORM_NOT_FOUND);
                 } else {
-                    resolve({ result: formData[0].value, message: constants.apiResponses.ORG_FORM_FETCHED })
+                    resolve({ data: formData[0].value, message: CONSTANTS.apiResponses.ORG_FORM_FETCHED, success: true })
                 }
 
             } catch (error) {
-                return reject(error)
+                return reject({
+                    success: false,
+                    message: error.message ? error.message : HTTP_STATUS_CODE["internal_server_error"].message,
+                    data: false
+                });
             }
         });
     }
@@ -595,14 +585,11 @@ module.exports = class OrganisationsHelper {
             try {
 
                 let requestBody = {
-                    orgName: inputData.name ? inputData.name : "",
+                    name: inputData.name ? inputData.name : "",
                     email: inputData.email ? inputData.email : "",
                     description: inputData.description ? inputData.description : "",
                     organisationId: inputData.organisationId,
-                    address: {
-                        addressLine1: inputData.address,
-                        city: inputData.address
-                    }
+                    address: inputData.address
                 }
                 if (inputData.externalId) {
                     requestBody['externalId'] = inputData.externalId;
@@ -610,14 +597,18 @@ module.exports = class OrganisationsHelper {
                 }
 
                 let updateOrg = await sunbirdService.updateOrganisationDetails(requestBody, token);
-                if (updateOrg && updateOrg.responseCode == constants.common.RESPONSE_OK) {
-                    resolve({ result: updateOrg.result, message: constants.apiResponses.ORG_UPDATED });
+                if (updateOrg && updateOrg.status == HTTP_STATUS_CODE.ok.status) {
+                    resolve({ data: updateOrg.result, message: CONSTANTS.apiResponses.ORG_UPDATED, success: true });
                 } else {
-                    reject({ message: updateOrg.params.errmsg });
+                    throw new Error(updateOrg.message);
                 }
 
             } catch (error) {
-                return reject(error)
+                return reject({
+                    success: false,
+                    message: error.message ? error.message : HTTP_STATUS_CODE["internal_server_error"].message,
+                    data: false
+                });
             }
         });
     }
@@ -635,7 +626,7 @@ module.exports = class OrganisationsHelper {
             try {
 
                 let orgDetails = await sunbirdService.getOrganisationDetails({ organisationId: organisationId }, token);
-                if (orgDetails && orgDetails.responseCode == constants.common.RESPONSE_OK) {
+                if (orgDetails && orgDetails.responseCode == CONSTANTS.common.RESPONSE_OK) {
                     let response = orgDetails.result.response;
                     let address = "";
                     if (response.address && response.address.addressLine1) {
@@ -657,13 +648,17 @@ module.exports = class OrganisationsHelper {
                         address: address
                     }
 
-                    resolve({ result: responseObj, message: constants.apiResponses.ORG_DETAILS_FOUND });
+                    resolve({ data: responseObj, message: CONSTANTS.apiResponses.ORG_DETAILS_FOUND, success: true });
                 } else {
-                    reject({ message: orgDetails.params.errmsg });
+                    throw new Error(orgDetails.message);
                 }
 
             } catch (error) {
-                return reject(error)
+                return reject({
+                    success: false,
+                    message: error.message ? error.message : HTTP_STATUS_CODE["internal_server_error"].message,
+                    data: false
+                });
             }
         });
     }
@@ -683,19 +678,23 @@ module.exports = class OrganisationsHelper {
             try {
 
                 let updateOrg = await sunbirdService.updateOrgStatus(inputData, token);
-                if (updateOrg && updateOrg.responseCode == constants.common.RESPONSE_OK) {
+                if (updateOrg && updateOrg.status == HTTP_STATUS_CODE.ok.status) {
 
-                    let msg = constants.apiResponses.ORG_ACTIVATED;
+                    let msg = CONSTANTS.apiResponses.ORG_ACTIVATED;
                     if (inputData.status == 0) {
-                        msg = constants.apiResponses.ORG_DEACTIVATED;
+                        msg = CONSTANTS.apiResponses.ORG_DEACTIVATED;
                     }
-                    resolve({ result: updateOrg.result, message: msg });
+                    resolve({ data: updateOrg.result, message: msg, success: true });
                 } else {
-                    reject({ message: updateOrg });
+                    throw new Error(updateOrg.message);
                 }
 
             } catch (error) {
-                return reject(error)
+                return reject({
+                    success: false,
+                    message: error.message ? error.message : HTTP_STATUS_CODE["internal_server_error"].message,
+                    data: false
+                });
             }
         });
     }
@@ -714,29 +713,29 @@ module.exports = class OrganisationsHelper {
             try {
 
                 let removeUser = await sunbirdService.removeUser(inputData, token);
-                if (removeUser && removeUser.responseCode == constants.common.RESPONSE_OK) {
+                if (removeUser && removeUser.status == HTTP_STATUS_CODE.ok.status) {
 
-                    if (removeUser.result.response == constants.common.SUCCESS_RESPONSE) {
-
-                        let queryObject = { userId: inputData.userId };
-                        let updateData = {
-                            $pull: {
-                                organisations: { value: inputData.organisationId },
-                                organisationRoles: {
-                                    organisationId: inputData.organisationId
-                                }
+                    let queryObject = { userId: inputData.userId };
+                    let updateData = {
+                        $pull: {
+                            organisations: { value: inputData.organisationId },
+                            organisationRoles: {
+                                organisationId: inputData.organisationId
                             }
                         }
-                        let updateUserDetails = await usersHelper.update(queryObject, updateData);
-
                     }
-                    resolve({ result: removeUser.result, message: constants.apiResponses.USER_REMOVED });
+                    let updateUserDetails = await usersHelper.update(queryObject, updateData);
+                    resolve({ data: removeUser.result, message: CONSTANTS.apiResponses.USER_REMOVED, success: true });
                 } else {
-                    reject({ message: removeUser });
+                    throw new Error(removeUser.message);
                 }
 
             } catch (error) {
-                return reject(error)
+                return reject({
+                    success: false,
+                    message: error.message ? error.message : HTTP_STATUS_CODE["internal_server_error"].message,
+                    data: false
+                });
             }
         });
     }
@@ -757,10 +756,10 @@ function _getUserRoles(userId, organisationId = "") {
     return new Promise(async (resolve, reject) => {
         try {
 
-            let  roles = await usersHelper.getUserRoles(userId, organisationId);
-            if(roles && roles.result){
+            let roles = await usersHelper.getUserRoles(userId, organisationId);
+            if (roles && roles.result) {
                 resolve(roles.result);
-            }else{
+            } else {
                 roles = [];
                 resolve(roles);
             }
@@ -806,7 +805,7 @@ function _userColumn() {
         let obj = { ...defaultColumn };
         let field = columns[column];
 
-        obj["label"] = gen.utils.camelCaseToCapitalizeCase(field);
+        obj["label"] = UTILS.camelCaseToCapitalizeCase(field);
         obj["key"] = field
 
         if (field === "actions") {
@@ -838,7 +837,7 @@ function _actions() {
     for (let action = 0; action < actions.length; action++) {
         actionsColumn.push({
             key: actions[action],
-            label: gen.utils.camelCaseToCapitalizeCase(actions[action]),
+            label: UTILS.camelCaseToCapitalizeCase(actions[action]),
             visible: true,
             icon: actions[action]
         })
@@ -860,7 +859,7 @@ function _getOrganisationsDetails(token) {
     return new Promise(async (resolve, reject) => {
 
         let organisationsList = [];
-        let sessionOrganisationData = sessionHelpers.get(constants.common.ORGANISATIONS_SESSION);
+        let sessionOrganisationData = sessionHelpers.get(CONSTANTS.common.ORGANISATIONS_SESSION);
 
         if (sessionOrganisationData && sessionOrganisationData.length > 0) {
             organisationsList = sessionOrganisationData;
@@ -872,7 +871,7 @@ function _getOrganisationsDetails(token) {
             }
 
             let organisationList = await sunbirdService.searchOrganisation(request, token);
-            if (organisationList.responseCode == constants.common.RESPONSE_OK) {
+            if (organisationList.status == HTTP_STATUS_CODE.ok.status) {
                 if (organisationList.result && organisationList.result.response &&
                     organisationList.result.response && organisationList.result.response.content) {
                     await Promise.all(organisationList.result.response.content.map(async function (orgInfo) {
@@ -881,7 +880,7 @@ function _getOrganisationsDetails(token) {
                             value: orgInfo.id
                         });
                     }));
-                    sessionHelpers.set(constants.common.ORGANISATIONS_SESSION, organisationsList);
+                    sessionHelpers.set(CONSTANTS.common.ORGANISATIONS_SESSION, organisationsList);
                 }
             }
 
@@ -945,7 +944,7 @@ function _organisationColumn() {
         let obj = { ...defaultColumn };
         let field = columns[column];
 
-        obj["label"] = gen.utils.camelCaseToCapitalizeCase(field);
+        obj["label"] = UTILS.camelCaseToCapitalizeCase(field);
         obj["key"] = field
 
         if (field === "actions") {

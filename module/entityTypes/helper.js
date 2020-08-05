@@ -50,11 +50,11 @@ module.exports = class EntityTypesHelper {
                 if (!entityTypeData) {
 
                     return resolve({
-                        message: constants.apiResponses.ENTITY_TYPE_NOT_FOUND,
+                        message: CONSTANTS.apiResponses.ENTITY_TYPE_NOT_FOUND,
                     });
                 }
 
-                return resolve({ message: constants.apiResponses.ENTITY_TYPE_FETCHED, result: entityTypeData });
+                return resolve({ message: CONSTANTS.apiResponses.ENTITY_TYPE_FETCHED, result: entityTypeData });
 
             } catch (error) {
                 return reject(error);
@@ -87,7 +87,7 @@ module.exports = class EntityTypesHelper {
                         entityTypeArray.push(entityType);
                     })
                 }
-                return resolve({ message: constants.apiResponses.ENTITY_TYPE_FETCHED, result: entityTypeArray });
+                return resolve({ message: CONSTANTS.apiResponses.ENTITY_TYPE_FETCHED, result: entityTypeArray });
 
             } catch (error) {
                 return reject(error);

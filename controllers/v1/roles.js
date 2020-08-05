@@ -20,7 +20,7 @@
 module.exports = class Roles extends Abstract {
 
     constructor() {
-        super(schemas["role"]);
+        super("role");
     }
 
     /**

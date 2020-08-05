@@ -31,7 +31,7 @@ function bulkUploadEntities(filePath, token, type) {
                 entities: fs.createReadStream(filePath)
             }
             let apiUrl =
-                samikshaServiceBaseURL + constants.endpoints.BULK_ENTITY + "?type=" + type;
+                samikshaServiceBaseURL + CONSTANTS.endpoints.BULK_ENTITY + "?type=" + type;
 
             let response = await httpCall(apiUrl, token, formData);
             resolve(response);
@@ -59,7 +59,7 @@ function entityMapping(filePath, token, programId, solutionId) {
                 entityMap: fs.createReadStream(filePath)
             }
             let apiUrl =
-                samikshaServiceBaseURL + constants.endpoints.BULK_ENTITY_MAPPING;
+                samikshaServiceBaseURL + CONSTANTS.endpoints.BULK_ENTITY_MAPPING;
             let response = await httpCall(apiUrl, token, formData);
             return resolve(response);
 
@@ -96,7 +96,7 @@ function httpCall(url, token, formData) {
             function callback(err, data) {
                 if (err) {
                     return reject({
-                        message: constants.apiResponses.SAMIKSHA_SERVICE_DOWN
+                        message: CONSTANTS.apiResponses.SAMIKSHA_SERVICE_DOWN
                     });
                 } else {
                     return resolve(data);

@@ -6,7 +6,7 @@
  */
 
 const userManagementService = 
-require( SERVICES_PATH+"/user-management");
+require( GENERIC_SERVICES_PATH+"/user-management");
 
 module.exports = class platFormUserProfileHelper {
 

@@ -14,7 +14,7 @@ const entityTypesHelper = require(MODULES_BASE_PATH + "/entityTypes/helper.js");
 */
 module.exports = class EntityTypes extends Abstract {
   constructor() {
-    super(schemas["entityTypes"]);
+    super("entityTypes");
   }
 
   static get name() {
@@ -108,11 +108,11 @@ module.exports = class EntityTypes extends Abstract {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
 
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
       }
     });

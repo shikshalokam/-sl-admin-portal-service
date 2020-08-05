@@ -11,7 +11,7 @@
  */
 
 const entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper.js");
-const csvFileStream = require(ROOT_PATH + "/generics/file-stream");
+const csvFileStream = require(GENERICS_FILES_PATH + "/file-stream");
 
 /**
     * Entities
@@ -21,7 +21,7 @@ const csvFileStream = require(ROOT_PATH + "/generics/file-stream");
 module.exports = class Entities extends Abstract {
 
   constructor() {
-    super(schemas["entities"]);
+    super("entities");
   }
 
   /**
@@ -142,8 +142,8 @@ module.exports = class Entities extends Abstract {
       } catch (error) {
 
         return reject({
-          status: error.status || httpStatusCode.internal_server_error.status,
-          message: error.message || httpStatusCode.internal_server_error.message,
+          status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+          message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
           errorObject: error
         })
 
@@ -194,8 +194,8 @@ module.exports = class Entities extends Abstract {
 
       if (!(req.params._id)) {
         return resolve({
-          status: httpStatusCode.bad_request.status,
-          message: constants.apiResponses.ENTITY_ID_NOT_FOUND
+          status: HTTP_STATUS_CODE.bad_request.status,
+          message: CONSTANTS.apiResponses.ENTITY_ID_NOT_FOUND
         })
       }
 
@@ -212,8 +212,8 @@ module.exports = class Entities extends Abstract {
       } catch (error) {
 
         return reject({
-          status: error.status || httpStatusCode.internal_server_error.status,
-          message: error.message || httpStatusCode.internal_server_error.message,
+          status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+          message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
           errorObject: error
         })
 
@@ -274,8 +274,8 @@ module.exports = class Entities extends Abstract {
 
       } catch (error) {
         return reject({
-          status: error.status || httpStatusCode.internal_server_error.status,
-          message: error.message || httpStatusCode.internal_server_error.message,
+          status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+          message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
           errorObject: error
         })
       }
@@ -367,8 +367,8 @@ module.exports = class Entities extends Abstract {
       } catch (error) {
 
         return reject({
-          status: error.status || httpStatusCode.internal_server_error.status,
-          message: error.message || httpStatusCode.internal_server_error.message,
+          status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+          message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
           errorObject: error
         });
 
@@ -493,8 +493,8 @@ module.exports = class Entities extends Abstract {
       } catch (error) {
 
         return reject({
-          status: error.status || httpStatusCode.internal_server_error.status,
-          message: error.message || httpStatusCode.internal_server_error.message,
+          status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+          message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
           errorObject: error
         });
 
@@ -543,8 +543,8 @@ module.exports = class Entities extends Abstract {
       } catch (error) {
 
         return reject({
-          status: error.status || httpStatusCode.internal_server_error.status,
-          message: error.message || httpStatusCode.internal_server_error.message,
+          status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+          message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
           errorObject: error
         });
 
@@ -592,10 +592,10 @@ module.exports = class Entities extends Abstract {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
 
       }
@@ -643,10 +643,10 @@ module.exports = class Entities extends Abstract {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
 
       }
@@ -708,10 +708,10 @@ module.exports = class Entities extends Abstract {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
         
       }
