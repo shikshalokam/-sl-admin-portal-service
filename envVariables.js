@@ -87,9 +87,13 @@ let enviromentVariables = {
     "message": "Required",
     "optional": false
   },
-  "KEYSPACE": {
+  "CASSANDRA_DB": {
     "message": "Required",
     "optional": false
+  },
+  "DEFAULT_REPORTS_PATH":{
+    "message" : "Please specify the value",
+    "optional" : false
   },
   "ENABLE_CONSOLE_LOGGING" : {
     "message" : "Please specify the value for e.g. ON/OFF",

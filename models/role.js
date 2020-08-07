@@ -5,7 +5,7 @@ module.exports = {
             name: "text",
             rolegroupid : {
                 type: "list",
-                typeDef: "<varchar>"
+                typeDef: "<text>"
             },  
             status:"int"
         },
