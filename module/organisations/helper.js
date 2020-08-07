@@ -243,15 +243,17 @@ module.exports = class OrganisationsHelper {
     }
 
 
-
     /**
-    * To add user to organisation
-    * @method
-    * @name  addUser
-    * @param {Object} organisationInfo  - organisation info
-    * @param {String}  token - user access token
-    * @returns {json} Response consists of success or failure of the api.
-    */
+      * To add user to organisation
+      * @method
+      * @name  addUser
+      * @param {Object} organisationInfo  - organisation object 
+      * @param {String} organisationInfo.userId - userId
+      * @param {String} organisationInfo.orgnisation - organisationId
+      * @param {Array} organisationInfo.roles - array of roles 
+      * @param {String} token - keyclock access token
+      * @returns {json} Response consists of add user details
+      */
     static addUser(organisationInfo, token) {
 
         return new Promise(async (resolve, reject) => {
@@ -320,20 +322,23 @@ module.exports = class OrganisationsHelper {
     }
 
 
-
-    /**
-     * To assign roles to organisation for a user
-     * @method
-     * @name  assignRoles
-     * @param  {orgnisationInfo,token}  - organisation object and token
-     * @returns {json} Response consists of assign role information.
-     */
-    static assignRoles(orgnisationInfo, token) {
+      /**
+      * To assign roles to organisation for a user
+      * @method
+      * @name  assignRoles
+      * @param {Object} organisationInfo  - organisation object 
+      * @param {String} organisationInfo.userId - userId
+      * @param {String} organisationInfo.organisationId - organisationId
+      * @param {Array} organisationInfo.roles - array of roles 
+      * @param {String} token - keyclock access token
+      * @returns {json} Response consists of assign role information.
+      */
+    static assignRoles(organisationInfo, token) {
         return new Promise(async (resolve, reject) => {
             try {
                 let plaformRoles = [];
                 let userRoles = [];
-                if (orgnisationInfo.roles) {
+                if (organisationInfo.roles) {
 
                     let rolesDoc = await platformRolesHelper.getRoles();
                     let sunbirdRolesDoc = await rolesHelper.list();
@@ -355,7 +360,7 @@ module.exports = class OrganisationsHelper {
                         });
                     }
 
-                    await Promise.all(orgnisationInfo.roles.map(async function (roleInfo) {
+                    await Promise.all(organisationInfo.roles.map(async function (roleInfo) {
                         if (customRoles[roleInfo]) {
                             userRoles.push({ code: roleInfo, name: customRoles[roleInfo] });
                         } else if (allRoles[roleInfo]) {
@@ -368,14 +373,14 @@ module.exports = class OrganisationsHelper {
                 if (plaformRoles.length == 0) {
                     plaformRoles.push(CONSTANTS.common.PUBLIC_ROLE);
                 }
-                orgnisationInfo.roles = plaformRoles;
+                organisationInfo.roles = plaformRoles;
 
-                let response = await sunbirdService.assignRoles(orgnisationInfo, token);
+                let response = await sunbirdService.assignRoles(organisationInfo, token);
                 if (response && response.status == HTTP_STATUS_CODE.ok.status) {
                     if (response.result.response == CONSTANTS.common.SUCCESS_RESPONSE) {
 
                         let queryObject = {
-                            userId: orgnisationInfo.userId, "organisationRoles.organisationId": orgnisationInfo.organisationId
+                            userId: organisationInfo.userId, "organisationRoles.organisationId": organisationInfo.organisationId
                         };
                         let updateData =
                             { "organisationRoles.$.roles": userRoles };
@@ -384,7 +389,7 @@ module.exports = class OrganisationsHelper {
                     }
 
                     let message = CONSTANTS.apiResponses.ASSIGNED_ROLE_SUCCESSFULLY;
-                    if (orgnisationInfo && orgnisationInfo.removeRoles) {
+                    if (organisationInfo && organisationInfo.removeRoles) {
                         message = CONSTANTS.apiResponses.ROLES_REMOVED;
                     }
                     resolve({ data: response.result, message: message, success: true });
@@ -401,35 +406,41 @@ module.exports = class OrganisationsHelper {
         });
     }
 
-    /**
-     * To get organisation detail list.
-     * @method
-     * @name  detailList
-     * @param  {inputData}  - hold query object
-     * @returns {json} Response consists of success or failure of the api.
-     */
-    static detailList(inputData) {
+     /**
+       * To get organisation detail list.
+       * @method
+       * @name detailList
+       * @param {Object} organisationDetails - organisation information
+       * @param {String} organisationDetails.userToken - user access token
+       * @param {String} organisationDetails.userId- keyclock user id
+       * @param {String} organisationDetails.pageSize - page size of the request
+       * @param {String} organisationDetails.pageNo - page number of the request
+       * @param {String} organisationDetails.searchText - text to search in a organisations
+       * @param {String} organisationDetails.status - organisation status filter
+       * @returns {json} Response consists of organisations details
+      */
+    static detailList(organisationDetails) {
         return new Promise(async (resolve, reject) => {
             try {
-                let roles = await _getUserRoles(inputData.userId);
-                let offset = inputData.pageSize * (inputData.pageNo - 1);
+                let roles = await _getUserRoles(organisationDetails.userId);
+                let offset = organisationDetails.pageSize * (organisationDetails.pageNo - 1);
                 if (roles.includes(CONSTANTS.common.PLATFROM_ADMIN_ROLE)) {
                     let request = {
                         "filters": {
                         },
-                        "limit": inputData.pageSize,
+                        "limit": organisationDetails.pageSize,
                         "offset": offset
                     }
 
-                    if (inputData.searchText) {
-                        request['query'] = inputData.searchText;
+                    if (organisationDetails.searchText) {
+                        request['query'] = organisationDetails.searchText;
                     }
-                    if (inputData.status) {
-                        request['filters']['status'] = inputData.status;
+                    if (organisationDetails.status) {
+                        request['filters']['status'] = organisationDetails.status;
                     }
 
                     let organisationInfo = [];
-                    let organisationList = await sunbirdService.searchOrganisation(request, inputData.userToken);
+                    let organisationList = await sunbirdService.searchOrganisation(request, organisationDetails.userToken);
                     if (organisationList && organisationList.status && organisationList.status == HTTP_STATUS_CODE.ok.status) {
                         if (organisationList.result && organisationList.result.response &&
                             organisationList.result.response && organisationList.result.response.content) {
@@ -495,31 +506,36 @@ module.exports = class OrganisationsHelper {
 
 
 
-    /** 
+      /** 
     * To create organisation.
     * @method
     * @name  create
-    * @param  {Json} inputData - hold query object
-    * @param  {String} token - user access token
+    * @param  {Object} organisationDetails - organisation details object
+    * @param {String} organisationDetails.description - description for the organisation
+    * @param {String} organisationDetails.externalId - externalId
+    * @param {String} organisationDetails.name - name of the organisation
+    * @param {String} organisationDetails.address - address of the organisation
+    * @param {String} organisationDetails.email - email id
+    * @param  {String} token - keyclock access token
     * @returns {json} Response consists of success or failure of the api.
     */
-    static create(inputData, token) {
+    static create(organisationDetails, token) {
         return new Promise(async (resolve, reject) => {
             try {
 
                 let requestBody = {
-                    "description": inputData.description,
-                    "externalId": inputData.externalId,
-                    "name": inputData.name,
-                    "address": inputData.address,
-                    "email": inputData.email,
+                    "description": organisationDetails.description,
+                    "externalId": organisationDetails.externalId,
+                    "name": organisationDetails.name,
+                    "address": organisationDetails.address,
+                    "email": organisationDetails.email,
                 }
                 let createOrg = await sunbirdService.createOrganisation(requestBody, token);
                 if (createOrg && createOrg.status == HTTP_STATUS_CODE.ok.status) {
 
                     let sessionOrganisationData = sessionHelpers.get(CONSTANTS.common.ORGANISATIONS_SESSION);
                     if (sessionOrganisationData) {
-                        sessionOrganisationData.push({ label: inputData.name, value: createOrg.result.organisationId });
+                        sessionOrganisationData.push({ label: organisationDetails.name, value: createOrg.result.organisationId });
                         sessionHelpers.set(CONSTANTS.common.ORGANISATIONS_SESSION, sessionOrganisationData);
                     }
 
@@ -573,27 +589,35 @@ module.exports = class OrganisationsHelper {
         });
     }
 
-    /**
+
+       /**
     * To update the organisational details
     * @method
     * @name  update
-    * @returns {json} Response consists of organisation creation form.
+    * @param  {Object} organisationDetails - organisation details object
+    * @param {String} organisationDetails.description - description for the organisation
+    * @param {String} organisationDetails.externalId - externalId
+    * @param {String} organisationDetails.name - name of the organisation
+    * @param {String} organisationDetails.address - address of the organisation
+    * @param {String} organisationDetails.email - email id
+    * @param {String} organisationDetails.organisationId - organisation id
+    * @param  {String} token - keyclock access token
+    * @returns {json} Response consists of organisation updated details.
     */
 
-    static update(inputData, token) {
+    static update(organisationDetails, token) {
         return new Promise(async (resolve, reject) => {
             try {
 
                 let requestBody = {
-                    name: inputData.name ? inputData.name : "",
-                    email: inputData.email ? inputData.email : "",
-                    description: inputData.description ? inputData.description : "",
-                    organisationId: inputData.organisationId,
-                    address: inputData.address
+                    name: organisationDetails.name ? organisationDetails.name : "",
+                    email: organisationDetails.email ? organisationDetails.email : "",
+                    description: organisationDetails.description ? organisationDetails.description : "",
+                    organisationId: organisationDetails.organisationId,
+                    address: organisationDetails.address
                 }
-                if (inputData.externalId) {
-                    requestBody['externalId'] = inputData.externalId;
-                    requestBody['provider'] = process.env.SUNBIRD_PROVIDER;
+                if (organisationDetails.externalId) {
+                    requestBody['externalId'] = organisationDetails.externalId;
                 }
 
                 let updateOrg = await sunbirdService.updateOrganisationDetails(requestBody, token);
@@ -614,11 +638,13 @@ module.exports = class OrganisationsHelper {
     }
 
 
-    /**
+     /**
     * To get the organisational details
     * @method
     * @name  details
-    * @returns {json} Response consists of organisation creation form.
+    * @param  {String} organisationId - organisation id
+    * @param  {String} token - keyclock access token
+    * @returns {json} Response consists oforganisation details
     */
 
     static details(organisationId, token) {
@@ -668,20 +694,22 @@ module.exports = class OrganisationsHelper {
     * To\update organisation status
     * @method
     * @name  updateStatus
-    * @param {Json} inputData -  organisation details
-    * @param  {token} token  - user access token
-    * @returns {json} Response consists of organisation creation form.
+    * @param {Object} organisationDetails - organisation details object
+    * @param {String} organisationDetails.organisationId - organisation id
+    * @param {String} organisationDetails.status - status code
+    * @param  {token} token  - keyclock access token
+    * @returns {json} Response consists of organisation update status info
     */
 
-    static updateStatus(inputData, token) {
+    static updateStatus(organisationDetails, token) {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let updateOrg = await sunbirdService.updateOrgStatus(inputData, token);
+                let updateOrg = await sunbirdService.updateOrgStatus(organisationDetails, token);
                 if (updateOrg && updateOrg.status == HTTP_STATUS_CODE.ok.status) {
 
                     let msg = CONSTANTS.apiResponses.ORG_ACTIVATED;
-                    if (inputData.status == 0) {
+                    if (organisationDetails.status == 0) {
                         msg = CONSTANTS.apiResponses.ORG_DEACTIVATED;
                     }
                     resolve({ data: updateOrg.result, message: msg, success: true });
@@ -703,24 +731,26 @@ module.exports = class OrganisationsHelper {
     * remove user from the organisation
     * @method
     * @name  removeUser
-    * @param {Json} inputData -  organisation user details
+    * @param {Object} organisationDetails - organisation user details 
+    * @param {String} organisationDetails.organisationId - organisation id
+    * @param {String} organisationDetails.userId - keyclock user id
     * @param  {token} token  - user access token
-    * @returns {json} Response consists of organisation creation form.
+    * @returns {json} Response consists of organisation removed user info
     */
 
-    static removeUser(inputData, token) {
+    static removeUser(organisationDetails, token) {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let removeUser = await sunbirdService.removeUser(inputData, token);
+                let removeUser = await sunbirdService.removeUser(organisationDetails, token);
                 if (removeUser && removeUser.status == HTTP_STATUS_CODE.ok.status) {
 
-                    let queryObject = { userId: inputData.userId };
+                    let queryObject = { userId: organisationDetails.userId };
                     let updateData = {
                         $pull: {
-                            organisations: { value: inputData.organisationId },
+                            organisations: { value: organisationDetails.organisationId },
                             organisationRoles: {
-                                organisationId: inputData.organisationId
+                                organisationId: organisationDetails.organisationId
                             }
                         }
                     }

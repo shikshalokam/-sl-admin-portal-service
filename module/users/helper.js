@@ -412,7 +412,6 @@ module.exports = class UsersHelper {
                     }
 
                 } else {
-                    console.log("profileData",profileData);
                     reject({ message: profileData.message });
                 }
 

@@ -3,10 +3,6 @@ let table = require("cli-table");
 let tableData = new table();
 
 let enviromentVariables = {
-  "ENABLE_BUNYAN_LOGGING": {
-    "message": "Enable or disable bunyan logging",
-    "optional": false
-  },
   "APPLICATION_BASE_URL": {
     "message": "Required Application base url",
     "optional": false
