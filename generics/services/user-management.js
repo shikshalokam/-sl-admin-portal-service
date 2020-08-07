@@ -183,7 +183,6 @@ function httpCall(url, token, requestBody= "", type = "") {
                 "headers": {
                     'Content-Type': "application/json",
                     "X-authenticated-user-token": token,
-                    "authorization": process.env.AUTHORIZATION,
                     "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN
                 }
             };

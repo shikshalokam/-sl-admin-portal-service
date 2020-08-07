@@ -7,10 +7,6 @@ let enviromentVariables = {
     "message": "Required Application base url",
     "optional": false
   },
-  "AUTHORIZATION": {
-    "message": "Required Server authorization code",
-    "optional": false
-  },
   "APPLICATION_BASE_HOST": {
     "message": "Required Base host",
     "optional": false

@@ -26,7 +26,6 @@ const organisationList = async function (token) {
         let options = {
             "headers": {
                 "content-type": "application/json",
-                "authorization": process.env.AUTHORIZATION,
                 "x-authenticated-user-token": token
             }
         };
