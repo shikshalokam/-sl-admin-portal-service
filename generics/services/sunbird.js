@@ -56,28 +56,13 @@ const organisationList = async function (token) {
 const getUserProfileInfo = function (token, userId) {
     return new Promise(async (resolve, reject) => {
 
-        const createUserUrl =
-            process.env.SUNBIRD_URL + CONSTANTS.endpoints.SUNBIRD_USER_READ + "/"
-            + userId + "?fields=completeness,missingFields,lastLoginTime";
-        let options = {
-            "headers": {
-                "content-type": "application/json",
-                "authorization": process.env.AUTHORIZATION,
-                "x-authenticated-user-token": token
-            }
+        const getProfileAPI = CONSTANTS.endpoints.SUNBIRD_USER_READ + "/"
+        + userId + "?fields=completeness,missingFields,lastLoginTime";
+        let response = await callToSunbird(token, "", getProfileAPI,"GET");
+       
+        return resolve(JSON.parse(response));
 
-        };
-
-        request.get(createUserUrl, options, callback);
-        function callback(err, data) {
-            if (err) {
-                return reject({
-                    message: CONSTANTS.apiResponses.SUNBIRD_SERVICE_DOWN
-                });
-            } else {
-                return resolve(JSON.parse(data.body));
-            }
-        }
+       
     });
 }
 
@@ -157,9 +142,11 @@ function callToSunbird(token, requestBody, url, type = "POST") {
                 "content-type": "application/json",
                 "x-authenticated-user-token": token,
                 "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN
-            },
-            json: requestBody
+            }
         };
+        if(type=="POST" || type=="PATCH"){
+            options['json'] = requestBody;
+        }
 
         url = process.env.SUNBIRD_SERIVCE_HOST + process.env.SUNBIRD_SERIVCE_BASE_URL + url;
         if (type == "PATCH") {

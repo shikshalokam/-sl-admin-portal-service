@@ -276,7 +276,7 @@ module.exports = class UsersHelper {
             try {
 
                 let profileData = await sunbirdService.getUserProfileInfo(userToken, userId);
-                if (profileData.responseCode == CONSTANTS.common.RESPONSE_OK) {
+                if (profileData.status == HTTP_STATUS_CODE.ok.status) {
 
                     let role = await _getUserRoles(orgAdminUserId);
 
@@ -412,7 +412,7 @@ module.exports = class UsersHelper {
                     }
 
                 } else {
-
+                    console.log("profileData",profileData);
                     reject({ message: profileData.message });
                 }
 
