@@ -397,7 +397,7 @@ module.exports = class Organisations {
           status: req.query.status ? req.query.status : ""
         }
         let response = await organisationsHelper.detailList(query);
-        return resolve({ result:response.data,message: response.message });
+        return resolve({ result:response.data ,message: response.message });
 
       } catch (error) {
         return reject({

@@ -439,6 +439,7 @@ module.exports = class OrganisationsHelper {
                         request['filters']['status'] = organisationDetails.status;
                     }
 
+                    console.log(request,"---");
                     let organisationInfo = [];
                     let organisationList = await sunbirdService.searchOrganisation(request, organisationDetails.userToken);
                     if (organisationList && organisationList.status && organisationList.status == HTTP_STATUS_CODE.ok.status) {
@@ -471,28 +472,23 @@ module.exports = class OrganisationsHelper {
                             let sortedOrganisations = organisationInfo.sort(UTILS.sortArrayOfObjects('organisationName'));
 
                             resolve({
-                                result: {
+                                data: {
                                     count: organisationList.result.response.count,
                                     columns: orgColumns,
                                     data: sortedOrganisations
                                 },
-                                message: CONSTANTS.apiResponses.ORG_INFO_FETCHED
+                                message: CONSTANTS.apiResponses.ORG_INFO_FETCHED,
+                                success:true
                             });
                         } else {
-                            resolve({
-                                result: {
-                                    count: 0,
-                                    columns: orgColumns,
-                                    data: []
-                                }, message: CONSTANTS.apiResponses.NO_ORG_FOUND
-                            })
+                            throw new Error(CONSTANTS.apiResponses.NO_ORG_FOUND)
                         }
 
                     } else {
-                        resolve({ data: organisationList, message: CONSTANTS.apiResponses.NO_ORG_FOUND, succes: true })
+                        throw new Error(CONSTANTS.apiResponses.NO_ORG_FOUND)
                     }
                 } else {
-                    throw new Error(CONSTANTS.apiResponses.INVALID_ACCESS);
+                    throw new Error(organisationList.message);
                 }
             } catch (error) {
                 return reject({
