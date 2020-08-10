@@ -58,7 +58,7 @@ module.exports = class Organisations {
   * @method
   * @name list
   * @param  {req}  - requested data.
-  * @returns {json} Response consists of platform organisation list
+  * @returns {json} Response consists of organisation list
   */
 
   list(req) {
@@ -311,7 +311,7 @@ module.exports = class Organisations {
   * @method
   * @name assignRoles
   * @param  {req}  - requested data.
-  * @returns {json} Response consists of success or failure of the request
+  * @returns {json} Response consists assigned role information
   * 
   */
 
@@ -377,11 +377,11 @@ module.exports = class Organisations {
  */
 
   /**
-  * to get organisation list
+  * To get organisation list
   * @method
   * @name detailList
   * @param  {req}  - requested data.
-  * @returns {json} Response consists of platform organisation list
+  * @returns {json} Response consists of organisations deatiled list
   */
 
   detailList(req) {
@@ -458,7 +458,7 @@ module.exports = class Organisations {
  */
 
   /**
-  * to create the organisation
+  * To create the organisation
   * @method
   * @name create
   * @param  {req}  - requested data.
@@ -636,7 +636,7 @@ module.exports = class Organisations {
      * 
    */
   /**
-   * to get organisation details
+   * To get organisation details
    * @method
    * @name details
    * @param  {req}  - requested data.
@@ -740,7 +740,7 @@ module.exports = class Organisations {
      * 
    */
   /**
-   * to update organisation status
+   * To update organisation status
    * @method
    * @name updateStatus
    * @param  {req}  - requested data.
