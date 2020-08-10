@@ -295,19 +295,19 @@ module.exports = class OrganisationsHelper {
                     userId: organisationInfo.userId
                 }
 
-                let response = await sunbirdService.addUser(orgCreateRequest, token);
+                let addUserResponse = await sunbirdService.addUser(orgCreateRequest, token);
 
-                if (response && response.status == HTTP_STATUS_CODE.ok.status) {
+                if (addUserResponse && addUserResponse.status == HTTP_STATUS_CODE.ok.status) {
                     let organisationsRoles = [];
                     organisationsRoles.push({ organisationId: organisationInfo.organisation.value, roles: userRoles });
                     let queryObject = { userId: organisationInfo.userId };
                     let updateData = { $push: { organisations: organisationInfo.organisation, organisationRoles: organisationsRoles } };
 
                     let update = await usersHelper.update(queryObject, updateData);
-                    resolve({ result: response.result, message: CONSTANTS.apiResponses.USER_ADDED_TO_ORG });
+                    resolve({ data: addUserResponse, message: CONSTANTS.apiResponses.USER_ADDED_TO_ORG, success: true });
 
                 } else {
-                    throw new Error(response.message);
+                    throw new Error(addUserResponse.message);
                 }
 
             } catch (error) {
@@ -322,17 +322,17 @@ module.exports = class OrganisationsHelper {
     }
 
 
-      /**
-      * To assign roles to organisation for a user
-      * @method
-      * @name  assignRoles
-      * @param {Object} organisationInfo  - organisation object 
-      * @param {String} organisationInfo.userId - userId
-      * @param {String} organisationInfo.organisationId - organisationId
-      * @param {Array} organisationInfo.roles - array of roles 
-      * @param {String} token - keyclock access token
-      * @returns {json} Response consists of assign role information.
-      */
+    /**
+    * To assign roles to organisation for a user
+    * @method
+    * @name  assignRoles
+    * @param {Object} organisationInfo  - organisation object 
+    * @param {String} organisationInfo.userId - userId
+    * @param {String} organisationInfo.organisationId - organisationId
+    * @param {Array} organisationInfo.roles - array of roles 
+    * @param {String} token - keyclock access token
+    * @returns {json} Response consists of assign role information.
+    */
     static assignRoles(organisationInfo, token) {
         return new Promise(async (resolve, reject) => {
             try {
@@ -406,19 +406,19 @@ module.exports = class OrganisationsHelper {
         });
     }
 
-     /**
-       * To get organisation detail list.
-       * @method
-       * @name detailList
-       * @param {Object} organisationDetails - organisation information
-       * @param {String} organisationDetails.userToken - user access token
-       * @param {String} organisationDetails.userId- keyclock user id
-       * @param {String} organisationDetails.pageSize - page size of the request
-       * @param {String} organisationDetails.pageNo - page number of the request
-       * @param {String} organisationDetails.searchText - text to search in a organisations
-       * @param {String} organisationDetails.status - organisation status filter
-       * @returns {json} Response consists of organisations details
-      */
+    /**
+      * To get organisation detail list.
+      * @method
+      * @name detailList
+      * @param {Object} organisationDetails - organisation information
+      * @param {String} organisationDetails.userToken - user access token
+      * @param {String} organisationDetails.userId- keyclock user id
+      * @param {String} organisationDetails.pageSize - page size of the request
+      * @param {String} organisationDetails.pageNo - page number of the request
+      * @param {String} organisationDetails.searchText - text to search in a organisations
+      * @param {String} organisationDetails.status - organisation status filter
+      * @returns {json} Response consists of organisations details
+     */
     static detailList(organisationDetails) {
         return new Promise(async (resolve, reject) => {
             try {
@@ -439,7 +439,6 @@ module.exports = class OrganisationsHelper {
                         request['filters']['status'] = organisationDetails.status;
                     }
 
-                    console.log(request,"---");
                     let organisationInfo = [];
                     let organisationList = await sunbirdService.searchOrganisation(request, organisationDetails.userToken);
                     if (organisationList && organisationList.status && organisationList.status == HTTP_STATUS_CODE.ok.status) {
@@ -478,7 +477,7 @@ module.exports = class OrganisationsHelper {
                                     data: sortedOrganisations
                                 },
                                 message: CONSTANTS.apiResponses.ORG_INFO_FETCHED,
-                                success:true
+                                success: true
                             });
                         } else {
                             throw new Error(CONSTANTS.apiResponses.NO_ORG_FOUND)
@@ -502,19 +501,19 @@ module.exports = class OrganisationsHelper {
 
 
 
-      /** 
-    * To create organisation.
-    * @method
-    * @name  create
-    * @param  {Object} organisationDetails - organisation details object
-    * @param {String} organisationDetails.description - description for the organisation
-    * @param {String} organisationDetails.externalId - externalId
-    * @param {String} organisationDetails.name - name of the organisation
-    * @param {String} organisationDetails.address - address of the organisation
-    * @param {String} organisationDetails.email - email id
-    * @param  {String} token - keyclock access token
-    * @returns {json} Response consists of success or failure of the api.
-    */
+    /** 
+  * To create organisation.
+  * @method
+  * @name  create
+  * @param  {Object} organisationDetails - organisation details object
+  * @param {String} organisationDetails.description - description for the organisation
+  * @param {String} organisationDetails.externalId - externalId
+  * @param {String} organisationDetails.name - name of the organisation
+  * @param {String} organisationDetails.address - address of the organisation
+  * @param {String} organisationDetails.email - email id
+  * @param  {String} token - keyclock access token
+  * @returns {json} Response consists of success or failure of the api.
+  */
     static create(organisationDetails, token) {
         return new Promise(async (resolve, reject) => {
             try {
@@ -586,20 +585,20 @@ module.exports = class OrganisationsHelper {
     }
 
 
-       /**
-    * To update the organisational details
-    * @method
-    * @name  update
-    * @param  {Object} organisationDetails - organisation details object
-    * @param {String} organisationDetails.description - description for the organisation
-    * @param {String} organisationDetails.externalId - externalId
-    * @param {String} organisationDetails.name - name of the organisation
-    * @param {String} organisationDetails.address - address of the organisation
-    * @param {String} organisationDetails.email - email id
-    * @param {String} organisationDetails.organisationId - organisation id
-    * @param  {String} token - keyclock access token
-    * @returns {json} Response consists of organisation updated details.
-    */
+    /**
+ * To update the organisational details
+ * @method
+ * @name  update
+ * @param  {Object} organisationDetails - organisation details object
+ * @param {String} organisationDetails.description - description for the organisation
+ * @param {String} organisationDetails.externalId - externalId
+ * @param {String} organisationDetails.name - name of the organisation
+ * @param {String} organisationDetails.address - address of the organisation
+ * @param {String} organisationDetails.email - email id
+ * @param {String} organisationDetails.organisationId - organisation id
+ * @param  {String} token - keyclock access token
+ * @returns {json} Response consists of organisation updated details.
+ */
 
     static update(organisationDetails, token) {
         return new Promise(async (resolve, reject) => {
@@ -634,22 +633,22 @@ module.exports = class OrganisationsHelper {
     }
 
 
-     /**
-    * To get the organisational details
-    * @method
-    * @name  details
-    * @param  {String} organisationId - organisation id
-    * @param  {String} token - keyclock access token
-    * @returns {json} Response consists oforganisation details
-    */
+    /**
+   * To get the organisational details
+   * @method
+   * @name  details
+   * @param  {String} organisationId - organisation id
+   * @param  {String} token - keyclock access token
+   * @returns {json} Response consists oforganisation details
+   */
 
     static details(organisationId, token) {
         return new Promise(async (resolve, reject) => {
             try {
 
                 let orgDetails = await sunbirdService.getOrganisationDetails({ organisationId: organisationId }, token);
-                if (orgDetails && orgDetails.responseCode == CONSTANTS.common.RESPONSE_OK) {
-                    let response = orgDetails.result.response;
+                if (orgDetails && orgDetails.status == HTTP_STATUS_CODE.ok.status) {
+                    let response = orgDetails.result;
                     let address = "";
                     if (response.address && response.address.addressLine1) {
                         address = response.address.addressLine1

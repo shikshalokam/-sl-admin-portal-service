@@ -56,12 +56,12 @@ const getUserProfileInfo = function (token, userId) {
     return new Promise(async (resolve, reject) => {
 
         const getProfileAPI = CONSTANTS.endpoints.SUNBIRD_USER_READ + "/"
-        + userId + "?fields=completeness,missingFields,lastLoginTime";
-        let response = await callToSunbird(token, "", getProfileAPI,"GET");
-       
+            + userId + "?fields=completeness,missingFields,lastLoginTime";
+        let response = await callToSunbird(token, "", getProfileAPI, "GET");
+
         return resolve(JSON.parse(response));
 
-       
+
     });
 }
 
@@ -108,7 +108,7 @@ const addUser = function (userInfo, token) {
   * @name assignRoles
   * @param rolesInfo - roles info organisation.
   * @param token - Logged in user token.
-  * @returns {JSON} - All users data.
+  * @returns {JSON} - assign roles status
 */
 
 const assignRoles = function (rolesInfo, token) {
@@ -143,7 +143,7 @@ function callToSunbird(token, requestBody, url, type = "POST") {
                 "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN
             }
         };
-        if(type=="POST" || type=="PATCH"){
+        if (type == "POST" || type == "PATCH") {
             options['json'] = requestBody;
         }
 
@@ -153,7 +153,6 @@ function callToSunbird(token, requestBody, url, type = "POST") {
         } else {
             request.post(url, options, callback);
         }
-
 
         function callback(err, data) {
             if (err) {
@@ -175,7 +174,7 @@ function callToSunbird(token, requestBody, url, type = "POST") {
   * @name searchOrganisation
   * @param searchDetails - search details.
   * @param token - Logged in user token.
-  * @returns {JSON} - All users data.
+  * @returns {JSON} - organisations informations
 */
 
 const searchOrganisation = function (searchDetails, token) {
@@ -193,7 +192,7 @@ const searchOrganisation = function (searchDetails, token) {
   * @name createOrganisation
   * @param organisationDetails - organisation details.
   * @param token - Logged in user token.
-  * @returns {JSON} - All users data.
+  * @returns {JSON} - return created user information
 */
 
 const createOrganisation = function (organisationDetails, token) {
@@ -231,13 +230,13 @@ const updateOrganisationDetails = function (organisationDetails, token) {
   * @name getOrganisationDetails
   * @param organisationDetails - organisation details .
   * @param token - Logged in user token.
-  * @returns {JSON} - return updated organisation details
+  * @returns {JSON} - return organisation details
 */
 const getOrganisationDetails = function (requestBody, token) {
     return new Promise(async (resolve, reject) => {
 
-        const OrgDetails = CONSTANTS.endpoints.SUNBIRD_READ_ORG;
-        let response = await callToSunbird(token, requestBody, OrgDetails);
+        const OrgDetailsAPIEndpoint = CONSTANTS.endpoints.SUNBIRD_READ_ORG + "/" + requestBody.organisationId;
+        let response = await callToSunbird(token, requestBody, OrgDetailsAPIEndpoint);
         return resolve(response);
 
 

@@ -1,5 +1,5 @@
 /**
- * name : Roles.js
+ * name : roles.js
  * author : Rakesh Kumar
  * created-date : 13-April-2020
  * Description : All Roles related information.
