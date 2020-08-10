@@ -192,7 +192,7 @@ const searchOrganisation = function (searchDetails, token) {
   * @name createOrganisation
   * @param organisationDetails - organisation details.
   * @param token - Logged in user token.
-  * @returns {JSON} - return created user information
+  * @returns {JSON} - returns created user information
 */
 
 const createOrganisation = function (organisationDetails, token) {
@@ -212,7 +212,7 @@ const createOrganisation = function (organisationDetails, token) {
   * @name updateOrganisationDetails
   * @param organisationDetails - organisation details .
   * @param token - Logged in user token.
-  * @returns {JSON} - return updated organisation details
+  * @returns {JSON} - returns updated organisation details
 */
 const updateOrganisationDetails = function (organisationDetails, token) {
     return new Promise(async (resolve, reject) => {
@@ -230,7 +230,7 @@ const updateOrganisationDetails = function (organisationDetails, token) {
   * @name getOrganisationDetails
   * @param organisationDetails - organisation details .
   * @param token - Logged in user token.
-  * @returns {JSON} - return organisation details
+  * @returns {JSON} - returns organisation details
 */
 const getOrganisationDetails = function (requestBody, token) {
     return new Promise(async (resolve, reject) => {
@@ -249,7 +249,7 @@ const getOrganisationDetails = function (requestBody, token) {
   * @name updateOrgStatus
   * @param organisationDetails - organisation details .
   * @param token - Logged in user token.
-  * @returns {JSON} - return updated organisation status
+  * @returns {JSON} - returns updated organisation status
 */
 const updateOrgStatus = function (organisationDetails, token) {
     return new Promise(async (resolve, reject) => {
