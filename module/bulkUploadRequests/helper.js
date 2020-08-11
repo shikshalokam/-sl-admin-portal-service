@@ -527,7 +527,7 @@ function _checkAccess(token, userId) {
                 })
             }
 
-            if (profileData.responseCode == CONSTANTS.common.RESPONSE_OK) {
+            if (profileData && profileData.status == HTTP_STATUS_CODE.ok.status) {
 
                 if (profileData.result && profileData.result.response) {
 

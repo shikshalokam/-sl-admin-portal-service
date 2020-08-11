@@ -220,8 +220,8 @@ module.exports = class OrganisationsHelper {
                     organisationUserDownloadFilters.limit, organisationUserDownloadFilters.page, organisationUserDownloadFilters.searchText,
                     organisationUserDownloadFilters.status, organisationUserDownloadFilters.usersList);
                 let responseData = [];
-                if (users.result && users.result.data) {
-                    await Promise.all(users.result.data.map(fields => {
+                if (users.data && users.data.data) {
+                    await Promise.all(users.data.data.map(fields => {
                         if (fields.id) {
                             delete fields.id;
                         }
