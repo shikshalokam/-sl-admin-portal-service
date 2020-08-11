@@ -369,15 +369,16 @@ module.exports = class OrganisationsHelper {
                         }
                     }));
                 }
-
+                
                 if (plaformRoles.length == 0) {
                     plaformRoles.push(CONSTANTS.common.PUBLIC_ROLE);
                 }
                 organisationInfo.roles = plaformRoles;
 
                 let response = await sunbirdService.assignRoles(organisationInfo, token);
+
                 if (response && response.status == HTTP_STATUS_CODE.ok.status) {
-                    if (response.result.response == CONSTANTS.common.SUCCESS_RESPONSE) {
+                    if (response.result == CONSTANTS.common.SUCCESS_RESPONSE) {
 
                         let queryObject = {
                             userId: organisationInfo.userId, "organisationRoles.organisationId": organisationInfo.organisationId
