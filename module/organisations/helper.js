@@ -105,7 +105,7 @@ module.exports = class OrganisationsHelper {
                         bodyOfRequest['query'] = searchText;
                     }
                     if (requestedUsers.length > 0) {
-                        bodyOfRequest["id"] = requestedUsers;
+                        bodyOfRequest["userIds"] = requestedUsers;
                     }
                     if (status) {
                         bodyOfRequest['status'] = status;
@@ -426,18 +426,16 @@ module.exports = class OrganisationsHelper {
                 let roles = await _getUserRoles(organisationDetails.userId);
                 let offset = organisationDetails.pageSize * (organisationDetails.pageNo - 1);
                 if (roles.includes(CONSTANTS.common.PLATFROM_ADMIN_ROLE)) {
-                    let request = {
-                        "filters": {
-                        },
-                        "limit": organisationDetails.pageSize,
-                        "offset": offset
-                    }
-
+                    let request = {}
+                    
+                    request["limit"]= organisationDetails.pageSize,
+                    request["offset"]= offset;
+                   
                     if (organisationDetails.searchText) {
                         request['query'] = organisationDetails.searchText;
                     }
                     if (organisationDetails.status) {
-                        request['filters']['status'] = organisationDetails.status;
+                        request['status'] = organisationDetails.status;
                     }
 
                     let organisationInfo = [];

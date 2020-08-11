@@ -179,7 +179,20 @@ function callToSunbird(token, requestBody, url, type = "POST") {
 
 const searchOrganisation = function (searchDetails, token) {
     return new Promise(async (resolve, reject) => {
-        const searchOrgUrl = CONSTANTS.endpoints.SUNBIRD_SEARCH_ORG;
+        let searchOrgUrl = CONSTANTS.endpoints.SUNBIRD_SEARCH_ORG;
+
+        if(searchDetails.limit){
+            searchOrgUrl= searchOrgUrl + "?limit="+searchDetails.limit;
+        }
+        if(searchDetails.offset){
+            searchOrgUrl= searchOrgUrl + "&page="+searchDetails.offset;
+        }
+        if(searchDetails.query){
+            searchOrgUrl= searchOrgUrl + "&search="+searchDetails.query;
+        }
+        if(searchDetails.status){
+            searchOrgUrl= searchOrgUrl + "&status="+searchDetails.status
+        }
         let response = await callToSunbird(token, searchDetails, searchOrgUrl);
         return resolve(response);
 
