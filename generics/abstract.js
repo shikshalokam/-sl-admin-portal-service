@@ -14,7 +14,7 @@ let Abstract = class Abstract {
   
   constructor(schema) {
     if (schema && schemas[schema] && schemas[schema].db_type && schemas[schema].db_type =="cassandra") {
-      cassandraDatabase.createModel(schemas[schema]);
+       cassandraDatabase.createModel(schemas[schema]);
     } else if(schema && schemas[schema]) {
       database.createModel(schemas[schema]);
     }

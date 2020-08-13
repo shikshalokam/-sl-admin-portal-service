@@ -280,12 +280,12 @@ module.exports = class UsersHelper {
 
                     let role = await _getUserRoles(orgAdminUserId);
 
-                    let orgInfo = [];
-
                     let organisationsList = await _getOrganisationlist(userToken, orgAdminUserId);
-
                     let userDocument = await database.models.userExtension.findOne({ userId: userId }, { organisations: 1, organisationRoles: 1 });
-
+                    if(!userDocument){
+                         userDocument = await _addUserEntry(profileData.result.response,orgAdminUserId);
+                    }
+                   
                     let usersOrganisations = [];
                     if (userDocument && userDocument.organisations) {
                         userDocument.organisations.map(organisations => {
@@ -757,4 +757,75 @@ function _checkDeactiveAccess(userProfileInfo, userId) {
             return reject(err);
         }
     });
+}
+
+/**
+ * To add user entry in the db
+ * @method
+ * @name _addUserEntry
+ * @param { object } profileData - userprofile infomration.
+ * @param { object } userId - admin user keyclock id
+ * @returns {Object} returns created user details
+ * */
+function _addUserEntry(profileData,orgAdminUserId){
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            let sunbirdRolesDoc = await rolesHelper.list();
+            let sunbirdRoles = {};
+            sunbirdRolesDoc.result.map(sunbirdRole=>{
+                sunbirdRoles[sunbirdRole.id] = {
+                    code:sunbirdRole.id,
+                    name:sunbirdRole.name
+                }
+            });
+
+            let organisations =[];
+            let organisationsRoles =[];
+
+            profileData.organisations.map(organisation=>{
+                organisations.push({ value:organisation.organisationId,label:organisation.orgName });
+
+                let roles =[]
+                if(organisation.roles && organisation.roles.length > 0){
+                    organisation.roles.map(role=>{
+                        if(sunbirdRoles[role]){
+                            roles.push(sunbirdRoles[role]);
+                        }
+                        
+                    });
+                }
+                organisationsRoles.push({ organisationId: organisation.organisationId, roles: roles });
+            });
+          
+            let userObj = {
+                status: CONSTANTS.common.ACTIVE,
+                externalId: profileData.userName,
+                userId: profileData.identifier,
+                isDeleted: false,
+                organisations: organisations,
+                organisationRoles: organisationsRoles,
+                createdAt: new Date,
+                updatedAt: new Date,
+                createdBy: orgAdminUserId,
+                updatedBy: orgAdminUserId
+            }
+
+            let metaInformation = {
+                 email: profileData.email ? profileData.email : "",
+                firstName: profileData.firstName,
+                lastName: profileData.lastName,
+                phoneNumber: profileData.phone ? profileData.phone : "",
+            }
+
+            userObj["metaInformation"] = metaInformation;
+            let db = await database.models.userExtension.create(userObj);
+
+            resolve(userObj);
+
+        } catch (err) {
+            return reject(err);
+        }
+    });
+
 }
