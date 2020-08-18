@@ -664,22 +664,17 @@ module.exports = class Organisations {
   }
 
   /**
-     * @api {post} /admin-service/api/v1/organisations/updateStatus 
-     * To update organisation status
+     * @api {post} /admin-service/api/v1/organisations/activate/:_id
+     * To activate organisation
      * @apiVersion 1.0.0
      * @apiGroup Organisations
      * @apiHeader {String} X-authenticated-user-token Authenticity token
-     * @apiSampleRequest /admin-service/api/v1/organisations/updateStatus
-     * @apiParamExample {json} Request:
-     * {
-     *   "organisationId": "013014480583598080574",
-     *   "status":"0"
-     * }
+     * @apiSampleRequest /admin-service/api/v1/organisations/activate/013014480583598080574
      * @apiUse successBody
      * @apiUse errorBody
      * @apiParamExample {json} Response:
      * {
-     *  "message": "Organisation Status Update Successfully",
+     *  "message": "Organisation activated successfully",
      *  "status": 200,
      *  "result": {
      *     "organisationId": "",
@@ -688,19 +683,66 @@ module.exports = class Organisations {
      * 
    */
   /**
-   * To update organisation status
+   * To activate organisation
    * @method
-   * @name updateStatus
+   * @name activate
    * @param  {req}  - requested data.
-   * @returns {json} Response consists updated organisation status
+   * @returns {json} Response consists activated organisation information
    **/
 
-  updateStatus(req) {
+  activate(req) {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let response = await organisationsHelper.updateStatus(req.body, req.userDetails.userToken);
-        return resolve({ result:response.data,message: response.message });
+        let activateOrganisation = await organisationsHelper.activate(req.params._id,req.userDetails.userToken);
+        return resolve({ result:activateOrganisation.data,message: activateOrganisation.message });
+
+      } catch (error) {
+        return reject({
+          status:
+            error.status ||
+            HTTP_STATUS_CODE["internal_server_error"].status,
+          message:
+            error.message ||
+            HTTP_STATUS_CODE["internal_server_error"].message
+        });
+      }
+    });
+  }
+
+      /**
+     * @api {post} /admin-service/api/v1/organisations/deactivate/:_id
+     * To deactivate organisation
+     * @apiVersion 1.0.0
+     * @apiGroup Organisations
+     * @apiHeader {String} X-authenticated-user-token Authenticity token
+     * @apiSampleRequest /admin-service/api/v1/organisations/deactivate/013014480583598080574
+     * @apiUse successBody
+     * @apiUse errorBody
+     * @apiParamExample {json} Response:
+     * {
+     *  "message": "Organisation Deactivated successfully",
+     *  "status": 200,
+     *  "result": {
+     *     "organisationId": "",
+     *   }
+     * }
+     * 
+   */
+  /**
+   * To deactivate organisation
+   * @method
+   * @name deactivate
+   * @param  {req}  - requested data.
+   * @returns {json} Response consists of deactivated organisation information
+   **/
+
+  deactivate(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
+
+        let deactivionateOrganisation = await organisationsHelper.deactivate(req.params._id,req.userDetails.userToken);
+        return resolve({ result:deactivionateOrganisation.data,message: deactivionateOrganisation.message });
 
       } catch (error) {
         return reject({
@@ -740,9 +782,9 @@ module.exports = class Organisations {
      * 
    */
   /**
-   * To update organisation status
+   * To remove user from the organisation 
    * @method
-   * @name updateStatus
+   * @name removeUser
    * @param  {req}  - requested data.
    * @returns {json} Response consists updated organisation status
    **/

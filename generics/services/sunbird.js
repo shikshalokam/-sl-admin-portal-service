@@ -134,7 +134,7 @@ const assignRoles = function (rolesInfo, token) {
   * @returns {JSON} - return response from the sunbird api.
 */
 
-function callToSunbird(token, requestBody, url, type = "POST") {
+function callToSunbird(token, requestBody="", url, type = "POST") {
     return new Promise(async (resolve, reject) => {
         let options = {
             "headers": {
@@ -148,7 +148,10 @@ function callToSunbird(token, requestBody, url, type = "POST") {
         }
 
         url = process.env.SUNBIRD_SERIVCE_HOST + process.env.SUNBIRD_SERIVCE_BASE_URL + url;
-        if (type == "PATCH") {
+     
+        if(type=="GET"){
+            request.get(url, options, callback);
+        }else if (type == "PATCH") {
             request.patch(url, options, callback);
         } else {
             request.post(url, options, callback);
@@ -160,7 +163,12 @@ function callToSunbird(token, requestBody, url, type = "POST") {
                     message: CONSTANTS.apiResponses.SUNBIRD_SERVICE_DOWN
                 });
             } else {
-                return resolve(data.body);
+                if(data.body && data.body.status){
+                    return resolve(data.body);
+                }else {
+                    return resolve(JSON.parse(data.body));
+                }
+                
             }
         }
 
@@ -257,23 +265,6 @@ const getOrganisationDetails = function (requestBody, token) {
 }
 
 /**
-  * For updating organisation status
-  * @function
-  * @name updateOrgStatus
-  * @param organisationDetails - organisation details .
-  * @param token - Logged in user token.
-  * @returns {JSON} - returns updated organisation status
-*/
-const updateOrgStatus = function (organisationDetails, token) {
-    return new Promise(async (resolve, reject) => {
-
-        const OrgDetails = CONSTANTS.endpoints.SUNBIRD_ORG_STATUS_UPDATE;
-        let response = await callToSunbird(token, organisationDetails, OrgDetails, "PATCH");
-        return resolve(response);
-    });
-}
-
-/**
   * For remove user from the organisation
   * @function
   * @name removeUser
@@ -315,6 +306,41 @@ const verifyToken = function (token) {
     })
 }
 
+/**
+  * To activate organisation
+  * @function
+  * @name activateOrganisation
+  * @param organisationId - organisation id.
+  * @param token - keycloak user token.
+  * @returns {JSON} - returns activated organisation status
+*/
+const activateOrganisation = function (organisationId, token) {
+    return new Promise(async (resolve, reject) => {
+
+        const activateOrganisationAPIEndpoint = CONSTANTS.endpoints.SUNBIRD_ORG_ACTIVATE+"/" + organisationId;
+        let response = await callToSunbird(token, "", activateOrganisationAPIEndpoint, "GET");
+        
+        return resolve(response);
+    });
+}
+
+/**
+  * To deactivate organisation
+  * @function
+  * @name deactivateOrganisation
+  * @param organisationId - organisation id.
+  * @param token - keycloak user token.
+  * @returns {JSON} - returns deactivate organisation status
+*/
+const deactivateOrganisation = function (organisationId, token) {
+    return new Promise(async (resolve, reject) => {
+
+        const deactivateOrganisationAPIEndpoint = CONSTANTS.endpoints.SUNBIRD_ORG_DEACTIVATE+"/" + organisationId;
+        let response = await callToSunbird(token, "", deactivateOrganisationAPIEndpoint, "GET");
+        return resolve(response);
+    });
+}
+
 module.exports = {
     organisationList: organisationList,
     getUserProfileInfo: getUserProfileInfo,
@@ -325,7 +351,9 @@ module.exports = {
     createOrganisation: createOrganisation,
     updateOrganisationDetails: updateOrganisationDetails,
     getOrganisationDetails: getOrganisationDetails,
-    updateOrgStatus: updateOrgStatus,
     removeUser: removeUser,
-    verifyToken: verifyToken
+    verifyToken: verifyToken,
+    activateOrganisation: activateOrganisation,
+    deactivateOrganisation: deactivateOrganisation
+
 };

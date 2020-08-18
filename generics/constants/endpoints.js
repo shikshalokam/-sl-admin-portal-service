@@ -36,5 +36,7 @@ module.exports = {
     DOWNLOAD_AZURE_URL: "/cloud-services/azure/getDownloadableUrl",
     BULK_ENTITY: "/entities/bulkCreate?type=",
     BULK_ENTITY_MAPPING: "/entities/mappingUpload",
-    VERIFY_TOKEN: "api/v1/token/verify"
+    VERIFY_TOKEN: "api/v1/token/verify",
+    SUNBIRD_ORG_ACTIVATE : "api/v1/organisations/activate",
+    SUNBIRD_ORG_DEACTIVATE : "api/v1/organisations/deactivate"
 }

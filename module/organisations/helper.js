@@ -683,43 +683,67 @@ module.exports = class OrganisationsHelper {
         });
     }
 
-
     /**
-    * To\update organisation status
+    * To activate organisation
     * @method
-    * @name  updateStatus
-    * @param {Object} organisationDetails - organisation details object
-    * @param {String} organisationDetails.organisationId - organisation id
-    * @param {String} organisationDetails.status - status code
+    * @name  activate
+    * @param {String} organisationId - organisation id
     * @param  {token} token  - keyclock access token
-    * @returns {json} Response consists of organisation update status info
+    * @returns {json} Response consists of organisation activated status info
     */
 
-    static updateStatus(organisationDetails, token) {
-        return new Promise(async (resolve, reject) => {
-            try {
+   static activate(organisationId, token) {
+    return new Promise(async (resolve, reject) => {
+        try {
 
-                let updateOrg = await sunbirdService.updateOrgStatus(organisationDetails, token);
-                if (updateOrg && updateOrg.status == HTTP_STATUS_CODE.ok.status) {
-
-                    let msg = CONSTANTS.apiResponses.ORG_ACTIVATED;
-                    if (organisationDetails.status == 0) {
-                        msg = CONSTANTS.apiResponses.ORG_DEACTIVATED;
-                    }
-                    resolve({ data: updateOrg.result, message: msg, success: true });
-                } else {
-                    throw new Error(updateOrg.message);
-                }
-
-            } catch (error) {
-                return reject({
-                    success: false,
-                    message: error.message ? error.message : HTTP_STATUS_CODE["internal_server_error"].message,
-                    data: false
-                });
+            let activateOrganisation = await sunbirdService.activateOrganisation(organisationId, token);
+            if (activateOrganisation && activateOrganisation.status == HTTP_STATUS_CODE.ok.status) {
+                const msg = CONSTANTS.apiResponses.ORG_ACTIVATED;
+                resolve({ data: { organisationId : organisationId }, message: msg, success: true });
+            } else {
+                throw new Error(activateOrganisation.message);
             }
-        });
-    }
+
+        } catch (error) {
+            return reject({
+                success: false,
+                message: error.message ? error.message : HTTP_STATUS_CODE["internal_server_error"].message,
+                data: false
+            });
+        }
+    });
+}
+
+    /**
+    * To deactivate organisation
+    * @method
+    * @name  deactivate
+    * @param {String} organisationId - organisation id
+    * @param  {token} token  - keyclock access token
+    * @returns {json} Response consists of organisation deactivated status info
+    */
+
+   static deactivate(organisationId, token) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            let deactivateOrganisation = await sunbirdService.deactivateOrganisation(organisationId, token);
+            if (deactivateOrganisation && deactivateOrganisation.status == HTTP_STATUS_CODE.ok.status) {
+                const msg = CONSTANTS.apiResponses.ORG_DEACTIVATED;
+                resolve({ data: { organisationId : organisationId }, message: msg, success: true });
+            } else {
+                throw new Error(deactivateOrganisation.message);
+            }
+
+        } catch (error) {
+            return reject({
+                success: false,
+                message: error.message ? error.message : HTTP_STATUS_CODE["internal_server_error"].message,
+                data: false
+            });
+        }
+    });
+}
 
     /**
     * remove user from the organisation
