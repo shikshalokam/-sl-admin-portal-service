@@ -14,7 +14,6 @@ const sunbirdService =
     require(GENERIC_SERVICES_PATH + "/sunbird");
 const kendraService =
     require(GENERIC_SERVICES_PATH + "/kendra-service");
-const rolesHelper = require(MODULES_BASE_PATH + "/roles/helper");
 const entityTypeHelper = require(MODULES_BASE_PATH + "/entityTypes/helper");
 const platformRolesHelper = require(MODULES_BASE_PATH + "/platformRoles/helper");
 const sessionHelpers = require(GENERIC_HELPERS_PATH + "/sessions");
@@ -49,7 +48,7 @@ module.exports = class UsersHelper {
                     });
                 }
 
-                let projection = ["entityTypeId", "metaInformation", "groups", "childHierarchyPath"];
+                const projection = ["entityTypeId", "metaInformation", "groups", "childHierarchyPath"];
 
                 let stateInfo = await entitiesHelper.entityDocuments({
                     entityType: CONSTANTS.common.STATE_ENTITY_TYPE
@@ -84,8 +83,8 @@ module.exports = class UsersHelper {
                 let organisations = await _getOrganisationlist(token, userId);
                 let roles = [];
 
-                let rolesDoc = await platformRolesHelper.getRoles();
-                let sunbirdRolesDoc = await rolesHelper.list();
+                const rolesDoc = await platformRolesHelper.getRoles();
+                const sunbirdRolesDoc = await sunbirdService.platformRoles();
 
                 if (sunbirdRolesDoc.result) {
                     sunbirdRolesDoc.result.map(function (sunbirdRole) {
@@ -152,21 +151,21 @@ module.exports = class UsersHelper {
     }
 
     /**
-   * create create.
+   * To create user.
    * @method
    * @name  create
-   * @param  {json} requestedData  - requested body.
+   * @param  {json} createUserData  - requested body.
    * @param  {String} userToken  - user access token
    * @returns {json} Response consists of created user.
    */
 
-    static create(requestedBodyData, userToken) {
+    static create(createUserData, userToken) {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let userProfileCreationData =
+                const userProfileCreationData =
                     await userManagementService.createPlatformUser(
-                        requestedBodyData,
+                        createUserData,
                         userToken
                     );
                 return resolve(userProfileCreationData);
@@ -199,7 +198,7 @@ module.exports = class UsersHelper {
                     updateData['dob'] = updateInfo.dob;
                 }
 
-                let updateUser =
+                const updateUser =
                     await userManagementService.updatePlatFormUser(
                         updateData,
                         userToken
@@ -225,7 +224,7 @@ module.exports = class UsersHelper {
     static activate(userId, userToken) {
         return new Promise(async (resolve, reject) => {
             try {
-                let statusUpdateUserInfo =
+                const statusUpdateUserInfo =
                     await userManagementService.activate(
                         userId,
                         userToken
@@ -249,7 +248,7 @@ module.exports = class UsersHelper {
     static inactivate(userId, userToken) {
         return new Promise(async (resolve, reject) => {
             try {
-                let statusUpdateUserInfo =
+                const statusUpdateUserInfo =
                     await userManagementService.inactivate(
                         userId,
                         userToken
@@ -282,10 +281,10 @@ module.exports = class UsersHelper {
 
                     let organisationsList = await _getOrganisationlist(userToken, orgAdminUserId);
                     let userDocument = await database.models.userExtension.findOne({ userId: userId }, { organisations: 1, organisationRoles: 1 });
-                    if(!userDocument){
-                         userDocument = await _addUserEntry(profileData.result.response,orgAdminUserId);
+                    if (!userDocument) {
+                        userDocument = await _addUserEntry(profileData.result.response, orgAdminUserId);
                     }
-                   
+
                     let usersOrganisations = [];
                     if (userDocument && userDocument.organisations) {
                         userDocument.organisations.map(organisations => {
@@ -317,7 +316,7 @@ module.exports = class UsersHelper {
                         let roles = [];
 
                         let rolesDoc = await platformRolesHelper.getRoles();
-                        let sunbirdRolesDoc = await rolesHelper.list();
+                        const sunbirdRolesDoc = await sunbirdService.platformRoles();
 
                         if (sunbirdRolesDoc.result) {
                             sunbirdRolesDoc.result.map(function (sunbirdRole) {
@@ -438,8 +437,8 @@ module.exports = class UsersHelper {
                     cloudStorage: process.env.CLOUD_STORAGE,
                 }
 
-                let response = await kendraService.getDownloadableUrls(fileInfo);
-                resolve(response);
+                const bulkUploadSampleFileDetails = await kendraService.getDownloadableUrls(fileInfo);
+                resolve(bulkUploadSampleFileDetails);
 
             } catch (error) {
                 return reject(error);
@@ -478,7 +477,7 @@ module.exports = class UsersHelper {
                     });
                 }
 
-                let usersData =
+                const usersData =
                     await database.models.userExtension.find(queryParameter, projection).lean();
 
                 if (!usersData) {
@@ -508,7 +507,7 @@ module.exports = class UsersHelper {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let usersData =
+                const usersData =
                     await database.models.userExtension.findOneAndUpdate(queryParameter, updateObject).lean();
                 if (usersData) {
                     return resolve({ message: CONSTANTS.apiResponses.USER_UPDATED, result: usersData });
@@ -533,7 +532,7 @@ module.exports = class UsersHelper {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let roles = _getUserRoles(userId);
+                const roles = _getUserRoles(userId);
                 resolve({ result: roles, message: CONSTANTS.apiResponses.ROLES_FOUND });
             } catch (error) {
                 return reject(error);
@@ -767,37 +766,37 @@ function _checkDeactiveAccess(userProfileInfo, userId) {
  * @param { object } userId - admin user keyclock id
  * @returns {Object} returns created user details
  * */
-function _addUserEntry(profileData,orgAdminUserId){
+function _addUserEntry(profileData, orgAdminUserId) {
     return new Promise(async (resolve, reject) => {
         try {
 
-            let sunbirdRolesDoc = await rolesHelper.list();
+            const sunbirdRolesDoc = await sunbirdService.platformRoles();
             let sunbirdRoles = {};
-            sunbirdRolesDoc.result.map(sunbirdRole=>{
+            sunbirdRolesDoc.result.map(sunbirdRole => {
                 sunbirdRoles[sunbirdRole.id] = {
-                    code:sunbirdRole.id,
-                    name:sunbirdRole.name
+                    code: sunbirdRole.id,
+                    name: sunbirdRole.name
                 }
             });
 
-            let organisations =[];
-            let organisationsRoles =[];
+            let organisations = [];
+            let organisationsRoles = [];
 
-            profileData.organisations.map(organisation=>{
-                organisations.push({ value:organisation.organisationId,label:organisation.orgName });
+            profileData.organisations.map(organisation => {
+                organisations.push({ value: organisation.organisationId, label: organisation.orgName });
 
-                let roles =[]
-                if(organisation.roles && organisation.roles.length > 0){
-                    organisation.roles.map(role=>{
-                        if(sunbirdRoles[role]){
+                let roles = []
+                if (organisation.roles && organisation.roles.length > 0) {
+                    organisation.roles.map(role => {
+                        if (sunbirdRoles[role]) {
                             roles.push(sunbirdRoles[role]);
                         }
-                        
+
                     });
                 }
                 organisationsRoles.push({ organisationId: organisation.organisationId, roles: roles });
             });
-          
+
             let userObj = {
                 status: CONSTANTS.common.ACTIVE,
                 externalId: profileData.userName,
@@ -812,7 +811,7 @@ function _addUserEntry(profileData,orgAdminUserId){
             }
 
             let metaInformation = {
-                 email: profileData.email ? profileData.email : "",
+                email: profileData.email ? profileData.email : "",
                 firstName: profileData.firstName,
                 lastName: profileData.lastName,
                 phoneNumber: profileData.phone ? profileData.phone : "",

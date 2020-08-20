@@ -33,7 +33,7 @@ module.exports = class BulkUploadRequests extends Abstract {
   * @apiParamExample {json} Response:
   * {
   *  result: { requestId: "ADSASSq31" },
-  *  message:"Request Submitted Successfully"
+  *  message:"Request submitted successfully."
   * }
   **/
 
@@ -42,7 +42,7 @@ module.exports = class BulkUploadRequests extends Abstract {
    * @method
    * @name create
    * @param  {req}  - requested data.
-   * @returns {json} Response consists of request details
+   * @returns {json} Response consists of newly created request details
   */
 
  create(req) {
@@ -162,14 +162,14 @@ module.exports = class BulkUploadRequests extends Abstract {
    * @method
    * @name list
    * @param  {req}  - requested data.
-   * @returns {json} Response consists of created user details
+   * @returns {json} Response consists of bulk upload request list
   */
 
   list(req) {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let list = await bulkUploadHelper.list(req.userDetails.userId,
+        const list = await bulkUploadHelper.list(req.userDetails.userId,
           req.searchText,
           req.pageSize,
           req.pageNo,
@@ -195,7 +195,7 @@ module.exports = class BulkUploadRequests extends Abstract {
   }
 
   /**
-   * @api {get} /admin-service/api/v1/bulkUploadRequests/getDownloadableUrls/_id
+   * @api {get} /admin-service/api/v1/bulkUploadRequests/getDownloadableUrls/:_id
    * Get downloadable url of bulk csv files
    * @apiVersion 1.0.0
    * @apiGroup Bulk Upload
@@ -205,7 +205,7 @@ module.exports = class BulkUploadRequests extends Abstract {
    * @apiUse errorBody
    * @apiParamExample {json} Response:
    * {
-   * "message": "Url's generated successfully",
+   * "message": "Url's generated successfully.",
    * "status": 200,
    * "result": {
    *     "filePath": "d04c5432-cb7e-4bbe-ace9-1df412117ae5/1590414313_52082.csv",
@@ -226,7 +226,7 @@ module.exports = class BulkUploadRequests extends Abstract {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let response = await bulkUploadHelper.getDownloadableUrls(req.params._id, req.query.fileType);
+        const response = await bulkUploadHelper.getDownloadableUrls(req.params._id, req.query.fileType);
         return resolve(response);
 
       } catch (error) {
@@ -256,7 +256,7 @@ module.exports = class BulkUploadRequests extends Abstract {
   * @apiUse errorBody
   * @apiParamExample {json} Response:
   {
-   "message": "Status list featched successfully",
+   "message": "Status list featched successfully.",
    "status": 200,
    "result": [
        {
@@ -287,7 +287,7 @@ module.exports = class BulkUploadRequests extends Abstract {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let response = await bulkUploadHelper.statusList();
+        const response = await bulkUploadHelper.statusList();
         return resolve(response);
 
       } catch (error) {
@@ -317,7 +317,7 @@ module.exports = class BulkUploadRequests extends Abstract {
    * @apiUse errorBody
    * @apiParamExample {json} Response:
    {
-    "message": "Request types featched successfully",
+    "message": "Request types featched successfully.",
     "status": 200,
     "result": [
         {
@@ -352,7 +352,7 @@ module.exports = class BulkUploadRequests extends Abstract {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let response = await bulkUploadHelper.types();
+        const response = await bulkUploadHelper.types();
         return resolve(response);
 
       } catch (error) {

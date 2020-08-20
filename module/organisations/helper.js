@@ -10,7 +10,6 @@ const sunbirdService =
 const formsHelper = require(MODULES_BASE_PATH + "/forms/helper");
 const platformRolesHelper = require(MODULES_BASE_PATH + "/platformRoles/helper");
 const sessionHelpers = require(GENERIC_HELPERS_PATH + "/sessions");
-const rolesHelper = require(MODULES_BASE_PATH + "/roles/helper");
 const usersHelper = require(MODULES_BASE_PATH + "/users/helper");
 
 
@@ -53,7 +52,7 @@ module.exports = class OrganisationsHelper {
                 }
                 if (organisationsList.length > 0) {
 
-                    let sortedOrganisations = organisationsList.sort(UTILS.sortArrayOfObjects('label'));
+                    const sortedOrganisations = organisationsList.sort(UTILS.sortArrayOfObjects('label'));
                     return resolve({ data: sortedOrganisations, message: CONSTANTS.apiResponses.ORG_INFO_FETCHED });
 
                 } else {
@@ -125,7 +124,7 @@ module.exports = class OrganisationsHelper {
                         const fieldsArray = ["roles", "organisationRoles", "userId"];
                         const queryObject = { userId: { $in: userIds } };
 
-                        let usersData = await usersHelper.list(queryObject, fieldsArray);
+                        const usersData = await usersHelper.list(queryObject, fieldsArray);
 
                         await Promise.all(usersList.result.content.map(async function (userItem) {
 
@@ -159,10 +158,10 @@ module.exports = class OrganisationsHelper {
                                 });
                             }
 
-                            let gender = userItem.gender == "M" ? "Male" : userItem.gender == "F" ? "Female" : "";
-                            let status = userItem.status == 1 ? "Active" : "Inactive";
+                            const gender = userItem.gender == "M" ? "Male" : userItem.gender == "F" ? "Female" : "";
+                            const status = userItem.status == 1 ? "Active" : "Inactive";
 
-                            let resultObj = {
+                            const resultObj = {
                                 firstName: userItem.firstName,
                                 lastName: userItem.lastName,
                                 id: userItem.id,
@@ -173,7 +172,7 @@ module.exports = class OrganisationsHelper {
                             userInfo.push(resultObj);
                         }));
 
-                        let columns = _userColumn();
+                        const columns = _userColumn();
                         response = {
                             "data": {
                                 count: usersList.result.count,
@@ -216,7 +215,7 @@ module.exports = class OrganisationsHelper {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let users = await this.users(token, userId, organisationUserDownloadFilters.organisationId,
+                const users = await this.users(token, userId, organisationUserDownloadFilters.organisationId,
                     organisationUserDownloadFilters.limit, organisationUserDownloadFilters.page, organisationUserDownloadFilters.searchText,
                     organisationUserDownloadFilters.status, organisationUserDownloadFilters.usersList);
                 let responseData = [];
@@ -259,8 +258,9 @@ module.exports = class OrganisationsHelper {
         return new Promise(async (resolve, reject) => {
             try {
                 let plaformRoles = [];
-                let rolesDoc = await platformRolesHelper.getRoles();
-                let sunbirdRolesDoc = await rolesHelper.list();
+                const rolesDoc = await platformRolesHelper.getRoles();
+                const sunbirdRolesDoc = await sunbirdService.platformRoles();
+
                 let userRoles = [];
                 let allRoles = {};
                 if (sunbirdRolesDoc.result) {
@@ -295,13 +295,13 @@ module.exports = class OrganisationsHelper {
                     userId: organisationInfo.userId
                 }
 
-                let addUserResponse = await sunbirdService.addUser(orgCreateRequest, token);
+                const addUserResponse = await sunbirdService.addUser(orgCreateRequest, token);
 
                 if (addUserResponse && addUserResponse.status == HTTP_STATUS_CODE.ok.status) {
                     let organisationsRoles = [];
                     organisationsRoles.push({ organisationId: organisationInfo.organisation.value, roles: userRoles });
-                    let queryObject = { userId: organisationInfo.userId };
-                    let updateData = { $push: { organisations: organisationInfo.organisation, organisationRoles: organisationsRoles } };
+                    const queryObject = { userId: organisationInfo.userId };
+                    const updateData = { $push: { organisations: organisationInfo.organisation, organisationRoles: organisationsRoles } };
 
                     let update = await usersHelper.update(queryObject, updateData);
                     resolve({ data: addUserResponse, message: CONSTANTS.apiResponses.USER_ADDED_TO_ORG, success: true });
@@ -340,8 +340,8 @@ module.exports = class OrganisationsHelper {
                 let userRoles = [];
                 if (organisationInfo.roles) {
 
-                    let rolesDoc = await platformRolesHelper.getRoles();
-                    let sunbirdRolesDoc = await rolesHelper.list();
+                    const rolesDoc = await platformRolesHelper.getRoles();
+                    const sunbirdRolesDoc = await sunbirdService.platformRoles();
 
                     let allRoles = {};
                     if (sunbirdRolesDoc.result) {
@@ -369,13 +369,13 @@ module.exports = class OrganisationsHelper {
                         }
                     }));
                 }
-                
+
                 if (plaformRoles.length == 0) {
                     plaformRoles.push(CONSTANTS.common.PUBLIC_ROLE);
                 }
                 organisationInfo.roles = plaformRoles;
 
-                let response = await sunbirdService.assignRoles(organisationInfo, token);
+                const response = await sunbirdService.assignRoles(organisationInfo, token);
 
                 if (response && response.status == HTTP_STATUS_CODE.ok.status) {
                     if (response.result == CONSTANTS.common.SUCCESS_RESPONSE) {
@@ -423,14 +423,14 @@ module.exports = class OrganisationsHelper {
     static detailList(organisationDetails) {
         return new Promise(async (resolve, reject) => {
             try {
-                let roles = await _getUserRoles(organisationDetails.userId);
+                const roles = await _getUserRoles(organisationDetails.userId);
                 let offset = organisationDetails.pageSize * (organisationDetails.pageNo - 1);
                 if (roles.includes(CONSTANTS.common.PLATFROM_ADMIN_ROLE)) {
                     let request = {}
-                    
-                    request["limit"]= organisationDetails.pageSize,
-                    request["offset"]= offset;
-                   
+
+                    request["limit"] = organisationDetails.pageSize,
+                        request["offset"] = offset;
+
                     if (organisationDetails.searchText) {
                         request['query'] = organisationDetails.searchText;
                     }
@@ -517,14 +517,14 @@ module.exports = class OrganisationsHelper {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let requestBody = {
+                let createOrganisation = {
                     "description": organisationDetails.description,
                     "externalId": organisationDetails.externalId,
                     "name": organisationDetails.name,
                     "address": organisationDetails.address,
                     "email": organisationDetails.email,
                 }
-                let createOrg = await sunbirdService.createOrganisation(requestBody, token);
+                const createOrg = await sunbirdService.createOrganisation(createOrganisation, token);
                 if (createOrg && createOrg.status == HTTP_STATUS_CODE.ok.status) {
 
                     let sessionOrganisationData = sessionHelpers.get(CONSTANTS.common.ORGANISATIONS_SESSION);
@@ -560,7 +560,7 @@ module.exports = class OrganisationsHelper {
     static getForm() {
         return new Promise(async (resolve, reject) => {
             try {
-                let formData =
+                const formData =
                     await formsHelper.list({
                         name: "organisationCreateForm"
                     }, {
@@ -603,7 +603,7 @@ module.exports = class OrganisationsHelper {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let requestBody = {
+                let updateInformation = {
                     name: organisationDetails.name ? organisationDetails.name : "",
                     email: organisationDetails.email ? organisationDetails.email : "",
                     description: organisationDetails.description ? organisationDetails.description : "",
@@ -611,10 +611,10 @@ module.exports = class OrganisationsHelper {
                     address: organisationDetails.address
                 }
                 if (organisationDetails.externalId) {
-                    requestBody['externalId'] = organisationDetails.externalId;
+                    updateInformation['externalId'] = organisationDetails.externalId;
                 }
 
-                let updateOrg = await sunbirdService.updateOrganisationDetails(requestBody, token);
+                let updateOrg = await sunbirdService.updateOrganisationDetails(updateInformation, token);
                 if (updateOrg && updateOrg.status == HTTP_STATUS_CODE.ok.status) {
                     resolve({ data: updateOrg.result, message: CONSTANTS.apiResponses.ORG_UPDATED, success: true });
                 } else {
@@ -692,27 +692,27 @@ module.exports = class OrganisationsHelper {
     * @returns {json} Response consists of organisation activated status info
     */
 
-   static activate(organisationId, token) {
-    return new Promise(async (resolve, reject) => {
-        try {
+    static activate(organisationId, token) {
+        return new Promise(async (resolve, reject) => {
+            try {
 
-            let activateOrganisation = await sunbirdService.activateOrganisation(organisationId, token);
-            if (activateOrganisation && activateOrganisation.status == HTTP_STATUS_CODE.ok.status) {
-                const msg = CONSTANTS.apiResponses.ORG_ACTIVATED;
-                resolve({ data: { organisationId : organisationId }, message: msg, success: true });
-            } else {
-                throw new Error(activateOrganisation.message);
+                let activateOrganisation = await sunbirdService.activateOrganisation(organisationId, token);
+                if (activateOrganisation && activateOrganisation.status == HTTP_STATUS_CODE.ok.status) {
+                    const msg = CONSTANTS.apiResponses.ORG_ACTIVATED;
+                    resolve({ data: { organisationId: organisationId }, message: msg, success: true });
+                } else {
+                    throw new Error(activateOrganisation.message);
+                }
+
+            } catch (error) {
+                return reject({
+                    success: false,
+                    message: error.message ? error.message : HTTP_STATUS_CODE["internal_server_error"].message,
+                    data: false
+                });
             }
-
-        } catch (error) {
-            return reject({
-                success: false,
-                message: error.message ? error.message : HTTP_STATUS_CODE["internal_server_error"].message,
-                data: false
-            });
-        }
-    });
-}
+        });
+    }
 
     /**
     * To deactivate organisation
@@ -723,27 +723,27 @@ module.exports = class OrganisationsHelper {
     * @returns {json} Response consists of organisation deactivated status info
     */
 
-   static deactivate(organisationId, token) {
-    return new Promise(async (resolve, reject) => {
-        try {
+    static deactivate(organisationId, token) {
+        return new Promise(async (resolve, reject) => {
+            try {
 
-            let deactivateOrganisation = await sunbirdService.deactivateOrganisation(organisationId, token);
-            if (deactivateOrganisation && deactivateOrganisation.status == HTTP_STATUS_CODE.ok.status) {
-                const msg = CONSTANTS.apiResponses.ORG_DEACTIVATED;
-                resolve({ data: { organisationId : organisationId }, message: msg, success: true });
-            } else {
-                throw new Error(deactivateOrganisation.message);
+                let deactivateOrganisation = await sunbirdService.deactivateOrganisation(organisationId, token);
+                if (deactivateOrganisation && deactivateOrganisation.status == HTTP_STATUS_CODE.ok.status) {
+                    const msg = CONSTANTS.apiResponses.ORG_DEACTIVATED;
+                    resolve({ data: { organisationId: organisationId }, message: msg, success: true });
+                } else {
+                    throw new Error(deactivateOrganisation.message);
+                }
+
+            } catch (error) {
+                return reject({
+                    success: false,
+                    message: error.message ? error.message : HTTP_STATUS_CODE["internal_server_error"].message,
+                    data: false
+                });
             }
-
-        } catch (error) {
-            return reject({
-                success: false,
-                message: error.message ? error.message : HTTP_STATUS_CODE["internal_server_error"].message,
-                data: false
-            });
-        }
-    });
-}
+        });
+    }
 
     /**
     * remove user from the organisation

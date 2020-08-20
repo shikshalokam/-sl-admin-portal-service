@@ -134,15 +134,18 @@ const assignRoles = function (rolesInfo, token) {
   * @returns {JSON} - return response from the sunbird api.
 */
 
-function callToSunbird(token, requestBody="", url, type = "POST") {
+function callToSunbird(token="", requestBody="", url, type = "POST") {
     return new Promise(async (resolve, reject) => {
         let options = {
             "headers": {
                 "content-type": "application/json",
-                "x-authenticated-user-token": token,
                 "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN
             }
         };
+       
+        if(token){
+            options['headers']['x-authenticated-user-token'] = token;
+        }
         if (type == "POST" || type == "PATCH") {
             options['json'] = requestBody;
         }
@@ -340,6 +343,18 @@ const deactivateOrganisation = function (organisationId, token) {
         return resolve(response);
     });
 }
+/**
+  * To get platform roles
+  * @function
+  * @name platformRoles
+  * @returns {JSON} - returns sunbird roles
+*/
+const platformRoles = function (organisationId, token) {
+    return new Promise(async (resolve, reject) => {
+        let response = await callToSunbird("", "", CONSTANTS.endpoints.SUNBIRD_PLATFORM_ROLES, "GET");
+        return resolve(response);
+    });
+}
 
 module.exports = {
     organisationList: organisationList,
@@ -354,6 +369,7 @@ module.exports = {
     removeUser: removeUser,
     verifyToken: verifyToken,
     activateOrganisation: activateOrganisation,
-    deactivateOrganisation: deactivateOrganisation
+    deactivateOrganisation: deactivateOrganisation,
+    platformRoles:platformRoles
 
 };

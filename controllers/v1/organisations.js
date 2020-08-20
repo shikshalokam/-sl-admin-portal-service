@@ -42,7 +42,7 @@ module.exports = class Organisations {
     * @apiParamExample {json} Response:
     * 
     * {
-    *   "message": "Organisation list fetched Successfully",
+    *   "message": "Organisation list fetched successfully.",
     *   "status": 200,
     *    "result": [ 
     *     {  
@@ -65,7 +65,7 @@ module.exports = class Organisations {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let organisationList = await organisationsHelper.list(
+        const organisationList = await organisationsHelper.list(
           req.userDetails.userToken,
           (req.params._id && req.params._id != "") ? req.params._id : req.userDetails.userId,
           req.pageSize,
@@ -97,7 +97,7 @@ module.exports = class Organisations {
   * @apiParamExample {json} Response:
   * 
   * {
-  *   "message": "Organisation list fetched Successfully",
+  *   "message": "Organisation list fetched successfully.",
   *   "status": 200,
   *    "result": {
   *      "count": 1,
@@ -125,7 +125,7 @@ module.exports = class Organisations {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let organisationList = await organisationsHelper.users(
+        const organisationUsersList = await organisationsHelper.users(
           req.userDetails.userToken,
           req.userDetails.userId,
           req.params._id,
@@ -134,7 +134,7 @@ module.exports = class Organisations {
           req.searchText,
           req.query.status ? req.query.status : ""
         );
-        return resolve({ result:organisationList.data,message: organisationList.message });
+        return resolve({ result:organisationUsersList.data, message: organisationUsersList.message });
 
       } catch (error) {
         return reject({
@@ -215,7 +215,7 @@ module.exports = class Organisations {
 
   /**
  * @api {post} /admin-service/api/v1/organisations/addUser 
- * To add User to the organisation.
+ * To add user to the organisation.
  * @apiVersion 1.0.0
  * @apiGroup Organisations
  * @apiHeader {String} X-authenticated-user-token Authenticity token
@@ -232,7 +232,7 @@ module.exports = class Organisations {
  * 
  * {
  *  "status": 200,
- *  "message": ""message": "User added to organisation Successfully"
+ *  "message": ""message": "User added to organisation successfully."
  *      "result": {
  *          "response": "SUCCESS"
  *      }
@@ -259,8 +259,8 @@ module.exports = class Organisations {
           roles: req.body.roles,
           organisation: req.body.organisation
         }
-        let response = await organisationsHelper.addUser(orgDetails, req.userDetails.userToken);
-        return resolve({ result:response.data,message: response.message });
+        const addUserToOrganisation = await organisationsHelper.addUser(orgDetails, req.userDetails.userToken);
+        return resolve({ result:addUserToOrganisation.data,message: addUserToOrganisation.message });
 
       } catch (error) {
         return reject({
@@ -296,7 +296,7 @@ module.exports = class Organisations {
  * 
  * {
  *  "status": 200,
- *  "message": ""message": "User roles added to organisation  successfully"
+ *  "message": ""message": "User roles added to organisation  successfully."
  *      "result": {
  *          "response": "SUCCESS"
  *      }
@@ -325,8 +325,8 @@ module.exports = class Organisations {
           roles: req.body.roles,
           removeRoles: req.body.removeRoles ? req.body.removeRoles : false
         }
-        let response = await organisationsHelper.assignRoles(orgDetails, req.userDetails.userToken);
-        return resolve({ result:response.data,message: response.message });
+        const assignRoles = await organisationsHelper.assignRoles(orgDetails, req.userDetails.userToken);
+        return resolve({ result:assignRoles.data, message: assignRoles.message });
 
       } catch (error) {
         return reject({
@@ -343,7 +343,7 @@ module.exports = class Organisations {
 
 
   /**
-   * @api {get} /admin-service/api/v1/organisations/detailList 
+   * @api {get} /admin-service/api/v1/organisations/detailList  
    * To get the organisation list for the user 
    * @apiVersion 1.0.0
    * @apiGroup Organisations
@@ -355,7 +355,7 @@ module.exports = class Organisations {
    * 
    * {
    *  "status": 200,
-   *  "message": ""message": "Organisation List fetched Successfully"
+   *  "message": ""message": "Organisation List fetched successfully."
    *      "result": {
    *          "columns":[{
    *             "type": "column",
@@ -396,8 +396,8 @@ module.exports = class Organisations {
           searchText: req.searchText,
           status: req.query.status ? req.query.status : ""
         }
-        let response = await organisationsHelper.detailList(query);
-        return resolve({ result:response.data ,message: response.message });
+        const organisationDetailList = await organisationsHelper.detailList(query);
+        return resolve({ result:organisationDetailList.data ,message: organisationDetailList.message });
 
       } catch (error) {
         return reject({
@@ -415,7 +415,7 @@ module.exports = class Organisations {
 
 
   /**
-   * @api {post} /admin-service/api/v1/organisations/create 
+   * @api {post} /admin-service/api/v1/organisations/create
    * To create the organisation
    * @apiVersion 1.0.0
    * @apiGroup Organisations
@@ -436,7 +436,7 @@ module.exports = class Organisations {
    * 
    * {
    *  "status": 200,
-   *  "message": ""message": "Organisation List fetched Successfully"
+   *  "message": ""message": "Organisation List fetched successfully."
    *      "result": {
    *          "columns":[{
    *             "type": "column",
@@ -462,15 +462,15 @@ module.exports = class Organisations {
   * @method
   * @name create
   * @param  {req}  - requested data.
-  * @returns {json} Response consists of platform organisation list
+  * @returns {json} Response consists of organisation created details
   */
 
   create(req) {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let response = await organisationsHelper.create(req.body, req.userDetails.userToken);
-        return resolve({ result:response.data,message: response.message });
+        const createOrganisation = await organisationsHelper.create(req.body, req.userDetails.userToken);
+        return resolve({ result:createOrganisation.data,message: createOrganisation.message });
 
       } catch (error) {
         return reject({
@@ -500,7 +500,7 @@ module.exports = class Organisations {
      * 
      * {
      *  "status": 200,
-     *  "message": ""message": "Organisation List fetched Successfully"
+     *  "message": ""message": "Organisation List fetched successfully."
      *      "result": [{
      *         "field": "name",
      *         "value": "",
@@ -574,7 +574,7 @@ module.exports = class Organisations {
      * @apiUse errorBody
      * @apiParamExample {json} Response:
      * {
-     *  "message": "Organisation Created Successfully",
+     *  "message": "Organisation updated successfully.",
      *  "status": 200,
      *  "result": {
      *     "organisationId": "013014480583598080574",
@@ -588,15 +588,15 @@ module.exports = class Organisations {
    * @method
    * @name update
    * @param  {req}  - requested data.
-   * @returns {json} Response consists of organisation create form
+   * @returns {json} Response consists of organisation update details
    */
 
   update(req) {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let response = await organisationsHelper.update(req.body, req.userDetails.userToken);
-        return resolve({ result:response.data,message: response.message });
+        const organisationUpdate = await organisationsHelper.update(req.body, req.userDetails.userToken);
+        return resolve({ result:organisationUpdate.data,message: organisationUpdate.message });
 
       } catch (error) {
         return reject({
@@ -623,7 +623,7 @@ module.exports = class Organisations {
      * @apiUse errorBody
      * @apiParamExample {json} Response:
      * {
-     *  "message": "Organisation Details Fetched Successfully",
+     *  "message": "Organisation details fetched successfully.",
      *  "status": 200,
      *  "result": {
      *     "organisationId": "013014480583598080574",
@@ -664,7 +664,7 @@ module.exports = class Organisations {
   }
 
   /**
-     * @api {post} /admin-service/api/v1/organisations/activate/:_id
+     * @api {get} /admin-service/api/v1/organisations/activate/:_id
      * To activate organisation
      * @apiVersion 1.0.0
      * @apiGroup Organisations
@@ -674,7 +674,7 @@ module.exports = class Organisations {
      * @apiUse errorBody
      * @apiParamExample {json} Response:
      * {
-     *  "message": "Organisation activated successfully",
+     *  "message": "Organisation activated successfully.",
      *  "status": 200,
      *  "result": {
      *     "organisationId": "",
@@ -711,7 +711,7 @@ module.exports = class Organisations {
   }
 
       /**
-     * @api {post} /admin-service/api/v1/organisations/deactivate/:_id
+     * @api {get} /admin-service/api/v1/organisations/deactivate/:_id
      * To deactivate organisation
      * @apiVersion 1.0.0
      * @apiGroup Organisations
@@ -721,7 +721,7 @@ module.exports = class Organisations {
      * @apiUse errorBody
      * @apiParamExample {json} Response:
      * {
-     *  "message": "Organisation Deactivated successfully",
+     *  "message": "Organisation de-activated successfully.",
      *  "status": 200,
      *  "result": {
      *     "organisationId": "",
@@ -773,7 +773,7 @@ module.exports = class Organisations {
      * @apiUse errorBody
      * @apiParamExample {json} Response:
      * {
-     *  "message": "user removed from Organisation Successfully",
+     *  "message": "user removed from organisation successfully.",
      *  "status": 200,
      *  "result": {
      *     "organisationId": "",
@@ -786,7 +786,7 @@ module.exports = class Organisations {
    * @method
    * @name removeUser
    * @param  {req}  - requested data.
-   * @returns {json} Response consists updated organisation status
+   * @returns {json} Response consists removed organisation information
    **/
 
   removeUser(req) {

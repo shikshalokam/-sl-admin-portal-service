@@ -47,7 +47,7 @@ module.exports = async function (req, res, next, token = "") {
 
   // Allow search endpoints for non-logged in users.
   let guestAccess = false;
-  let guestAccessPaths = [];
+  const guestAccessPaths = [];
   await Promise.all(guestAccessPaths.map(async function (path) {
     if (req.path.includes(path)) {
       guestAccess = true;
@@ -59,7 +59,7 @@ module.exports = async function (req, res, next, token = "") {
     return;
   }
 
-  let internalAccessApiPaths = [];
+  const internalAccessApiPaths = [];
   let performInternalAccessTokenCheck = false;
   await Promise.all(internalAccessApiPaths.map(async function (path) {
     if (req.path.includes(path)) {
@@ -80,7 +80,7 @@ module.exports = async function (req, res, next, token = "") {
   }
 
 
-  let tokenOrInternalAccessTokenRequiredPaths = [];
+  const tokenOrInternalAccessTokenRequiredPaths = [];
   let tokenOrInternalAccessTokenRequired = false;
   await Promise.all(tokenOrInternalAccessTokenRequiredPaths.map(async function (path) {
     if (req.path.includes(path)) {
@@ -100,7 +100,7 @@ module.exports = async function (req, res, next, token = "") {
     }
   }
 
-  let securedApiPaths = [];
+  const securedApiPaths = [];
   let tokenAndInternalAccessTokenRequired = false;
   await Promise.all(securedApiPaths.map(async function (path) {
     if (req.path.includes(path)) {

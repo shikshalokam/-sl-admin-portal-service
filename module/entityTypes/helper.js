@@ -44,7 +44,7 @@ module.exports = class EntityTypesHelper {
                 }
 
 
-                let entityTypeData =
+                const entityTypeData =
                     await database.models.entityTypes.find(queryParameter, projection).lean();
 
                 if (!entityTypeData) {

@@ -212,7 +212,7 @@ module.exports = class UserCreationHelper {
                         }
                     }
 
-                    let count = await database.models.bulkUploadRequests.countDocuments(query);
+                    const count = await database.models.bulkUploadRequests.countDocuments(query);
                     let request = await database.models.bulkUploadRequests.find(query,
                         {
                             requestId: 1,
@@ -286,9 +286,9 @@ module.exports = class UserCreationHelper {
                 let profileData = await _checkAccess(token, userId);
                 if (profileData && profileData['allowed']) {
 
-                    let requestDoc = await database.models.bulkUploadRequests.findOne({ requestId: requestId });
-                    if (requestDoc) {
-                        resolve({ result: { data: { requestDoc } } });
+                    const requestDetails= await database.models.bulkUploadRequests.findOne({ requestId: requestId });
+                    if (requestDetails) {
+                        resolve({ result: { data: { requestDetails } } });
                     } else {
                         reject({ status: HTTP_STATUS_CODE["bad_request"].status, message: HTTP_STATUS_CODE["bad_request"].message });
                     }
@@ -306,7 +306,7 @@ module.exports = class UserCreationHelper {
     }
 
     /**
-    * To get request details.
+    * To get request downloadable urls
     * @method
     * @name  getDownloadableUrls
     * @param {String} requestId - bulk upload request id.
@@ -319,7 +319,7 @@ module.exports = class UserCreationHelper {
             try {
 
 
-                let requestDoc = await database.models.bulkUploadRequests.findOne({ requestId: requestId })
+                const requestDoc = await database.models.bulkUploadRequests.findOne({ requestId: requestId })
 
                 if (requestDoc) {
 
@@ -331,7 +331,7 @@ module.exports = class UserCreationHelper {
                     } else {
                         fileInfo = requestDoc.inputFile;
                     }
-                    let response = await kendraService.getDownloadableUrls(fileInfo);
+                    const response = await kendraService.getDownloadableUrls(fileInfo);
                     resolve(response);
 
                 } else {
@@ -356,7 +356,7 @@ module.exports = class UserCreationHelper {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let bulkRequestDocument = await database.models.bulkUploadRequests.distinct("status");
+                const bulkRequestDocument = await database.models.bulkUploadRequests.distinct("status");
 
                 let status = [];
                 if (bulkRequestDocument && bulkRequestDocument.length == 0) {
@@ -392,7 +392,7 @@ module.exports = class UserCreationHelper {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let bulkRequestDocument = await database.models.bulkUploadRequests.distinct("type");
+                const bulkRequestDocument = await database.models.bulkUploadRequests.distinct("type");
 
                 let requestTypes = [];
                 if (bulkRequestDocument && bulkRequestDocument.length == 0) {

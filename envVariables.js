@@ -40,55 +40,43 @@ let enviromentVariables = {
     "optional": false
   },
   "USER_MANAGEMENT_HOST": {
-    "message": "Required",
-    "optional": false
-  },
-  "PLATFORM_AND_ORG_ADMIN_ROLE_TO_USER": {
-    "message": "Required",
+    "message": "Required user management host",
     "optional": false
   },
   "USER_MANAGEMENT_BASE_URL": {
-    "message": "Required",
-    "optional": false
+    "message": "Required user management base url",
+    "optional": true,
+    "default" : "/user-management/"
   },
   "URL_PREFIX": {
-    "message": "Required",
-    "optional": false
+    "message": "Required url prefix",
+    "optional": true,
+    "default": "api/v1"
   },
   "SAMIKSHA_SERIVCE_HOST": {
-    "message": "Required",
+    "message": "Required samkiksha host",
     "optional": false
   },
   "SAMIKSHA_SERIVCE_BASE_URL": {
-    "message": "Required",
-    "optional": false
+    "message": "Required samiksha service base url",
+    "optional": true,
+    "default" : "/samiksha/"
   },
   "KENDRA_SERIVCE_HOST": {
-    "message": "Required",
+    "message": "Required kendra service host",
     "optional": false
   },
   "KENDRA_SERIVCE_BASE_URL": {
-    "message": "Required",
-    "optional": false
+    "message": "Required kendra service base url",
+    "optional": true,
+    "default" : "/kendra/"
   },
   "CLOUD_STORAGE": {
-    "message": "Required",
+    "message": "Required cloud storage",
     "optional": false
   },
   "STORAGE_BUCKET": {
-    "message": "Required",
-    "optional": false
-  },
-  "CASSANDRA_HOST": {
-    "message": "Required",
-    "optional": false
-  },
-  "CASSANDRA_PORT": {
-    "message": "Required",
-    "optional": false
-  },
-  "CASSANDRA_DB": {
-    "message": "Required",
+    "message": "Required cloud storage bucket",
     "optional": false
   },
   "DEFAULT_REPORTS_PATH":{
@@ -110,15 +98,17 @@ let enviromentVariables = {
   },
   "LOGGER_DIRECTORY" : {
     "message" : "Please specify the value for logger directory",
-    "optional" : false
+    "optional" : true,
+    "default": "logs"
   },
   "SUNBIRD_SERIVCE_HOST" : {
-    "message" : "Please specify the value",
+    "message" : "Please specify the value for sunbird service",
     "optional" : false
   },
   "SUNBIRD_SERIVCE_BASE_URL" : {
-    "message" : "Please specify the value",
-    "optional" : false
+    "message" : "Please specify the value for sunbird service base url",
+    "optional" : true,
+    "default" : "/sunbird/"
   }
 }
 

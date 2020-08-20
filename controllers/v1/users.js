@@ -57,7 +57,7 @@ module.exports = class Users extends Abstract {
     * @apiParamExample {json} Response:
     * 
     *   {
-    * "message" : "User creation form fetched successfully",
+    * "message" : "User creation form fetched successfully.",
     * "status": 200,
     * "result": {
     * "form": [
@@ -187,7 +187,7 @@ module.exports = class Users extends Abstract {
    * @apiUse errorBody
    * @apiParamExample {json} Response:
    * {
-   *  "message": "User created successfully",
+   *  "message": "User created successfully.",
    *  "status": 200,
    *   "result": {
    *   "response": "SUCCESS",
@@ -208,7 +208,7 @@ module.exports = class Users extends Abstract {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let getUserForm =
+        const getUserForm =
           await usersHelper.create(
             req.body,
             req.userDetails.userToken
@@ -242,12 +242,19 @@ module.exports = class Users extends Abstract {
   * @apiUse successBody
   * @apiUse errorBody
   * @apiParamExample {json} Response:
+  * {
+  *  "message": "User details updated successfully.",
+  *  "status": 200,
+  *  "result": {
+  *     "response": "SUCCESS"
+  *  }
+  * }
  */
 
   /**
-   * update User
+   * To update user details
    * @method
-   * @name create
+   * @name update
    * @param  {req}  - requested data.
    * @returns {json} Response consists updated user details
   */
@@ -290,7 +297,7 @@ module.exports = class Users extends Abstract {
   * @apiParamExample {json} Response:
   * 
   * {
-  *  "message": "User activated successfully",
+  *  "message": "User activated successfully.",
   *  "status": 200,
   *  "result": {
   *     "response": "SUCCESS"
@@ -310,7 +317,7 @@ module.exports = class Users extends Abstract {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let updateUserData =
+        const updateUserData =
           await usersHelper.activate(req.params._id,
             req.userDetails.userToken
           );
@@ -343,7 +350,7 @@ module.exports = class Users extends Abstract {
 * @apiParamExample {json} Response:
 * 
 * {
-*  "message": "User deactivated successfully",
+*  "message": "User de-activated successfully.",
 *  "status": 200,
 *  "result": {
 *     "response": "SUCCESS"
@@ -363,7 +370,7 @@ module.exports = class Users extends Abstract {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let updateUserData =
+        const updateUserData =
           await usersHelper.inactivate(req.params._id,
             req.userDetails.userToken
           );
@@ -385,12 +392,12 @@ module.exports = class Users extends Abstract {
 
 
   /**
-     * @api {get} /admin-service/api/v1/users/details 
+     * @api {get} /admin-service/api/v1/users/details/:_id
      * To get the user details
      * @apiVersion 1.0.0
      * @apiGroup Users
      * @apiHeader {String} X-authenticated-user-token Authenticity token
-     * @apiSampleRequest /admin-service/api/v1/users/details/:id
+     * @apiSampleRequest /admin-service/api/v1/users/details/:_id
      * @apiUse successBody
      * @apiUse errorBody
      * @apiParamExample {json} Response:
@@ -449,14 +456,14 @@ module.exports = class Users extends Abstract {
     * @method 
     * @name details
     * @param  {req}  - requested data.
-    * @returns {json} Response consists updated user details
+    * @returns {json} Response consists user details
    */
 
   details(req) {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let userDetails =
+        const userDetails =
           await usersHelper.details(
             (req.params._id && req.params._id != "") ? req.params._id : req.userDetails.userId,
             req.userDetails.userToken, req.userDetails.userId
@@ -496,7 +503,7 @@ module.exports = class Users extends Abstract {
    * @method
    * @name bulkUploadSampleFile
    * @param  {req}  - requested data.
-   * @returns {json} Response consists of created user details
+   * @returns {json} Response consists of downloadable bulk upload sample file
   */
 
  bulkUploadSampleFile(req) {

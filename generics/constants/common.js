@@ -1,5 +1,5 @@
 /**
- * name : onstants/common.js
+ * name : constants/common.js
  * author : Rakesh Kumar
  * Date : 18-March-2019
  * Description : All common messages.

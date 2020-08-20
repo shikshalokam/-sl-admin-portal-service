@@ -27,7 +27,7 @@ module.exports = class FormsHelper {
                 queryParameter = {};
             };
 
-            let formData = 
+            const formData = 
             await database.models.forms.find(queryParameter, projection).lean();
 
             return resolve(formData);

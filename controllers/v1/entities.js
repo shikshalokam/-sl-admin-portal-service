@@ -11,7 +11,6 @@
  */
 
 const entitiesHelper = require(MODULES_BASE_PATH + "/entities/helper.js");
-const csvFileStream = require(GENERICS_FILES_PATH + "/file-stream");
 
 /**
     * Entities
@@ -53,7 +52,7 @@ module.exports = class Entities extends Abstract {
     * @apiUse errorBody
     * @apiParamExample {json} Response:
     * {
-    * "message": "List of entities fetched successfully",
+    * "message": "List of entities fetched successfully.",
     * "status": 200,
     * "result": {
     *  "count": 6,
@@ -134,7 +133,7 @@ module.exports = class Entities extends Abstract {
           searchText : req.searchText
         }
 
-        let entityDocuments = await entitiesHelper.listByEntityType(
+        const entityDocuments = await entitiesHelper.listByEntityType(
           requestedData
         );
         return resolve(entityDocuments);
@@ -162,7 +161,7 @@ module.exports = class Entities extends Abstract {
    * @apiUse errorBody
    * @apiParamExample {json} Response:
    * {
-   * "message": "List of entities fetched successfully",
+   * "message": "List of entities fetched successfully.",
    * "status": 200,
    * "result": {
    *  "data": [
@@ -192,15 +191,8 @@ module.exports = class Entities extends Abstract {
   subEntityList(req) {
     return new Promise(async (resolve, reject) => {
 
-      if (!(req.params._id)) {
-        return resolve({
-          status: HTTP_STATUS_CODE.bad_request.status,
-          message: CONSTANTS.apiResponses.ENTITY_ID_NOT_FOUND
-        })
-      }
-
       try {
-        let entityDocuments = await entitiesHelper.subEntityList(
+        const entityDocuments = await entitiesHelper.subEntityList(
           req.params._id ? req.params._id : "",
           req.query.type ? req.query.type : "",
           req.searchText,
@@ -235,7 +227,7 @@ module.exports = class Entities extends Abstract {
  * @apiUse errorBody
  * @apiParamExample {json} Response:
  * {
- * "message": "Entity information fetched successfully",
+ * "message": "Entity information fetched successfully.",
  * "status": 200,
  * "result": {
     "_id": "5db173598a8e070bedca6ba1",
@@ -267,10 +259,10 @@ module.exports = class Entities extends Abstract {
     return new Promise(async (resolve, reject) => {
 
       try {
-        let result = await entitiesHelper.details(
+        const entityDetails = await entitiesHelper.details(
           req.params._id
         );
-        return resolve(result);
+        return resolve(entityDetails);
 
       } catch (error) {
         return reject({
@@ -361,8 +353,8 @@ module.exports = class Entities extends Abstract {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let result = await entitiesHelper.relatedEntities(req.params._id);
-        return resolve(result);
+        const relatedEntities = await entitiesHelper.relatedEntities(req.params._id);
+        return resolve(relatedEntities);
 
       } catch (error) {
 
@@ -487,8 +479,8 @@ module.exports = class Entities extends Abstract {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let result = await entitiesHelper.stateCreationForm();
-        return resolve(result);
+        const stateCreationForm = await entitiesHelper.stateCreationForm();
+        return resolve(stateCreationForm);
 
       } catch (error) {
 
@@ -530,15 +522,15 @@ module.exports = class Entities extends Abstract {
  * @method
  * @name createState
  * @param {Object} req - requested data.
- * @returns {JSON} - response consist of success or failure of entity creation
+ * @returns {JSON} - response consist of success or failure of state entity creation
  */
 
   createState(req) {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let result = await entitiesHelper.createState(req.body);
-        return resolve(result);
+        const createStateResponse = await entitiesHelper.createState(req.body);
+        return resolve(createStateResponse);
 
       } catch (error) {
 
@@ -585,7 +577,7 @@ module.exports = class Entities extends Abstract {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let sampleCsvFile = await entitiesHelper.bulkUploadSampleFile();
+        const sampleCsvFile = await entitiesHelper.bulkUploadSampleFile();
         return resolve(sampleCsvFile);
       } catch (error) {
 
@@ -614,7 +606,7 @@ module.exports = class Entities extends Abstract {
   * @apiUse errorBody
   * @apiParamExample {json} Response:
   * {
-   "message": "Url's generated successfully",
+   "message": "Url's generated successfully.",
    "status": 200,
    "result": {
        "filePath": "bulkUploadSamples/users.csv",
@@ -635,7 +627,7 @@ module.exports = class Entities extends Abstract {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let sampleCsvFile = await entitiesHelper.bulkEntityMappingSampleFile();
+        const sampleCsvFile = await entitiesHelper.bulkEntityMappingSampleFile();
         return resolve(sampleCsvFile);
 
       } catch (error) {
@@ -664,7 +656,7 @@ module.exports = class Entities extends Abstract {
   * @apiUse errorBody
   * @apiParamExample {json} Response:
   * {
-    "message": "State list fetched successfully",
+    "message": "State list fetched successfully.",
     "status": 200,
     "result": [
         {
@@ -700,7 +692,7 @@ module.exports = class Entities extends Abstract {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let stateList = await entitiesHelper.stateList();
+        const stateList = await entitiesHelper.stateList();
         return resolve(stateList);
 
       } catch (error) {
