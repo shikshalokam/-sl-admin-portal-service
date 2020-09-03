@@ -20,6 +20,18 @@ module.exports = class BulkUploadRequests extends Abstract {
     return "bulkUploadRequests";
   }
 
+    /**
+   * @apiDefine errorBody
+   * @apiError {String} status 4XX,5XX
+   * @apiError {String} message Error
+   */
+
+  /**
+   * @apiDefine successBody
+   *  @apiSuccess {String} status 200
+   * @apiSuccess {String} result Data
+   */
+
   /**
   * @api {get} /admin-service/api/v1/bulkUploadRequests/create 
   * For bulk upload

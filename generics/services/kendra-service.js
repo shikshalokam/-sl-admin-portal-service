@@ -38,7 +38,7 @@ function uploadFile(filePath, uploadPath) {
                 }
             };
 
-             let endpoint = "";
+            let endpoint = "";
 
             let cloudStorage = process.env.CLOUD_STORAGE;
             if (cloudStorage == CONSTANTS.common.AWS_SERVICE) {

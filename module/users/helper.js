@@ -18,6 +18,8 @@ const entityTypeHelper = require(MODULES_BASE_PATH + "/entityTypes/helper");
 const platformRolesHelper = require(MODULES_BASE_PATH + "/platformRoles/helper");
 const sessionHelpers = require(GENERIC_HELPERS_PATH + "/sessions");
 
+const organisationHelper = require(GENERIC_HELPERS_PATH + "/organisations");
+
 module.exports = class UsersHelper {
 
     /**
@@ -36,9 +38,7 @@ module.exports = class UsersHelper {
                 let formData =
                     await formsHelper.list({
                         name: CONSTANTS.common.USER_CREATE_FORM
-                    }, {
-                        value: 1
-                    });
+                    },["value"]);
 
                 if (!formData[0]) {
                     return resolve({
@@ -80,11 +80,17 @@ module.exports = class UsersHelper {
                     states = states.sort(UTILS.sortArrayOfObjects('label'));
                 }
 
-                let organisations = await _getOrganisationlist(token, userId);
+                let userAccessRoles = await _getUserRoles(userId);
+
+                let organisations = await organisationHelper.getOrganisationlist(token, userId,userAccessRoles);
                 let roles = [];
 
-                const rolesDoc = await platformRolesHelper.getRoles();
-                const sunbirdRolesDoc = await sunbirdService.platformRoles();
+                const getAllRoles  = await Promise.all([
+                    sunbirdService.platformRoles(),
+                    platformRolesHelper.getRoles(),
+                ]);
+                const sunbirdRolesDoc = getAllRoles[0]; 
+                const rolesDoc = getAllRoles[1];
 
                 if (sunbirdRolesDoc.result) {
                     sunbirdRolesDoc.result.map(function (sunbirdRole) {
@@ -279,7 +285,7 @@ module.exports = class UsersHelper {
 
                     let role = await _getUserRoles(orgAdminUserId);
 
-                    let organisationsList = await _getOrganisationlist(userToken, orgAdminUserId);
+                    let organisationsList = await organisationHelper.getOrganisationlist(userToken, orgAdminUserId,role);
                     let userDocument = await database.models.userExtension.findOne({ userId: userId }, { organisations: 1, organisationRoles: 1 });
                     if (!userDocument) {
                         userDocument = await _addUserEntry(profileData.result.response, orgAdminUserId);
@@ -315,8 +321,12 @@ module.exports = class UsersHelper {
                         let userDetails = {};
                         let roles = [];
 
-                        let rolesDoc = await platformRolesHelper.getRoles();
-                        const sunbirdRolesDoc = await sunbirdService.platformRoles();
+                        const getAllRoles  = await Promise.all([
+                            sunbirdService.platformRoles(),
+                            platformRolesHelper.getRoles(),
+                        ]);
+                        const sunbirdRolesDoc = getAllRoles[0]; 
+                        const rolesDoc = getAllRoles[1];
 
                         if (sunbirdRolesDoc.result) {
                             sunbirdRolesDoc.result.map(function (sunbirdRole) {
@@ -401,13 +411,9 @@ module.exports = class UsersHelper {
                             roles: [],
                             organisationsList: []
                         }
-
-
                         userDetails.roles = roles;
                         userDetails.organisationsList = organisationsList;
                         resolve({ result: userDetails });
-
-
                     }
 
                 } else {

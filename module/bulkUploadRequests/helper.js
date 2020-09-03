@@ -6,23 +6,24 @@
  */
 
 const sunbirdService =
-    require(GENERIC_SERVICES_PATH+"/sunbird");
+    require(GENERIC_SERVICES_PATH + "/sunbird");
 const kendraService =
-    require(GENERIC_SERVICES_PATH+"/kendra-service");
+    require(GENERIC_SERVICES_PATH + "/kendra-service");
 
 const samikshaService =
-    require(GENERIC_SERVICES_PATH+"/samiksha-service");
+    require(GENERIC_SERVICES_PATH + "/samiksha-service");
+
+const bulkUploadEntityMappingHelper = require(MODULES_BASE_PATH + "/bulkUploadEntityMapping/helper");
+
+const entityBulkUploadHelper = require(MODULES_BASE_PATH + "/bulkUploadEntities/helper");
 
 
 const csv = require('csvtojson');
-const uniqid = require('uniqid');
-const ObjectsToCsv = require('objects-to-csv');
 const fs = require('fs');
 const moment = require("moment");
-const ObjectId = require('mongoose').Types.ObjectId;
 
 
-module.exports = class UserCreationHelper {
+module.exports = class BulkUploadRequestsHelper {
 
 
     /**
@@ -39,36 +40,37 @@ module.exports = class UserCreationHelper {
             try {
 
                 let profileData = await _checkAccess(req.userDetails.userToken, userId);
+
                 if (profileData && profileData['allowed']) {
 
                     let uploadFileData = await csv().fromString(req.files.uploadFile.data.toString());
                     let status = "";
-                    if (req.query.requestType == "entityMapping") {
+                    if (req.query.requestType == CONSTANTS.common.BULK_ENTITY_MAPPING_REQUEST_TYPE) {
 
                         status = CONSTANTS.common.BULK_ENTITY_MAPPING_TYPE;
+                        let validateMapping = await bulkUploadEntityMappingHelper.validateEntityMapping(uploadFileData);
 
-                        let validateMapping = await _validateEntityMapping(uploadFileData);
-                        if (validateMapping == false) {
+                        if (validateMapping && validateMapping.data == false) {
                             reject({
                                 status: HTTP_STATUS_CODE["bad_request"].status,
                                 message: CONSTANTS.apiResponses.VALIDATION_FAILED
                             })
                         }
-
-
                     }
-                    else if (req.query.requestType == "entityCreation") {
+                    else if (req.query.requestType == CONSTANTS.common.BULK_ENTITY_REQUEST_TYPE) {
 
-                        status = CONSTANTS.common.BULK_ENTITY_CREATION_TYPE;
+                       
                         if (!req.query.entityType) {
                             reject({
                                 status: HTTP_STATUS_CODE["bad_request"].status,
                                 message: CONSTANTS.apiResponses.VALIDATION_FAILED
                             })
                         }
+                        status = CONSTANTS.common.BULK_ENTITY_CREATION_TYPE;
 
-                        let validateEntityRequest = await _validateEntityUploadRequest(uploadFileData);
-                        if (validateEntityRequest == false) {
+                        let validateEntityRequest = await entityBulkUploadHelper.validateEntityUploadRequest(uploadFileData);
+
+                        if (validateEntityRequest && validateEntityRequest.data == false) {
                             reject({
                                 status: HTTP_STATUS_CODE["bad_request"].status,
                                 message: CONSTANTS.apiResponses.VALIDATION_FAILED
@@ -76,7 +78,7 @@ module.exports = class UserCreationHelper {
                         }
 
 
-                    } else if (req.query.requestType == "userCreation") {
+                    } else if (req.query.requestType == CONSTANTS.common.BULK_USER_REQUEST_TYPE) {
 
                         status = CONSTANTS.common.BULK_USER_CREATION_TYPE;
                         let validateUser = await _validateUsers(uploadFileData);
@@ -108,7 +110,7 @@ module.exports = class UserCreationHelper {
                     let requestBody = {
                         fileNames: files,
                     }
-                   
+
                     let errorFileData = {};
                     let successFileData = {};
 
@@ -129,7 +131,7 @@ module.exports = class UserCreationHelper {
                         }
                     }));
 
-                    let requestId = uniqid();
+                    let requestId = UTILS.generateUniqueId();
                     let doc = {
                         requestId: requestId,
                         type: status,
@@ -145,20 +147,19 @@ module.exports = class UserCreationHelper {
                     let request = await database.models.bulkUploadRequests.create(doc);
 
 
-                    if (req.body.requestType == "entityCreation") {
+                    if (req.query.requestType == CONSTANTS.common.BULK_ENTITY_REQUEST_TYPE) {
                         _bulkUploadEntities(request.requestId,
                             fileCompletePath,
                             req.userDetails.userToken,
                             req.query.entityType,
                             req.userDetails.userId);
-                    } else if (req.query.requestType == "entityMapping") {
+                    } else if (req.query.requestType == CONSTANTS.common.BULK_ENTITY_MAPPING_REQUEST_TYPE) {
 
                         _entityMapping(request.requestId,
                             fileCompletePath,
                             req.userDetails.userToken,
-                            req.userDetails.userId,
-                            req.query.programId,
-                            req.query.solutionId);
+                            req.userDetails.userId);
+
                     }
                     resolve({ result: { requestId: request.requestId }, message: CONSTANTS.apiResponses.REQUEST_SUBMITTED });
 
@@ -286,7 +287,7 @@ module.exports = class UserCreationHelper {
                 let profileData = await _checkAccess(token, userId);
                 if (profileData && profileData['allowed']) {
 
-                    const requestDetails= await database.models.bulkUploadRequests.findOne({ requestId: requestId });
+                    const requestDetails = await database.models.bulkUploadRequests.findOne({ requestId: requestId });
                     if (requestDetails) {
                         resolve({ result: { data: { requestDetails } } });
                     } else {
@@ -317,10 +318,7 @@ module.exports = class UserCreationHelper {
     static getDownloadableUrls(requestId, fileType) {
         return new Promise(async (resolve, reject) => {
             try {
-
-
                 const requestDoc = await database.models.bulkUploadRequests.findOne({ requestId: requestId })
-
                 if (requestDoc) {
 
                     let fileInfo;
@@ -635,29 +633,19 @@ function _validateUsers(inputArray) {
 function _bulkUploadEntities(bulkRequestId, fileCompletePath, token, entityType, userId) {
     return new Promise(async (resolve, reject) => {
 
-        let samikshaResponse = await samikshaService.bulkUploadEntities(fileCompletePath, token, entityType);
-        if (samikshaResponse && samikshaResponse.statusCode == HTTP_STATUS_CODE["ok"].status) {
-            let responseData = await csv().fromString(samikshaResponse.body.toString());
-            let files = [];
-            let cv = new ObjectsToCsv(responseData);
-            let successFile = UTILS.generateUniqueId() + "_success.csv";
-            await cv.toDisk(PROJECT_ROOT_DIRECTORY + process.env.BATCH_FOLDER_PATH + successFile);
-            files.push(userId + "/" + successFile);
 
-            let uploadResponse = await kendraService.uploadFile(PROJECT_ROOT_DIRECTORY + process.env.BATCH_FOLDER_PATH + successFile,
-                userId + "/" + successFile, token);
-
-            if (uploadResponse.status == HTTP_STATUS_CODE["ok"].status) {
+        try {
+            let entityUploadResponse = await entityBulkUploadHelper.entitiesUpload(fileCompletePath, token, entityType, userId);
+            if (entityUploadResponse.success == true && entityUploadResponse.data) {
 
                 let successFileData = {
-                    sourcePath: uploadResponse.result.name
+                    sourcePath: entityUploadResponse.data.result.name
                 }
                 let update = await database.models.bulkUploadRequests.findOneAndUpdate(
                     { requestId: bulkRequestId },
                     { $set: { "successFile": successFileData, status: CONSTANTS.common.BULK_UPLOAD_COMPLETE } }
                 )
                 resolve(update);
-
             } else {
 
                 let update = await database.models.bulkUploadRequests.findOneAndUpdate(
@@ -665,8 +653,10 @@ function _bulkUploadEntities(bulkRequestId, fileCompletePath, token, entityType,
                     { $set: { status: CONSTANTS.common.BULK_UPLOAD_FAILURE } }
                 )
                 resolve(update);
-
             }
+
+        } catch (error) {
+            return reject(error);
         }
     });
 }
@@ -680,39 +670,29 @@ function _bulkUploadEntities(bulkRequestId, fileCompletePath, token, entityType,
 * @param {String} filePath - complete file path
 * @param {String} userToken - user access token
 * @param {String} userid - user id 
-* @param {String} programId - program id  
-* @param {String} solutionId - solution id
 * @returns {json} Response consist request entity mapping details
 **/
 function _entityMapping(bulkRequestId,
     filePath,
     userToken,
-    userId,
-    programId = "",
-    solutionId = "") {
+    userId) {
     return new Promise(async (resolve, reject) => {
 
         try {
-            let samikshaResponse = await samikshaService.entityMapping(filePath, userToken, programId, solutionId);
-            if (samikshaResponse && samikshaResponse.statusCode == HTTP_STATUS_CODE["ok"].status) {
-
-
-                let successFile = UTILS.generateUniqueId() + "_success.csv";
-                let uploadResponse = await kendraService.uploadFile(filePath,
-                    userId + "/" + successFile, userToken);
-
-                if (uploadResponse.status == HTTP_STATUS_CODE["ok"].status) {
-
-                    let successFileData = {
-                        sourcePath: uploadResponse.result.name
-                    }
-
-                    let update = await database.models.bulkUploadRequests.findOneAndUpdate(
-                        { requestId: bulkRequestId },
-                        { $set: { status: CONSTANTS.common.BULK_UPLOAD_COMPLETE, "successFile": successFileData } }
-                    );
-                    resolve(update);
+            const entityMappingResponse = await bulkUploadEntityMappingHelper.entityMapping(filePath,
+                userToken,
+                userId);
+            if (entityMappingResponse.success == true && entityMappingResponse.data) {
+                
+                let successFileData = {
+                    sourcePath: entityMappingResponse.data.result.name
                 }
+
+                let update = await database.models.bulkUploadRequests.findOneAndUpdate(
+                    { requestId: bulkRequestId },
+                    { $set: { status: CONSTANTS.common.BULK_UPLOAD_COMPLETE, "successFile": successFileData } }
+                );
+                resolve(update);
             } else {
                 let update = await database.models.bulkUploadRequests.findOneAndUpdate(
                     { requestId: bulkRequestId },
@@ -726,70 +706,6 @@ function _entityMapping(bulkRequestId,
     });
 }
 
-/**
- * To check weather entity mapping csv is valid or not
- * @name _validateEntityMapping
- * @param {*} inputArray entity mapping csv json
- */
-function _validateEntityMapping(inputArray) {
-    return new Promise(async (resolve, reject) => {
-
-        let valid = true;
-        await Promise.all(inputArray.map(async function (element) {
-            if (element) {
-
-                let keys = Object.keys(element);
-                if (element.parentEntiyId) {
-
-                    if (ObjectId.isValid(element.parentEntiyId) == false) {
-                        valid = false;
-                    }
-                }
-                else if (element.childEntityId) {
-
-                    if (ObjectId.isValid(element.childEntityId) == false) {
-                        valid = false;
-                    }
-
-                } else {
-                    valid = false;
-                }
-            }
-        }));
-
-        resolve(valid);
-    });
-
-
-}
-
-
-/**
- * to check weather entity mapping csv is valid or not
- * @name _validateEntityUploadRequest
- * @param {*} inputArray entity mapping csv json
- */
-function _validateEntityUploadRequest(inputArray) {
-    return new Promise(async (resolve, reject) => {
-
-        let valid = true;
-        await Promise.all(inputArray.map(async function (element) {
-            if (element) {
-
-                let keys = Object.keys(element);
-                if (element.externalId && element.state && element.name && element.types && element._existingKeyField) {
-
-                }
-                else {
-                    valid = false;
-                }
-            }
-        }));
-        resolve(valid);
-    });
-
-
-}
 
 /**
  * to get all field object for dropdown

@@ -21,6 +21,18 @@ module.exports = class EntityTypes extends Abstract {
     return "entityTypes";
   }
 
+    /**
+   * @apiDefine errorBody
+   * @apiError {String} status 4XX,5XX
+   * @apiError {String} message Error
+   */
+
+  /**
+   * @apiDefine successBody
+   *  @apiSuccess {String} status 200
+   * @apiSuccess {String} result Data
+   */
+
 
   /**
       * @api {get} /admin-service/api/v1/entityTypes/list
@@ -94,7 +106,7 @@ module.exports = class EntityTypes extends Abstract {
    * @method
    * @name list
    * @param {Object} req - requested data.
-   * @returns {JSON} - response consist of state list
+   * @returns {JSON} - response consist list of entity types
    */
   list(req) {
     return new Promise(async (resolve, reject) => {

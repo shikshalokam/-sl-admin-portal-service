@@ -31,6 +31,7 @@ module.exports = class EntityTypesHelper {
 
                 let projection = {}
 
+                console.log("fieldsArray",fieldsArray);
                 if (fieldsArray != "all") {
                     fieldsArray.forEach(field => {
                         projection[field] = 1;

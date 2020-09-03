@@ -249,8 +249,11 @@ module.exports = class entitiesHelper {
                 let queryObject = {};
 
 
+                console.log("entityTraversalType",entityTraversalType);
                 if (entityTraversalType != "") {
                     let entityTraversal = `groups.${entityTraversalType}`;
+
+                    console.log("entityTraversal",entityTraversal);
                     projection.push(entityTraversal);
                     queryObject = {
                         _id: entityId,
@@ -258,16 +261,17 @@ module.exports = class entitiesHelper {
                         [entityTraversal]: { $exists: true }
                     }
 
-                } else {
+                } 
+                // else {
 
-                    queryObject = {
-                        _id: entityId
-                    }
-                    projection = [
-                        "entityType",
-                        "groups"
-                    ];
-                }
+                //     queryObject = {
+                //         _id: entityId
+                //     }
+                //     projection = [
+                //         "entityType",
+                //         "groups"
+                //     ];
+                // }
 
                 let entityDocs =
                     await this.entityDocuments(

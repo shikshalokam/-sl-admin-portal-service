@@ -27,14 +27,16 @@ const fs = require('fs');
 function bulkUploadEntities(filePath, token, type) {
     return new Promise(async (resolve, reject) => {
         try {
+
             let formData = {
                 entities: fs.createReadStream(filePath)
             }
             let apiUrl =
                 samikshaServiceBaseURL + CONSTANTS.endpoints.BULK_ENTITY + "?type=" + type;
 
-            let response = await httpCall(apiUrl, token, formData);
+            let response = await callToSamiksha(apiUrl, token, formData);
             resolve(response);
+
 
         } catch (error) {
             return reject(error);
@@ -47,11 +49,9 @@ function bulkUploadEntities(filePath, token, type) {
  * @name entityMapping
  * @param {String} filePath filePath of the file to upload
  * @param {String} token user access token
- * @param {String} programId Program External ID.
- * @param {String} solutionId Solution External ID.
  * @returns {Json} - entity mapping information 
  */
-function entityMapping(filePath, token, programId, solutionId) {
+function entityMapping(filePath, token) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -60,7 +60,7 @@ function entityMapping(filePath, token, programId, solutionId) {
             }
             let apiUrl =
                 samikshaServiceBaseURL + CONSTANTS.endpoints.BULK_ENTITY_MAPPING;
-            let response = await httpCall(apiUrl, token, formData);
+            let response = await callToSamiksha(apiUrl, token, formData);
             return resolve(response);
 
         } catch (error) {
@@ -71,14 +71,14 @@ function entityMapping(filePath, token, programId, solutionId) {
 
 
 /**
-* Common http request call 
-* @name httpCall
+* Common http request call to samiksha service 
+* @name callToSamiksha
 * @param {String} url filePath of the file to upload
 * @param {String} token user access token
 * @param {Json} formData form data of the request
 * @returns {Json} - consists of api response body
 */
-function httpCall(url, token, formData) {
+function callToSamiksha(url, token, formData) {
     return new Promise(async (resolve, reject) => {
         try {
 

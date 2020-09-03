@@ -355,7 +355,7 @@ module.exports = class Organisations {
    * 
    * {
    *  "status": 200,
-   *  "message": ""message": "Organisation List fetched successfully."
+   *  "message": "Organisation List fetched successfully."
    *      "result": {
    *          "columns":[{
    *             "type": "column",

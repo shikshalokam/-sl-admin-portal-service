@@ -12,6 +12,7 @@ const platformRolesHelper = require(MODULES_BASE_PATH + "/platformRoles/helper")
 const sessionHelpers = require(GENERIC_HELPERS_PATH + "/sessions");
 const usersHelper = require(MODULES_BASE_PATH + "/users/helper");
 
+const organisationHelper = require(GENERIC_HELPERS_PATH + "/organisations");
 
 module.exports = class OrganisationsHelper {
 
@@ -30,7 +31,7 @@ module.exports = class OrganisationsHelper {
                 let organisationsList = [];
                 let roles = await _getUserRoles(userId);
                 if (roles.includes(CONSTANTS.common.PLATFROM_ADMIN_ROLE)) {
-                    organisationsList = await _getOrganisationsDetails(token);
+                    organisationsList = await organisationHelper.getOrganisationlist(token,"",roles);
                 } else if (roles.includes(CONSTANTS.common.ORG_ADMIN_ROLE)) {
 
                     let profileData = await _getProfileData(token, userId);
@@ -41,14 +42,14 @@ module.exports = class OrganisationsHelper {
                         organisationsIds.push(orgInfo.organisationId);
                     });
 
-                    organisationsList = await _getOrganisationsDetails(token);
-                    let modifiedOrganisations = [];
+                    organisationsList = await organisationHelper.getOrganisationlist(token,"",roles);
+                    let filterOrganisations = [];
                     organisationsList.map(organisation => {
                         if (organisationsIds.includes(organisation.value)) {
-                            modifiedOrganisations.push(organisation);
+                            filterOrganisations.push(organisation);
                         }
                     });
-                    organisationsList = modifiedOrganisations;
+                    organisationsList = filterOrganisations;
                 }
                 if (organisationsList.length > 0) {
 
@@ -88,18 +89,13 @@ module.exports = class OrganisationsHelper {
 
                 let response;
                 let userRoles = await _getUserRoles(userId, organisationId);
-                let offset = pageSize * (pageNo - 1);
+                
                 if (userRoles.includes(CONSTANTS.common.PLATFROM_ADMIN_ROLE) || userRoles.includes(CONSTANTS.common.ORG_ADMIN_ROLE)) {
 
                     let bodyOfRequest = {
                         organisationId: organisationId,
                     }
-                    if (pageNo) {
-                        bodyOfRequest['offset'] = pageNo;
-                    }
-                    if (pageSize) {
-                        bodyOfRequest['limit'] = pageSize;
-                    }
+                   
                     if (searchText) {
                         bodyOfRequest['query'] = searchText;
                     }
@@ -111,7 +107,7 @@ module.exports = class OrganisationsHelper {
                     }
 
                     let usersList =
-                        await sunbirdService.users(token, bodyOfRequest);
+                        await sunbirdService.users(token, bodyOfRequest,pageSize,pageNo);
 
                     if (usersList.status == HTTP_STATUS_CODE.ok.status) {
 
@@ -258,9 +254,13 @@ module.exports = class OrganisationsHelper {
         return new Promise(async (resolve, reject) => {
             try {
                 let plaformRoles = [];
-                const rolesDoc = await platformRolesHelper.getRoles();
-                const sunbirdRolesDoc = await sunbirdService.platformRoles();
-
+                const getAllRoles  = await Promise.all([
+                    sunbirdService.platformRoles(),
+                    platformRolesHelper.getRoles(),
+                ]);
+                const sunbirdRolesDoc = getAllRoles[0]; 
+                const rolesDoc = getAllRoles[1];
+               
                 let userRoles = [];
                 let allRoles = {};
                 if (sunbirdRolesDoc.result) {
@@ -340,8 +340,12 @@ module.exports = class OrganisationsHelper {
                 let userRoles = [];
                 if (organisationInfo.roles) {
 
-                    const rolesDoc = await platformRolesHelper.getRoles();
-                    const sunbirdRolesDoc = await sunbirdService.platformRoles();
+                    const getAllRoles  = await Promise.all([
+                        sunbirdService.platformRoles(),
+                        platformRolesHelper.getRoles(),
+                    ]);
+                    const sunbirdRolesDoc = getAllRoles[0]; 
+                    const rolesDoc = getAllRoles[1];
 
                     let allRoles = {};
                     if (sunbirdRolesDoc.result) {
@@ -563,9 +567,8 @@ module.exports = class OrganisationsHelper {
                 const formData =
                     await formsHelper.list({
                         name: "organisationCreateForm"
-                    }, {
-                        value: 1
-                    });
+                    }, ["value"]
+                   );
 
                 if (!formData[0]) {
                     throw new Error(CONSTANTS.apiResponses.ORG_FORM_NOT_FOUND);
@@ -894,49 +897,6 @@ function _actions() {
     return actionsColumn;
 }
 
-/**
-   * To get Organisation Details By Id.
-   * @method
-   * @name _getOrganisationsDetails
-   * @param {String} token - user access token
-   * @returns {json} - returns organisational details
-*/
-
-function _getOrganisationsDetails(token) {
-
-    return new Promise(async (resolve, reject) => {
-
-        let organisationsList = [];
-        let sessionOrganisationData = sessionHelpers.get(CONSTANTS.common.ORGANISATIONS_SESSION);
-
-        if (sessionOrganisationData && sessionOrganisationData.length > 0) {
-            organisationsList = sessionOrganisationData;
-        } else {
-
-            let request = {
-                "filters": {
-                }
-            }
-
-            let organisationList = await sunbirdService.searchOrganisation(request, token);
-            if (organisationList.status == HTTP_STATUS_CODE.ok.status) {
-                if (organisationList.result && organisationList.result.response &&
-                    organisationList.result.response && organisationList.result.response.content) {
-                    await Promise.all(organisationList.result.response.content.map(async function (orgInfo) {
-                        organisationsList.push({
-                            label: orgInfo.orgName,
-                            value: orgInfo.id
-                        });
-                    }));
-                    sessionHelpers.set(CONSTANTS.common.ORGANISATIONS_SESSION, organisationsList);
-                }
-            }
-
-        }
-        resolve(organisationsList);
-    });
-
-}
 
 /**
  * to get _getProfileData of user

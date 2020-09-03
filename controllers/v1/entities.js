@@ -151,7 +151,7 @@ module.exports = class Entities extends Abstract {
   }
 
   /**
-   * @api {post} /admin-service/api/v1/entities/subEntityList/:entityId?type=:type&search=:search&page=:page&limit=:limit
+   * @api {get} /admin-service/api/v1/entities/subEntityList/:entityId?type=:type&search=:search&page=:page&limit=:limit
    * Get sub entity list for the given entity. 
    * @apiVersion 1.0.0
    * @apiGroup Entities

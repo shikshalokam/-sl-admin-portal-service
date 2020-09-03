@@ -26,5 +26,8 @@ module.exports = {
     BULK_UPLOAD_COMPLETE: "completed",
     BULK_UPLOAD_FAILURE: "failed",
     ORGANISATIONS_SESSION: "organisations",
-    ACTIVE: "active"
+    ACTIVE: "active",
+    BULK_ENTITY_REQUEST_TYPE:"entityCreation",
+    BULK_ENTITY_MAPPING_REQUEST_TYPE:"entityMapping",
+    BULK_USER_REQUEST_TYPE:"userCreation"
 };

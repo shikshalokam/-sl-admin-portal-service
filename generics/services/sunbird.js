@@ -59,7 +59,12 @@ const getUserProfileInfo = function (token, userId) {
             + userId + "?fields=completeness,missingFields,lastLoginTime";
         let response = await callToSunbird(token, "", getProfileAPI, "GET");
 
-        return resolve(JSON.parse(response));
+        if(response.message){
+            return resolve(response);
+        } else {
+            return resolve(JSON.parse(response));
+        }
+        
 
 
     });
@@ -69,15 +74,17 @@ const getUserProfileInfo = function (token, userId) {
   * Get users.
   * @function
   * @name users
-  * @param userInfo - user search api request.
   * @param token - Logged in user token.
+  * @param {Object} userInfo - user search api request.
+  * @param {String} limit - request limit
+  * @param {String} offset - page number
   * @returns {JSON} - All users data.
 */
 
-const users = function (token, userInfo) {
+const users = function (token, userInfo,limit,offset) {
     return new Promise(async (resolve, reject) => {
 
-        const userSearchAPI = CONSTANTS.endpoints.SUNBIRD_SEARCH_USER + "?limit=" + userInfo.limit + "&page=" + userInfo.offset;
+        const userSearchAPI = CONSTANTS.endpoints.SUNBIRD_SEARCH_USER + "?limit=" + limit + "&page=" + offset;
         let response = await callToSunbird(token, userInfo, userSearchAPI);
         return resolve(response);
     })
@@ -286,7 +293,7 @@ const removeUser = function (userDetails, token) {
 }
 
 /**
-  * to Varify token is valid or not
+  * To verify token is valid or not
   * @function
   * @name verifyToken
   * @param token - user token for verification 
