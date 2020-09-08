@@ -9,8 +9,8 @@ module.exports = {
 
       let allFields = [];
 
-      let inputFields = ["organisation", "state","firstName", "lastName", "email", "phoneNumber",
-        "userName","gender","password","confirmPassword","roles","dateOfBirth" ];
+      let inputFields = ["organisation", "state", "firstName", "lastName", "email", "phoneNumber",
+        "userName", "gender", "password", "confirmPassword", "roles", "dateOfBirth"];
 
       let inputField = {
         "field": "",
@@ -24,7 +24,7 @@ module.exports = {
           "validator": "required",
           "message": ""
         }
-      ]
+        ]
       };
 
       await Promise.all(inputFields.map(async function (fields) {
@@ -33,12 +33,8 @@ module.exports = {
         let field = fields.replace(/([A-Z])/g, " $1");
         inputObj.label = field.charAt(0).toUpperCase() + field.slice(1);
         inputObj.field = fields;
-
-
         inputObj.validation[0].message = inputObj.label + " required";
-
-        
-        if (fields == "userName"){
+        if (fields == "userName") {
           inputObj.validation.push({
             "name": "pattern",
             "validator": "^[a-zA-Z0-9]+$",
@@ -47,14 +43,14 @@ module.exports = {
         }
         else if (fields == "password" || fields == "confirmPassword") {
           inputObj.input = "password";
-         
+
           inputObj.validation.push({
             "name": "pattern",
-            "validator": "^([a-zA-Z0-9@*#]{8,15})$",
+            "validator": "^(?=.{8,})(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+*!=]).*$",
             "message": "Minimum eight charaters required"
           });
 
-          
+
         } else if (fields == "email") {
           inputObj.validation = [];
           inputObj.validation.push({
@@ -70,31 +66,31 @@ module.exports = {
             "validator": "(0/91)?[7-9][0-9]{9}",
             "message": "Please provide a valid Phone Number"
           });
-        }else if (fields == "gender") {
-           inputObj.options=[
-             {
+        } else if (fields == "gender") {
+          inputObj.options = [
+            {
               "label": "Female",
               "value": "F"
-            },{
+            }, {
               "label": "Male",
               "value": "M"
             }]
-            inputObj.validation = [];
-            inputObj.input = "select";
-       }else if (fields == "dateOfBirth") {
+          inputObj.validation = [];
+          inputObj.input = "select";
+        } else if (fields == "dateOfBirth") {
           inputObj.input = "date";
           inputObj.validation = [];
 
-        }else if (fields === "state"){
+        } else if (fields === "state") {
           inputObj.input = "select";
           inputObj.validation = [];
 
-        }else if(fields === "roles") {
-              inputObj.options = [];
-              inputObj.input = "multiselect";
+        } else if (fields === "roles") {
+          inputObj.options = [];
+          inputObj.input = "multiselect";
 
-          }else if( fields === "organisation"){
-            inputObj.input = "select";
+        } else if (fields === "organisation") {
+          inputObj.input = "select";
         }
         allFields.push(inputObj);
       }));
@@ -106,7 +102,6 @@ module.exports = {
       await db.collection('forms').insertOne(createForm);
 
     }
-    // return await db.collection('albums').updateOne({artist: 'The Beatles'}, {$set: {blacklisted: true}});
   },
 
   async down(db) {

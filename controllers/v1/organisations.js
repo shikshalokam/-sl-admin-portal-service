@@ -6,18 +6,14 @@
  */
 
 const organisationsHelper = require(MODULES_BASE_PATH + "/organisations/helper.js");
-const csvFileStream = require(ROOT_PATH + "/generics/file-stream");
+const csvFileStream = require(GENERICS_FILES_PATH + "/file-stream");
 
 /**
-    * organisations
+    * Organisations
     * @class
 */
 
-module.exports = class Organisations extends Abstract {
-
-  constructor() {
-    super(schemas["organisation"]);
-  }
+module.exports = class Organisations {
 
   static get name() {
     return "organisations";
@@ -27,11 +23,12 @@ module.exports = class Organisations extends Abstract {
 * @apiDefine errorBody
 * @apiError {String} status 4XX,5XX
 * @apiError {String} message Error
-*/ /**
-        * @apiDefine successBody
-        * @apiSuccess {String} status 200
-        * @apiSuccess {String} result Data
-        */
+*/
+  /**
+    * @apiDefine successBody
+    * @apiSuccess {String} status 200
+    * @apiSuccess {String} result Data
+ */
 
   /**
     * @api {get} /admin-service/api/v1/organisations/list 
@@ -45,7 +42,7 @@ module.exports = class Organisations extends Abstract {
     * @apiParamExample {json} Response:
     * 
     * {
-    *   "message": "Organisation list fetched Successfully",
+    *   "message": "Organisation list fetched successfully.",
     *   "status": 200,
     *    "result": [ 
     *     {  
@@ -61,30 +58,28 @@ module.exports = class Organisations extends Abstract {
   * @method
   * @name list
   * @param  {req}  - requested data.
-  * @returns {json} Response consists of platform organisation list
+  * @returns {json} Response consists of organisation list
   */
 
   list(req) {
     return new Promise(async (resolve, reject) => {
       try {
 
-
-
-        let organisationList = await organisationsHelper.list(
+        const organisationList = await organisationsHelper.list(
           req.userDetails.userToken,
           (req.params._id && req.params._id != "") ? req.params._id : req.userDetails.userId,
           req.pageSize,
           req.pageNo);
-        return resolve(organisationList);
+        return resolve({ result:organisationList.data,message: organisationList.message });
 
       } catch (error) {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
       }
     });
@@ -102,7 +97,7 @@ module.exports = class Organisations extends Abstract {
   * @apiParamExample {json} Response:
   * 
   * {
-  *   "message": "Organisation list fetched Successfully",
+  *   "message": "Organisation list fetched successfully.",
   *   "status": 200,
   *    "result": {
   *      "count": 1,
@@ -121,7 +116,7 @@ module.exports = class Organisations extends Abstract {
   /**
   * Get platform users list for organisation.
   * @method
-  * @name list
+  * @name users
   * @param  {req}  - requested data.
   * @returns {json} Response consists of platform organisation list
   */
@@ -130,7 +125,7 @@ module.exports = class Organisations extends Abstract {
     return new Promise(async (resolve, reject) => {
       try {
 
-        let organisationList = await organisationsHelper.users(
+        const organisationUsersList = await organisationsHelper.users(
           req.userDetails.userToken,
           req.userDetails.userId,
           req.params._id,
@@ -139,16 +134,16 @@ module.exports = class Organisations extends Abstract {
           req.searchText,
           req.query.status ? req.query.status : ""
         );
-        return resolve(organisationList);
+        return resolve({ result:organisationUsersList.data, message: organisationUsersList.message });
 
       } catch (error) {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
       }
     });
@@ -172,7 +167,7 @@ module.exports = class Organisations extends Abstract {
   /**
   * Get Download users list for organisation.
   * @method
-  * @name list
+  * @name downloadUsers
   * @param  {req}  - requested data.
   * @returns {json} Response consists of csv downladable file
   */
@@ -180,6 +175,7 @@ module.exports = class Organisations extends Abstract {
   downloadUsers(req) {
     return new Promise(async (resolve, reject) => {
       try {
+
         let csvData = await organisationsHelper.downloadUsers(
           req.body,
           req.userDetails.userToken,
@@ -207,10 +203,10 @@ module.exports = class Organisations extends Abstract {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
       }
     });
@@ -218,27 +214,25 @@ module.exports = class Organisations extends Abstract {
 
 
   /**
- * @api {get} /admin-service/api/v1/organisations/addUser 
- * To add User to the organisation.
+ * @api {post} /admin-service/api/v1/organisations/addUser 
+ * To add user to the organisation.
  * @apiVersion 1.0.0
  * @apiGroup Organisations
  * @apiHeader {String} X-authenticated-user-token Authenticity token
  * @apiSampleRequest /admin-service/api/v1/organisations/addUser
+ * @apiParamExample {json} Request:
  * {
  *   "userId":"",
  *   "organisationId":"",
  *   "roles":["ASSESSOR"]
  * }
- * 
- * 
- * 
  * @apiUse successBody
  * @apiUse errorBody
  * @apiParamExample {json} Response:
  * 
  * {
  *  "status": 200,
- *  "message": ""message": "User added to organisation Successfully"
+ *  "message": ""message": "User added to organisation successfully."
  *      "result": {
  *          "response": "SUCCESS"
  *      }
@@ -249,7 +243,7 @@ module.exports = class Organisations extends Abstract {
 */
 
   /**
-  * to add user to organisation
+  * To add user to organisation
   * @method
   * @name addUser
   * @param  {req}  - requested data.
@@ -261,23 +255,21 @@ module.exports = class Organisations extends Abstract {
       try {
 
         let orgDetails = {
-          // organisationId: req.body.organisationId,
           userId: req.body.userId,
           roles: req.body.roles,
-          organisation:req.body.organisation
+          organisation: req.body.organisation
         }
-
-        let response = await organisationsHelper.addUser(orgDetails, req.userDetails.userToken);
-        return resolve(response);
+        const addUserToOrganisation = await organisationsHelper.addUser(orgDetails, req.userDetails.userToken);
+        return resolve({ result:addUserToOrganisation.data,message: addUserToOrganisation.message });
 
       } catch (error) {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
       }
     });
@@ -285,19 +277,18 @@ module.exports = class Organisations extends Abstract {
 
 
   /**
- * @api {get} /admin-service/api/v1/organisations/assignRoles 
+ * @api {post} /admin-service/api/v1/organisations/assignRoles 
  * To assign Roles to the organisation for the user
  * @apiVersion 1.0.0
  * @apiGroup Organisations
  * @apiHeader {String} X-authenticated-user-token Authenticity token
  * @apiSampleRequest /admin-service/api/v1/organisations/assignRoles
+ * @apiParamExample {json} Request:
  * {
  *   "userId":"",
- *   "organisationId":"",
+ *   "organisationId":"0125747659358699520",
  *   "roles":["ASSESSOR"]
  * }
- * 
- * 
  * 
  * @apiUse successBody
  * @apiUse errorBody
@@ -305,7 +296,7 @@ module.exports = class Organisations extends Abstract {
  * 
  * {
  *  "status": 200,
- *  "message": ""message": "roles updated to organisation Successfully"
+ *  "message": ""message": "User roles added to organisation  successfully."
  *      "result": {
  *          "response": "SUCCESS"
  *      }
@@ -316,11 +307,11 @@ module.exports = class Organisations extends Abstract {
 */
 
   /**
-  * to add roles to organisation
+  * To assign Roles to the organisation for the user
   * @method
-  * @name addUser
+  * @name assignRoles
   * @param  {req}  - requested data.
-  * @returns {json} Response consists of success or failure of the request
+  * @returns {json} Response consists assigned role information
   * 
   */
 
@@ -331,21 +322,20 @@ module.exports = class Organisations extends Abstract {
         let orgDetails = {
           organisationId: req.body.organisationId,
           userId: req.body.userId,
-          roles: req.body.roles
+          roles: req.body.roles,
+          removeRoles: req.body.removeRoles ? req.body.removeRoles : false
         }
-
-        
-        let response = await organisationsHelper.assignRoles(orgDetails, req.userDetails.userToken);
-        return resolve(response);
+        const assignRoles = await organisationsHelper.assignRoles(orgDetails, req.userDetails.userToken);
+        return resolve({ result:assignRoles.data, message: assignRoles.message });
 
       } catch (error) {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
       }
     });
@@ -353,7 +343,7 @@ module.exports = class Organisations extends Abstract {
 
 
   /**
-   * @api {get} /admin-service/api/v1/organisations/detailList 
+   * @api {get} /admin-service/api/v1/organisations/detailList  
    * To get the organisation list for the user 
    * @apiVersion 1.0.0
    * @apiGroup Organisations
@@ -365,7 +355,7 @@ module.exports = class Organisations extends Abstract {
    * 
    * {
    *  "status": 200,
-   *  "message": ""message": "Organisation List fetched Successfully"
+   *  "message": "Organisation List fetched successfully."
    *      "result": {
    *          "columns":[{
    *             "type": "column",
@@ -387,37 +377,36 @@ module.exports = class Organisations extends Abstract {
  */
 
   /**
-  * to get organisation list
+  * To get organisation list
   * @method
   * @name detailList
   * @param  {req}  - requested data.
-  * @returns {json} Response consists of platform organisation list
+  * @returns {json} Response consists of organisations deatiled list
   */
 
- detailList(req) {
+  detailList(req) {
     return new Promise(async (resolve, reject) => {
       try {
 
-       let query = { 
-        userToken:req.userDetails.userToken,
-        userId:req.userDetails.userId,
-        pageSize:req.pageSize,
-        pageNo:req.pageNo,
-        searchText:req.searchText,
-        status:req.query.status ? req.query.status : "" 
-      }
-    
-        let response = await organisationsHelper.detailList(query);
-        return resolve(response);
+        let query = {
+          userToken: req.userDetails.userToken,
+          userId: req.userDetails.userId,
+          pageSize: req.pageSize,
+          pageNo: req.pageNo,
+          searchText: req.searchText,
+          status: req.query.status ? req.query.status : ""
+        }
+        const organisationDetailList = await organisationsHelper.detailList(query);
+        return resolve({ result:organisationDetailList.data ,message: organisationDetailList.message });
 
       } catch (error) {
         return reject({
           status:
             error.status ||
-            httpStatusCode["internal_server_error"].status,
+            HTTP_STATUS_CODE["internal_server_error"].status,
           message:
             error.message ||
-            httpStatusCode["internal_server_error"].message
+            HTTP_STATUS_CODE["internal_server_error"].message
         });
       }
     });
@@ -426,19 +415,28 @@ module.exports = class Organisations extends Abstract {
 
 
   /**
-   * @api {get} /admin-service/api/v1/organisations/create 
+   * @api {post} /admin-service/api/v1/organisations/create
    * To create the organisation
    * @apiVersion 1.0.0
    * @apiGroup Organisations
    * @apiHeader {String} X-authenticated-user-token Authenticity token
    * @apiSampleRequest /admin-service/api/v1/organisations/create
+   * @apiParamExample {json} Request:
+   * {
+      "description": "for test",
+      "externalId": "ext1332sdddda2ww22",
+      "provider": "string",
+      "name": "testing",
+      "email2": "abc@gmail.com",
+      "address": "iiii"
+    }
    * @apiUse successBody
    * @apiUse errorBody
    * @apiParamExample {json} Response:
    * 
    * {
    *  "status": 200,
-   *  "message": ""message": "Organisation List fetched Successfully"
+   *  "message": ""message": "Organisation List fetched successfully."
    *      "result": {
    *          "columns":[{
    *             "type": "column",
@@ -460,311 +458,354 @@ module.exports = class Organisations extends Abstract {
  */
 
   /**
-  * to get create create
+  * To create the organisation
   * @method
   * @name create
   * @param  {req}  - requested data.
-  * @returns {json} Response consists of platform organisation list
+  * @returns {json} Response consists of organisation created details
   */
 
- create(req) {
-  return new Promise(async (resolve, reject) => {
-    try {
-  
-      let response = await organisationsHelper.create(req.body, req.userDetails.userToken);
-      return resolve(response);
+  create(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
 
-    } catch (error) {
-      return reject({
-        status:
-          error.status ||
-          httpStatusCode["internal_server_error"].status,
-        message:
-          error.message ||
-          httpStatusCode["internal_server_error"].message
-      });
-    }
-  });
-}
+        const createOrganisation = await organisationsHelper.create(req.body, req.userDetails.userToken);
+        return resolve({ result:createOrganisation.data,message: createOrganisation.message });
 
-
-
-/**
-   * @api {get} /admin-service/api/v1/organisations/getForm 
-   * To get create form organisation
-   * @apiVersion 1.0.0
-   * @apiGroup Organisations
-   * @apiHeader {String} X-authenticated-user-token Authenticity token
-   * @apiSampleRequest /admin-service/api/v1/organisations/getForm
-   * @apiUse successBody
-   * @apiUse errorBody
-   * @apiParamExample {json} Response:
-   * 
-   * {
-   *  "status": 200,
-   *  "message": ""message": "Organisation List fetched Successfully"
-   *      "result": [{
-   *         "field": "name",
-   *         "value": "",
-   *         "visible": true,
-   *         "editable": true,
-   *         "label": "Name",
-   *         "input": "text",
-   *         "validation": [
-   *             {
-   *                 "name": "required",
-   *                 "validator": "required",
-   *                 "message": "Name required"
-   *             },
-   *             {
-   *                 "name": "pattern",
-   *                 "validator": "([a-zA-Z]{3,30}s*)+",
-   *                 "message": "Please Provide Valid Name"
-   *             }
-   *         ]
-   *     }]
-   * }
-   * 
-   * 
- */
- /**
-  * to get create organisation form
-  * @method
-  * @name getForm
-  * @param  {req}  - requested data.
-  * @returns {json} Response consists of organisation create form
-  */
-
- getForm(req) {
-  return new Promise(async (resolve, reject) => {
-    try {
-  
-      let response = await organisationsHelper.getForm();
-      return resolve(response);
-
-    } catch (error) {
-      return reject({
-        status:
-          error.status ||
-          httpStatusCode["internal_server_error"].status,
-        message:
-          error.message ||
-          httpStatusCode["internal_server_error"].message
-      });
-    }
-  });
-}
-
-/**
-   * @api {get} /admin-service/api/v1/organisations/update 
-   * To update organisation details
-   * @apiVersion 1.0.0
-   * @apiGroup Organisations
-   * @apiHeader {String} X-authenticated-user-token Authenticity token
-   * @apiSampleRequest /admin-service/api/v1/organisations/update
-   * {
-   *  name:"",
-   *  email:"",
-   *  description:"",
-   *  externalId:"",
-   *  organisationId:""
-   * }
-   * @apiUse successBody
-   * @apiUse errorBody
-   * @apiParamExample {json} Response:
-   * {
-   *  "message": "Organisation Created Successfully",
-   *  "status": 200,
-   *  "result": {
-   *     "organisationId": "013014480583598080574",
-   *   "response": "SUCCESS"
-   *   }
-   * }
-   * 
- */
- /**
-  * to update organisation data
-  * @method
-  * @name getForm
-  * @param  {req}  - requested data.
-  * @returns {json} Response consists of organisation create form
-  */
-
- update(req) {
-  return new Promise(async (resolve, reject) => {
-    try {
-  
-      let response = await organisationsHelper.update(req.body,req.userDetails.userToken);
-      return resolve(response);
-
-    } catch (error) {
-      return reject({
-        status:
-          error.status ||
-          httpStatusCode["internal_server_error"].status,
-        message:
-          error.message ||
-          httpStatusCode["internal_server_error"].message
-      });
-    }
-  });
-}
+      } catch (error) {
+        return reject({
+          status:
+            error.status ||
+            HTTP_STATUS_CODE["internal_server_error"].status,
+          message:
+            error.message ||
+            HTTP_STATUS_CODE["internal_server_error"].message
+        });
+      }
+    });
+  }
 
 
-/**
-   * @api {get} /admin-service/api/v1/organisations/details 
+
+  /**
+     * @api {get} /admin-service/api/v1/organisations/getForm 
+     * Organisation create form
+     * @apiVersion 1.0.0
+     * @apiGroup Organisations
+     * @apiHeader {String} X-authenticated-user-token Authenticity token
+     * @apiSampleRequest /admin-service/api/v1/organisations/getForm
+     * @apiUse successBody
+     * @apiUse errorBody
+     * @apiParamExample {json} Response:
+     * 
+     * {
+     *  "status": 200,
+     *  "message": ""message": "Organisation List fetched successfully."
+     *      "result": [{
+     *         "field": "name",
+     *         "value": "",
+     *         "visible": true,
+     *         "editable": true,
+     *         "label": "Name",
+     *         "input": "text",
+     *         "validation": [
+     *             {
+     *                 "name": "required",
+     *                 "validator": "required",
+     *                 "message": "Name required"
+     *             },
+     *             {
+     *                 "name": "pattern",
+     *                 "validator": "([a-zA-Z]{3,30}s*)+",
+     *                 "message": "Please Provide Valid Name"
+     *             }
+     *         ]
+     *     }]
+     * }
+     * 
+     * 
+   */
+  /**
+   * To get organisation create form
+   * @method
+   * @name getForm
+   * @param  {req}  - requested data.
+   * @returns {json} Response consists of organisation create form
+   */
+
+  getForm(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
+
+        let response = await organisationsHelper.getForm();
+        return resolve({ result:response.data,message: response.message });
+
+      } catch (error) {
+
+        return reject({
+          status:
+            error.status ||
+            HTTP_STATUS_CODE["internal_server_error"].status,
+          message:
+            error.message ||
+            HTTP_STATUS_CODE["internal_server_error"].message
+        });
+
+      }
+    });
+  }
+
+  /**
+     * @api {post} /admin-service/api/v1/organisations/update 
+     * To update organisation details
+     * @apiVersion 1.0.0
+     * @apiGroup Organisations
+     * @apiHeader {String} X-authenticated-user-token Authenticity token
+     * @apiSampleRequest /admin-service/api/v1/organisations/update
+     * @apiParamExample {json} Request:
+     * {
+     *  name:"organisation name",
+     *  email:"abc@gmail.com",
+     *  description:"new organisation",
+     *  externalId:"external123",
+     *  organisationId:"XXXXXXXXXXXX"
+     * }
+     * @apiUse successBody
+     * @apiUse errorBody
+     * @apiParamExample {json} Response:
+     * {
+     *  "message": "Organisation updated successfully.",
+     *  "status": 200,
+     *  "result": {
+     *     "organisationId": "013014480583598080574",
+     *   "response": "SUCCESS"
+     *   }
+     * }
+     * 
+   */
+  /**
+   * To update organisation data
+   * @method
+   * @name update
+   * @param  {req}  - requested data.
+   * @returns {json} Response consists of organisation update details
+   */
+
+  update(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
+
+        const organisationUpdate = await organisationsHelper.update(req.body, req.userDetails.userToken);
+        return resolve({ result:organisationUpdate.data,message: organisationUpdate.message });
+
+      } catch (error) {
+        return reject({
+          status:
+            error.status ||
+            HTTP_STATUS_CODE["internal_server_error"].status,
+          message:
+            error.message ||
+            HTTP_STATUS_CODE["internal_server_error"].message
+        });
+      }
+    });
+  }
+
+
+  /**
+     * @api {get} /admin-service/api/v1/organisations/details 
+     * To get organisation details
+     * @apiVersion 1.0.0
+     * @apiGroup Organisations
+     * @apiHeader {String} X-authenticated-user-token Authenticity token
+     * @apiSampleRequest /admin-service/api/v1/organisations/details/:organisationId
+     * @apiUse successBody
+     * @apiUse errorBody
+     * @apiParamExample {json} Response:
+     * {
+     *  "message": "Organisation details fetched successfully.",
+     *  "status": 200,
+     *  "result": {
+     *     "organisationId": "013014480583598080574",
+     *     "name": "",
+     *     "email":"",
+     *     "provider":"",
+     *     "externalId":""
+     *   }
+     * }
+     * 
+   */
+  /**
    * To get organisation details
-   * @apiVersion 1.0.0
-   * @apiGroup Organisations
-   * @apiHeader {String} X-authenticated-user-token Authenticity token
-   * @apiSampleRequest /admin-service/api/v1/organisations/details/:organisationId
-   * @apiUse successBody
-   * @apiUse errorBody
-   * @apiParamExample {json} Response:
-   * {
-   *  "message": "Organisation Details Fetched Successfully",
-   *  "status": 200,
-   *  "result": {
-   *     "organisationId": "013014480583598080574",
-   *     "name": "",
-   *     "email":"",
-   *     "provider":"",
-   *     "externalId":""
-   *   }
-   * }
-   * 
- */
- /**
-  * to get organisation details
-  * @method
-  * @name details
-  * @param  {req}  - requested data.
-  * @returns {json} Response consists of organisation details
-  */
+   * @method
+   * @name details
+   * @param  {req}  - requested data.
+   * @returns {json} Response consists of organisation details
+   */
 
- details(req) {
-  return new Promise(async (resolve, reject) => {
-    try {
-  
-      let response = await organisationsHelper.details(req.params._id,req.userDetails.userToken);
-      return resolve(response);
+  details(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
 
-    } catch (error) {
-      return reject({
-        status:
-          error.status ||
-          httpStatusCode["internal_server_error"].status,
-        message:
-          error.message ||
-          httpStatusCode["internal_server_error"].message
-      });
-    }
-  });
-}
+        let response = await organisationsHelper.details(req.params._id, req.userDetails.userToken);
+        return resolve({ result:response.data,message: response.message });
 
-/**
-   * @api {get} /admin-service/api/v1/organisations/updateStatus 
-   * To update organisation status
-   * @apiVersion 1.0.0
-   * @apiGroup Organisations
-   * @apiHeader {String} X-authenticated-user-token Authenticity token
-   * @apiSampleRequest /admin-service/api/v1/organisations/updateStatus
-   * {
-   *   "organisationId": "013014480583598080574",
-   *   "status":"0"
-   * }
-   * @apiUse successBody
-   * @apiUse errorBody
-   * @apiParamExample {json} Response:
-   * {
-   *  "message": "Organisation Status Update Successfully",
-   *  "status": 200,
-   *  "result": {
-   *     "organisationId": "",
-   *   }
-   * }
-   * 
- */
- /**
-  * to update organisation status
-  * @method
-  * @name updateStatus
-  * @param  {req}  - requested data.
-  * @returns {json} Response consists updated organisation status
-  **/
+      } catch (error) {
+        return reject({
+          status:
+            error.status ||
+            HTTP_STATUS_CODE["internal_server_error"].status,
+          message:
+            error.message ||
+            HTTP_STATUS_CODE["internal_server_error"].message
+        });
+      }
+    });
+  }
 
- updateStatus(req) {
-  return new Promise(async (resolve, reject) => {
-    try {
-  
-      let response = await organisationsHelper.updateStatus(req.body,req.userDetails.userToken);
-      return resolve(response);
+  /**
+     * @api {get} /admin-service/api/v1/organisations/activate/:_id
+     * To activate organisation
+     * @apiVersion 1.0.0
+     * @apiGroup Organisations
+     * @apiHeader {String} X-authenticated-user-token Authenticity token
+     * @apiSampleRequest /admin-service/api/v1/organisations/activate/013014480583598080574
+     * @apiUse successBody
+     * @apiUse errorBody
+     * @apiParamExample {json} Response:
+     * {
+     *  "message": "Organisation activated successfully.",
+     *  "status": 200,
+     *  "result": {
+     *     "organisationId": "",
+     *   }
+     * }
+     * 
+   */
+  /**
+   * To activate organisation
+   * @method
+   * @name activate
+   * @param  {req}  - requested data.
+   * @returns {json} Response consists activated organisation information
+   **/
 
-    } catch (error) {
-      return reject({
-        status:
-          error.status ||
-          httpStatusCode["internal_server_error"].status,
-        message:
-          error.message ||
-          httpStatusCode["internal_server_error"].message
-      });
-    }
-  });
-}
+  activate(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
 
+        let activateOrganisation = await organisationsHelper.activate(req.params._id,req.userDetails.userToken);
+        return resolve({ result:activateOrganisation.data,message: activateOrganisation.message });
 
-/**
-   * @api {get} /admin-service/api/v1/organisations/removeUser  
-   * To remove User from organisation
-   * @apiVersion 1.0.0
-   * @apiGroup Organisations
-   * @apiHeader {String} X-authenticated-user-token Authenticity token
-   * @apiSampleRequest /admin-service/api/v1/organisations/removeUser
-   * {
-   *   "organisationId": "",
-   *   "userId":""
-   * }
-   * @apiUse successBody
-   * @apiUse errorBody
-   * @apiParamExample {json} Response:
-   * {
-   *  "message": "user removed from Organisation Successfully",
-   *  "status": 200,
-   *  "result": {
-   *     "organisationId": "",
-   *   }
-   * }
-   * 
- */
- /**
-  * to update organisation status
-  * @method
-  * @name updateStatus
-  * @param  {req}  - requested data.
-  * @returns {json} Response consists updated organisation status
-  **/
+      } catch (error) {
+        return reject({
+          status:
+            error.status ||
+            HTTP_STATUS_CODE["internal_server_error"].status,
+          message:
+            error.message ||
+            HTTP_STATUS_CODE["internal_server_error"].message
+        });
+      }
+    });
+  }
 
- removeUser(req) {
-  return new Promise(async (resolve, reject) => {
-    try {
-  
-      let response = await organisationsHelper.removeUser(req.body,req.userDetails.userToken);
-      return resolve(response);
+      /**
+     * @api {get} /admin-service/api/v1/organisations/deactivate/:_id
+     * To deactivate organisation
+     * @apiVersion 1.0.0
+     * @apiGroup Organisations
+     * @apiHeader {String} X-authenticated-user-token Authenticity token
+     * @apiSampleRequest /admin-service/api/v1/organisations/deactivate/013014480583598080574
+     * @apiUse successBody
+     * @apiUse errorBody
+     * @apiParamExample {json} Response:
+     * {
+     *  "message": "Organisation de-activated successfully.",
+     *  "status": 200,
+     *  "result": {
+     *     "organisationId": "",
+     *   }
+     * }
+     * 
+   */
+  /**
+   * To deactivate organisation
+   * @method
+   * @name deactivate
+   * @param  {req}  - requested data.
+   * @returns {json} Response consists of deactivated organisation information
+   **/
 
-    } catch (error) {
-      return reject({
-        status:
-          error.status ||
-          httpStatusCode["internal_server_error"].status,
-        message:
-          error.message ||
-          httpStatusCode["internal_server_error"].message
-      });
-    }
-  });
-}
+  deactivate(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
+
+        let deactivionateOrganisation = await organisationsHelper.deactivate(req.params._id,req.userDetails.userToken);
+        return resolve({ result:deactivionateOrganisation.data,message: deactivionateOrganisation.message });
+
+      } catch (error) {
+        return reject({
+          status:
+            error.status ||
+            HTTP_STATUS_CODE["internal_server_error"].status,
+          message:
+            error.message ||
+            HTTP_STATUS_CODE["internal_server_error"].message
+        });
+      }
+    });
+  }
 
 
+  /**
+     * @api {get} /admin-service/api/v1/organisations/removeUser  
+     * To remove User from organisation
+     * @apiVersion 1.0.0
+     * @apiGroup Organisations
+     * @apiHeader {String} X-authenticated-user-token Authenticity token
+     * @apiSampleRequest /admin-service/api/v1/organisations/removeUser
+     * {
+     *   "organisationId": "",
+     *   "userId":""
+     * }
+     * @apiUse successBody
+     * @apiUse errorBody
+     * @apiParamExample {json} Response:
+     * {
+     *  "message": "user removed from organisation successfully.",
+     *  "status": 200,
+     *  "result": {
+     *     "organisationId": "",
+     *   }
+     * }
+     * 
+   */
+  /**
+   * To remove user from the organisation 
+   * @method
+   * @name removeUser
+   * @param  {req}  - requested data.
+   * @returns {json} Response consists removed organisation information
+   **/
 
+  removeUser(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
+
+        let response = await organisationsHelper.removeUser(req.body, req.userDetails.userToken);
+        return resolve({ result:response.data,message: response.message });
+
+      } catch (error) {
+        return reject({
+          status:
+            error.status ||
+            HTTP_STATUS_CODE["internal_server_error"].status,
+          message:
+            error.message ||
+            HTTP_STATUS_CODE["internal_server_error"].message
+        });
+      }
+    });
+  }
 };

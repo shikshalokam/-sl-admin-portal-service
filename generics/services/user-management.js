@@ -7,10 +7,10 @@
 
 //dependencies
 
-let urlPrefix = 
-process.env.USER_MANAGEMENT_HOST + 
-process.env.USER_MANAGEMENT_BASE_URL +
-process.env.URL_PREFIX; 
+const apiBaseUrl =
+    process.env.USER_MANAGEMENT_HOST +
+    process.env.USER_MANAGEMENT_BASE_URL +
+    process.env.URL_PREFIX;
 
 const request = require('request');
 
@@ -18,231 +18,204 @@ const request = require('request');
   * Get platform user roles
   * @function
   * @name platformUserProfile
-  * @returns {Promise} returns a promise.
+  * @param userId - user id of keyclock
+  * @param token - logged in user token
+  * @returns {Json} returns a platform user profile info.
 */
 
-var platformUserProfile = function ( userId,token ) {
-
-    const platformUserRolesUrl = 
-    urlPrefix + constants.endpoints.PLATFORM_USER_PROFILE+"/"+userId;
-    
+const platformUserProfile = function (userId, token) {
     return new Promise(async (resolve, reject) => {
         try {
 
-            const _userManagementCallBack = function (err, response) {
-                if (err) {
-                    logger.error("Failed to connect to user management service.");
-                } else {
-                    let userManagementData = JSON.parse(response.body);
-                    return resolve(userManagementData);
-                }
-            }
-
-            request.get(
-                platformUserRolesUrl,{
-                    headers: {
-                        "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN,
-                        "X-authenticated-user-token" : token 
-                    }
-                },
-                _userManagementCallBack
-            )
+            let platformUserRolesUrl =
+                apiBaseUrl + CONSTANTS.endpoints.PLATFORM_USER_PROFILE + "/" + userId;
+            let requestBody = {}
+            let userManagementData = await httpCall(platformUserRolesUrl, token, requestBody, "GET");
+            userManagementData = JSON.parse(userManagementData);
+            return resolve(userManagementData);
 
         } catch (error) {
             return reject(error);
         }
-    })
-
+    });
 }
 
 /**
-  * post create PlatForm User 
+  * To create platForm User 
   * @function
-  * @name createPlatFormUser
-  * @returns {Promise} returns a promise.
+  * @name createPlatformUser
+  * @param userDetails - user details 
+  * @param token - logged in user token  
+  * @returns {json} returns created user details
 */
 
-var createPlatFormUser = function ( requestBody,token ) {
-
-    const platformUserRolesUrl = 
-    urlPrefix + constants.endpoints.PLATFORM_USER_CREATE;
-    
+const createPlatformUser = function (userDetails, token) {
     return new Promise(async (resolve, reject) => {
         try {
 
-
-            let options = {
-                "headers":{
-                "content-type": "application/json",
-                "authorization" :  process.env.AUTHORIZATION,
-                "x-authenticated-user-token" : token,
-                },
-                json : requestBody
-            };
-
-             request.post(platformUserRolesUrl,options,callback);
-            
-            function callback(err,data){
-                if( err ) {
-                    return reject({
-                        message : constants.apiResponses.SUNBIRD_SERVICE_DOWN
-                    });
-                } else {
-                    let dialCodeData = data.body;
-                    return resolve(dialCodeData);
-                }
-            }
+            let platformUserRolesUrl =
+                apiBaseUrl + CONSTANTS.endpoints.PLATFORM_USER_CREATE;
+            let requestBody = userDetails;
+            let createResponse = await httpCall(platformUserRolesUrl, token, requestBody, "POST");
+            return resolve(createResponse);
 
         } catch (error) {
             return reject(error);
         }
-    })
-
+    });
 }
 
 /**
-  * to update PlatForm User data
+  * To update platForm user data
   * @function
   * @name updatePlatFormUser
-  * @returns {Promise} returns a promise.
+  * @param userInfo - user details
+  * @param token - logged in user token
+  * @returns {Json} returns user details
 */
 
-var updatePlatFormUser = function ( requestBody,token ) {
-
-    const platformUserUpdateUrl = 
-    urlPrefix + constants.endpoints.PLATFORM_USER_UPDATE;
-    
+const updatePlatFormUser = function (userInfo, token) {
     return new Promise(async (resolve, reject) => {
         try {
 
-            let options = {
-                "headers":{
-                "content-type": "application/json",
-                "authorization" :  process.env.AUTHORIZATION,
-                "x-authenticated-user-token" : token,
-                },
-                json : requestBody
-            };
-
-             request.post(platformUserUpdateUrl,options,callback);
-            
-            function callback(err,data){
-                if( err ) {
-                    return reject({
-                        message : constants.apiResponses.SUNBIRD_SERVICE_DOWN
-                    });
-                } else {
-                    let dialCodeData = data.body;
-                    return resolve(dialCodeData);
-                }
-            }
+            let platformUserUpdateUrl =
+                apiBaseUrl + CONSTANTS.endpoints.PLATFORM_USER_UPDATE;
+            let requestBody = userInfo;
+            let response = await httpCall(platformUserUpdateUrl, token, requestBody, "POST");
+            return resolve(response);
 
         } catch (error) {
             return reject(error);
         }
-    })
-
+    });
 }
 
-
 /**
-  * to update status of the user
+  * To activate the user
   * @function
-  * @name statusUpdate
-  * @returns {Promise} returns a promise.
+  * @name activate
+  * @param userId - keyclock user id
+  * @param token - logged in user token
+  * @returns {json} consists of response from the actiavte api
 */
 
-var statusUpdate = function ( userId,token,status ) {
-
-    const platformUserStatusUpdateUrl = 
-    urlPrefix + constants.endpoints.STATUS_UPDATE;
-    
+const activate = function (userId, token) {
     return new Promise(async (resolve, reject) => {
         try {
 
-
-            let options = {
-                "headers":{
-                "content-type": "application/json",
-                "authorization" :  process.env.AUTHORIZATION,
-                "x-authenticated-user-token" : token,
-                },
-                json : { userId : userId,status:status }
-            };
-
-             request.post(platformUserStatusUpdateUrl,options,callback);
-            
-            function callback(err,data){
-                if( err ) {
-                    return reject({
-                        message : constants.apiResponses.SUNBIRD_SERVICE_DOWN
-                    });
-                } else {
-                    let dialCodeData = data.body;
-                    return resolve(dialCodeData);
-                }
-            }
+            let platformUserStatusUpdateUrl =
+                apiBaseUrl + CONSTANTS.endpoints.ACTIVATE_USER;
+            let requestBody = { userId: userId };
+            let response = await httpCall(platformUserStatusUpdateUrl, token, requestBody, "POST");
+            return resolve(response);
 
         } catch (error) {
             return reject(error);
         }
-    })
+    });
+}
 
+/**
+  * To deactivate the user
+  * @function
+  * @name inactivate
+  * @param userId - keyclock user id
+  * @param token - logged in user token
+  * @returns consists of response from the deactiavte api
+*/
+
+const inactivate = function (userId, token) {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            let platformUserStatusUpdateUrl =
+                apiBaseUrl + CONSTANTS.endpoints.INACTIVATE_USER;
+            let requestBody = { userId: userId };
+            let response = await httpCall(platformUserStatusUpdateUrl, token, requestBody, "POST");
+            return resolve(response);
+
+        } catch (error) {
+            return reject(error);
+        }
+    });
 }
 
 
 /**
-  * to get user details from user-management service
+  * To get user details for a specific user
   * @function
   * @name userDetails
-  * @returns {Promise} returns a promise.
+  * @param userId - user id.
+  * @param token - Logged in user token.
+  * @returns {Json} returns a user details.
 */
 
-var userDetails = function ( userId,token ) {
-
-    const userDetailsAPIUrl = 
-    urlPrefix + constants.endpoints.USER_DETAILS;
-
-
-    
+const userDetails = function (userId, token) {
     return new Promise(async (resolve, reject) => {
         try {
 
-
-            let options = {
-                "headers":{
-                "content-type": "application/json",
-                "authorization" :  process.env.AUTHORIZATION,
-                "x-authenticated-user-token" : token,
-                },
-                json : { userId : userId }
-            };
-
-             request.post(userDetailsAPIUrl,options,callback);
-            
-            function callback(err,data){
-                if( err ) {
-                    return reject({
-                        message : constants.apiResponses.SUNBIRD_SERVICE_DOWN
-                    });
-                } else {
-
-                    return resolve(data.body);
-                }
-            }
+            const userDetailsAPIUrl =
+                apiBaseUrl + CONSTANTS.endpoints.USER_DETAILS;
+            let requestBody = { userId: userId };
+            let userDetails = await httpCall(userDetailsAPIUrl, token, requestBody, "POST");
+            return resolve(userDetails);
 
         } catch (error) {
             return reject(error);
         }
-    })
+    });
+}
 
+
+/**
+* Common http request call 
+* @name httpCall
+* @param {String} url filePath of the file to upload
+* @param {String} token user access token
+* @param {Json} requestBody body of the request
+* @returns {Json} - consists of api response body
+*/
+function httpCall(url, token, requestBody= "", type = "") {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            let options = {
+                "headers": {
+                    'Content-Type': "application/json",
+                    "X-authenticated-user-token": token,
+                    "internal-access-token": process.env.INTERNAL_ACCESS_TOKEN
+                }
+            };
+
+            let apiUrl = url;
+
+            if (type == "POST") {
+                options["json"] = requestBody;
+                request.post(apiUrl, options, callback);
+            } else {
+                request.get(apiUrl, options, callback);
+            }
+            function callback(err, data) {
+                if (err) {
+                    return reject({
+                        message: CONSTANTS.apiResponses.USER_MANAGEMENT_SERVICE_DOWN
+                    });
+                } else {
+                   return resolve(data.body);
+                }
+            }
+        } catch (error) {
+            return reject(error);
+        }
+    })
 }
 
 
 module.exports = {
-    platformUserProfile : platformUserProfile,
-    createPlatFormUser:createPlatFormUser,
-    updatePlatFormUser:updatePlatFormUser,
-    statusUpdate:statusUpdate,
-    userDetails:userDetails
+    platformUserProfile: platformUserProfile,
+    createPlatformUser: createPlatformUser,
+    updatePlatFormUser: updatePlatFormUser,
+    userDetails: userDetails,
+    activate: activate,
+    inactivate: inactivate
 };

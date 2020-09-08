@@ -1,7 +1,7 @@
 {
-    "name": "SL-DHITI-SERVICE",
+    "name": "SL-ADMIN-SERVICE",
     "version": "0.0.1",
-    "description": "SL dhiti service API's",
-    "title": "SL dhiti service API's",
+    "description": "SL admin service API's",
+    "title": "SL admin service API's",
     "url" : "https://shikshalokam.org"
     }

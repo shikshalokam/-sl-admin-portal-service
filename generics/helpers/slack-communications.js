@@ -1,7 +1,7 @@
 /**
  * name : slack-communications.js
- * author : Rakesh kumar
- * Date : 17-March-2020
+ * author : Aman Karki
+ * Date : 20-July-2020
  * Description : Slack error message.
  */
 
@@ -9,14 +9,8 @@
 
 const request = require('./http-request');
 const SLACK_COMMUNICATION_ON_OFF = process.env.SLACK_COMMUNICATIONS_ON_OFF;
-const SLACK_TOKEN = process.env.SLACK_TOKEN
 const SLACK_HOOK = process.env.SLACK_EXCEPTION_LOG_URL;
-const ERROR_MESSAGES_TO_SLACK = 
-(!process.env.ERROR_MESSAGE_TO_SLACK || 
-  !process.env.ERROR_MESSAGE_TO_SLACK != "OFF") ?
- "ON" : 
- "OFF";
-
+const ERROR_MESSAGES_TO_SLACK = process.env.ERROR_MESSAGE_TO_SLACK;
 /**
   * Send the error message to slack.
   * @function
@@ -29,8 +23,7 @@ let sendMessageToSlack = function (errorMessage) {
   return new Promise(async (resolve, reject) => {
     try {
 
-      if (SLACK_COMMUNICATION_ON_OFF === "ON" && 
-      ERROR_MESSAGES_TO_SLACK === "ON" && SLACK_TOKEN != "") {
+      if (SLACK_COMMUNICATION_ON_OFF === "ON" && ERROR_MESSAGES_TO_SLACK === "ON") {
 
         let reqObj = new request()
         let attachmentData = new Array
@@ -50,7 +43,7 @@ let sendMessageToSlack = function (errorMessage) {
 
         fieldsData.push({
           title: "Environment",
-          value: process.env.NODE_ENV,
+          value: process.env.APPLICATION_ENV,
           short: false
         })
 

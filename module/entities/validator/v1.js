@@ -1,0 +1,26 @@
+module.exports = (req) => {
+
+    let enitiyValidator = {
+
+        listByEntityType: function () {
+            req.checkParams('_id').exists().withMessage("required entityType");
+        },
+        subEntityList: function () {
+            req.checkParams('_id').isMongoId().withMessage("Invalid entityId");
+        },
+        details: function () {
+            req.checkParams('_id').isMongoId().withMessage("Invalid entityId");
+        },
+        relatedEntities: function () {
+            req.checkParams('_id').isMongoId().withMessage("required entityId");
+        },
+        createState: function () {
+            req.checkBody('name').exists().withMessage("required name");
+            req.checkBody('externalId').exists().withMessage("required externalId");
+            req.checkBody('capital').exists().withMessage("required capital");
+            req.checkBody('region').exists().withMessage("required region");
+            
+        }
+    }
+    if (enitiyValidator[req.params.method]) enitiyValidator[req.params.method]();
+};

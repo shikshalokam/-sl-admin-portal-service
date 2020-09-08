@@ -12,22 +12,38 @@ module.exports = class FormsHelper {
      * Form list.
      * @method
      * @name list
+     * @name list
      * @param {Object} [queryParameter = "all"] - Filtered query data.
-     * @param {Object} [projection = {}] - Projected data.   
+     * @param {Array} [projection = {}] - Projected data.   
+     * @param {Object} [skipFields = "none" ]
      * @returns {Object} returns a form data.
     */
 
-   static list(queryParameter = "all", projection = {}) {
+   static list(queryParameter = "all", fieldsArray = {},skipFields = "none") {
        
     return new Promise(async (resolve, reject) => {
         
         try {
             
-            if( queryParameter === "all" ) {
+            if (queryParameter === "all") {
                 queryParameter = {};
             };
 
-            let formData = 
+            let projection = {}
+
+            if (fieldsArray != "all") {
+                fieldsArray.forEach(field => {
+                    projection[field] = 1;
+                });
+            }
+
+            if (skipFields != "none") {
+                skipFields.forEach(element => {
+                    projection[element] = 0;
+                });
+            }
+
+            const formData = 
             await database.models.forms.find(queryParameter, projection).lean();
 
             return resolve(formData);

@@ -1,90 +1,62 @@
 module.exports = {
   async up(db) {
     global.migrationMsg = "Create Organisation Form Generation"
-    // return await db.collection('albums').updateOne({artist: 'The Beatles'}, {$set: {blacklisted: true}});
 
     let userCreateForm =
-    await db.collection('forms').findOne({ name: "organisationCreateForm" });
+      await db.collection('forms').findOne({ name: "organisationCreateForm" });
 
-  if (!userCreateForm) {
+    if (!userCreateForm) {
 
-    let allFields = [];
+      let allFields = [];
 
-    let inputFields = ["name","description","email", "externalId","address"];
+      let inputFields = ["name", "description", "email", "externalId", "address"];
 
-    let inputField = {
-      "field": "",
-      "value": "",
-      "visible": true,
-      "editable": true,
-      "label": "",
-      "input": "text",
-      "validation": [{
-        "name": "required",
-        "validator": "required",
-        "message": ""
-      }]
-    };
+      let inputField = {
+        "field": "",
+        "value": "",
+        "visible": true,
+        "editable": true,
+        "label": "",
+        "input": "text",
+        "validation": [{
+          "name": "required",
+          "validator": "required",
+          "message": ""
+        }]
+      };
 
-    await Promise.all(inputFields.map(async function (fields) {
+      await Promise.all(inputFields.map(async function (fields) {
 
-      let inputObj = JSON.parse(JSON.stringify(inputField));
-      let field = fields.replace(/([A-Z])/g, " $1");
-      inputObj.label = field.charAt(0).toUpperCase() + field.slice(1);
-      inputObj.field = fields;
+        let inputObj = JSON.parse(JSON.stringify(inputField));
+        let field = fields.replace(/([A-Z])/g, " $1");
+        inputObj.label = field.charAt(0).toUpperCase() + field.slice(1);
+        inputObj.field = fields;
 
-      let message = "";
-      let validator = "";
-      
+        let message = "";
+        let validator = "";
+        inputObj.validation[0].message = inputObj.label + " required";
+        if (fields == "email") {
+          validator = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+          message = "Please provide a valid Email";
+          inputObj.validation.push(
+            {
+              "name": "pattern",
+              "validator": validator,
+              "message": message
+            });
 
-      if (fields == "email") {
-        validator = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
-        message = "Please provide a valid Email";
+        } else if (fields == "description" || fields == "address") {
+          inputObj.input = "textarea";
+        }
+        allFields.push(inputObj);
+      }));
 
-      } else if(fields == "description" || fields =="address"){
-        // validator = "^[a-z0-9_-]{3,15}$";
-        // message = "Please provide a valid User Name";
-        inputObj.input = "textarea";
-        // inputObj.validation = [];
+      let createForm = {
+        name: "organisationCreateForm",
+        value: allFields
       }
-      // else if (fields == "externalId") {
-
-      //   validator = "[^a-zA-Z0-9\s\:]*";
-      //   message = "Please provide a valid external id";
-      // }else if (fields == "address") {
-      //   validator = "^[a-z0-9_-]{3,80}$";
-      //   message = "Please provide a valid address";
-      //   inputObj.input = "textarea";
-      // }else {
-      //   validator = inputObj.validation[1].validator; 
-      //   message = "Please Provide Valid " + inputObj.label;
-      // }
-      
-      inputObj.validation[0].message = inputObj.label + " required";
-      if(fields === "email"  ){
-        // delete inputObj.validation[0];
-        inputObj.validation = [{
-          "name": "pattern",
-          "validator": validator,
-          "message": message
-        }];
-      }
-
-      allFields.push(inputObj);
-
-    }));
-
-    let createForm = {
-      name: "organisationCreateForm",
-      value: allFields
+      await db.collection('forms').insertOne(createForm);
     }
-
-   
-    await db.collection('forms').insertOne(createForm);
-
-  }
-
-
   },
 
   async down(db) {

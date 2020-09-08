@@ -5,6 +5,9 @@
  * Description : All utility functions.
  */
 
+// Dependencies
+const uuid = require('uuid/v4');
+
  /**
   * convert string to camelCaseToTitleCase.
   * @function
@@ -122,11 +125,23 @@ function sortArrayOfObjects(key, order = 'asc') {
   };
 }
 
+/**
+   * Generate unique id.s
+   * @method
+   * @name generateUniqueId
+   * @returns {String} - unique id 
+  */
+
+ function generateUniqueId() {
+  return uuid();
+}
+
 module.exports = {
   camelCaseToTitleCase : camelCaseToTitleCase,
   lowerCase : lowerCase,
   checkIfStringIsUrl : checkIfStringIsUrl,
   hyphenCaseToCamelCase : hyphenCaseToCamelCase,  
   camelCaseToCapitalizeCase : camelCaseToCapitalizeCase,
-  sortArrayOfObjects:sortArrayOfObjects
+  sortArrayOfObjects:sortArrayOfObjects,
+  generateUniqueId : generateUniqueId
 };
