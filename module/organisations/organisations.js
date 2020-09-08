@@ -15,7 +15,7 @@ const sessionHelpers = require(GENERIC_HELPERS_PATH + "/sessions");
   * @method
   * @name getOrganisationlist
   * @param { object } userProfileInfo - user profile information
-  * @param  {String} userId  - userId
+  * @param  {Object} userDocument  - user information
   * @param  {String} userToken  - user access token
   * @param {Array} roles - roles of users
   * @returns {boolean} return boolen value
