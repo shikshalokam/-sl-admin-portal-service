@@ -10,12 +10,9 @@ const sunbirdService =
 const kendraService =
     require(GENERIC_SERVICES_PATH + "/kendra-service");
 
-const samikshaService =
-    require(GENERIC_SERVICES_PATH + "/samiksha-service");
+const bulkUploadEntityMappingHelper = require(MODULES_BASE_PATH + "/entityTypes/bulkUploads.js");
 
-const bulkUploadEntityMappingHelper = require(MODULES_BASE_PATH + "/bulkUploadEntityMapping/helper");
-
-const entityBulkUploadHelper = require(MODULES_BASE_PATH + "/bulkUploadEntities/helper");
+const entityBulkUploadHelper = require(MODULES_BASE_PATH + "/entities/bulkUploads.js");
 
 
 const csv = require('csvtojson');

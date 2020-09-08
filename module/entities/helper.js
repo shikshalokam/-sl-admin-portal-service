@@ -248,12 +248,9 @@ module.exports = class entitiesHelper {
                 let projection = [];
                 let queryObject = {};
 
-
-                console.log("entityTraversalType",entityTraversalType);
                 if (entityTraversalType != "") {
                     let entityTraversal = `groups.${entityTraversalType}`;
 
-                    console.log("entityTraversal",entityTraversal);
                     projection.push(entityTraversal);
                     queryObject = {
                         _id: entityId,
@@ -293,7 +290,7 @@ module.exports = class entitiesHelper {
                             name: entitiesDocument[0].entityType
                         }, ["immediateChildrenEntityType"]
                         );
-                    if (getImmediateEntityTypes && getImmediateEntityTypes.result && getImmediateEntityTypes.result.length > 0) {
+                    if (getImmediateEntityTypes && getImmediateEntityTypes.data && getImmediateEntityTypes.data.length > 0) {
                         getImmediateEntityTypes = getImmediateEntityTypes.result[0];
                         Object.keys(entitiesDocument[0].groups).forEach(entityGroup => {
                             if (

@@ -1,7 +1,7 @@
 /**
- * name : bulkUploadEntities/helper.js
+ * name : entities/bulkUploads.js
  * author : Rakesh Kumar
- * Date : 18-March-2020
+ * Date : 07-Sep-2020
  * Description : Consist of bulk upload entity information.
  */
 
@@ -11,7 +11,7 @@ const samikshaService =
 const kendraService =
     require(GENERIC_SERVICES_PATH + "/kendra-service");
 
-module.exports = class BulkUploadEntitiesHelper {
+module.exports = class BulkUploads {
 
     /**
      * To check weather entity mapping csv is valid or not
@@ -20,14 +20,18 @@ module.exports = class BulkUploadEntitiesHelper {
      */
     static validateEntityUploadRequest(inputArray) {
         return new Promise(async (resolve, reject) => {
-            let valid = false;
-            await Promise.all(inputArray.map(async function (element) {
+            let valid = true;
+            for (let i = 0; i < inputArray.length; i++) {
+                let element = inputArray[i];
                 if (element) {
-                    if (element.externalId && element.state && element.name && element.types && element._existingKeyField) {
-                        valid = true;
+                    if (!element.externalId || !element.state || !element.name || !element.types || !element._existingKeyField) {
+                        valid = false;
                     }
                 }
-            }));
+                if (valid == false) {
+                    break;
+                }
+            }
             resolve({ success: true, data: valid, message: valid });
         });
     }

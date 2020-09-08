@@ -114,7 +114,7 @@ module.exports = class EntityTypes extends Abstract {
 
         let projection = ["name","_id"];
         let entityTypesList = await entityTypesHelper.getList("all",projection);
-        return resolve(entityTypesList);
+        return resolve({ result:entityTypesList.data,message:entityTypesList.message });
 
       } catch (error) {
         return reject({

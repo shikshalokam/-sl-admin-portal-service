@@ -1,7 +1,7 @@
 /**
- * name : bulkUploadEntities/helper.js
+ * name : entityTypes/bulkUploads.js
  * author : Rakesh Kumar
- * Date : 18-March-2020
+ * Date : 07-Sep-2020
  * Description : Consist of bulk upload entity mapping information.
  */
 
@@ -13,7 +13,10 @@ const kendraService =
 
 const fs = require("fs");
 
-module.exports = class BulkUploadEntityMappingHelper {
+const mongoose = require('mongoose');
+const { ObjectId } = mongoose.Types;
+
+module.exports = class BulkUploads {
 
 
     /**
@@ -24,17 +27,22 @@ module.exports = class BulkUploadEntityMappingHelper {
     static validateEntityMapping(inputArray) {
         return new Promise(async (resolve, reject) => {
 
-            let valid = false;
-            await Promise.all(inputArray.map(async function (element) {
+            let valid = true;
+            for (let i = 0; i < inputArray.length; i++) {
+                let element = inputArray[i];
+
                 if (element) {
 
-                    if (element.parentEntiyId && ObjectId.isValid(element.parentEntiyId) == true &&
-                    element.childEntityId && ObjectId.isValid(element.childEntityId) == true) {
-                        valid = true;
+                    if (!element.parentEntiyId || ObjectId.isValid(element.parentEntiyId) != true ||
+                        !element.childEntityId || ObjectId.isValid(element.childEntityId) != true) {
+                        valid = false;
                     }
                 }
-            }));
-            resolve({ success:true,data:valid,message:valid });
+                if(valid==false){
+                    break;
+                }
+            }
+            resolve({ success: true, data: valid, message: valid });
         });
     }
 
@@ -56,7 +64,7 @@ module.exports = class BulkUploadEntityMappingHelper {
             try {
                 let samikshaResponse = await samikshaService.entityMapping(filePath, userToken);
                 if (samikshaResponse && samikshaResponse.statusCode == HTTP_STATUS_CODE["ok"].status) {
-                    
+
                     let successFile = UTILS.generateUniqueId() + "_success.csv";
                     let uploadResponse = await kendraService.uploadFile(filePath,
                         userId + "/" + successFile);
@@ -64,14 +72,14 @@ module.exports = class BulkUploadEntityMappingHelper {
                     fs.unlink(filePath);
                     if (uploadResponse.status == HTTP_STATUS_CODE["ok"].status) {
 
-                        return resolve({ 
-                            success:true,
-                            data:uploadResponse,
-                            message:uploadResponse.message 
+                        return resolve({
+                            success: true,
+                            data: uploadResponse,
+                            message: uploadResponse.message
                         });
-  
-                    }else {
-                        throw new Error(uploadResponse.message);   
+
+                    } else {
+                        throw new Error(uploadResponse.message);
                     }
                 } else {
                     fs.unlink(filePath);
@@ -79,9 +87,9 @@ module.exports = class BulkUploadEntityMappingHelper {
                 }
             } catch (error) {
                 return reject({
-                    success:false,
-                    data:false,
-                    message:error.message
+                    success: false,
+                    data: false,
+                    message: error.message
                 })
             }
         });

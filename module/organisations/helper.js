@@ -12,7 +12,7 @@ const platformRolesHelper = require(MODULES_BASE_PATH + "/platformRoles/helper")
 const sessionHelpers = require(GENERIC_HELPERS_PATH + "/sessions");
 const usersHelper = require(MODULES_BASE_PATH + "/users/helper");
 
-const organisationHelper = require(GENERIC_HELPERS_PATH + "/organisations");
+const organisationHelper = require(MODULES_BASE_PATH + "/organisations/organisations.js");
 
 module.exports = class OrganisationsHelper {
 
@@ -30,6 +30,7 @@ module.exports = class OrganisationsHelper {
             try {
                 let organisationsList = [];
                 let roles = await _getUserRoles(userId);
+
                 if (roles.includes(CONSTANTS.common.PLATFROM_ADMIN_ROLE)) {
                     organisationsList = await organisationHelper.getOrganisationlist(token,"",roles);
                 } else if (roles.includes(CONSTANTS.common.ORG_ADMIN_ROLE)) {

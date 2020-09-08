@@ -30,8 +30,6 @@ module.exports = class EntityTypesHelper {
                 };
 
                 let projection = {}
-
-                console.log("fieldsArray",fieldsArray);
                 if (fieldsArray != "all") {
                     fieldsArray.forEach(field => {
                         projection[field] = 1;
@@ -49,16 +47,21 @@ module.exports = class EntityTypesHelper {
                     await database.models.entityTypes.find(queryParameter, projection).lean();
 
                 if (!entityTypeData) {
-
-                    return resolve({
-                        message: CONSTANTS.apiResponses.ENTITY_TYPE_NOT_FOUND,
-                    });
+                    throw new Error(CONSTANTS.apiResponses.ENTITY_TYPE_NOT_FOUND);
                 }
 
-                return resolve({ message: CONSTANTS.apiResponses.ENTITY_TYPE_FETCHED, result: entityTypeData });
+                return resolve({ 
+                    message: CONSTANTS.apiResponses.ENTITY_TYPE_FETCHED, 
+                    data: entityTypeData,
+                    success:true 
+                });
 
             } catch (error) {
-                return reject(error);
+                return reject({
+                    success:false,
+                    data:false,
+                    message:error.message
+                });
             }
         })
 
@@ -76,11 +79,11 @@ module.exports = class EntityTypesHelper {
         return new Promise(async (resolve, reject) => {
             try {
 
-                let entityTypeData = await this.all(queryObject, fieldsArray);
+                let entityTypeData = await this.list(queryObject, fieldsArray);
 
                 let entityTypeArray = [];
-                if (entityTypeData && entityTypeData.result) {
-                    entityTypeData.result.map(types => {
+                if (entityTypeData && entityTypeData.data) {
+                    entityTypeData.data.map(types => {
                         let entityType = {
                             label: types.name,
                             value: types._id,
@@ -88,10 +91,19 @@ module.exports = class EntityTypesHelper {
                         entityTypeArray.push(entityType);
                     })
                 }
-                return resolve({ message: CONSTANTS.apiResponses.ENTITY_TYPE_FETCHED, result: entityTypeArray });
+                return resolve({ 
+                    message: CONSTANTS.apiResponses.ENTITY_TYPE_FETCHED, 
+                    data: entityTypeArray,
+                    success:true
+                 });
 
             } catch (error) {
-                return reject(error);
+            
+                return reject({
+                    success:false,
+                    data:false,
+                    message:error.message
+                });
             }
         })
 

@@ -18,7 +18,7 @@ const entityTypeHelper = require(MODULES_BASE_PATH + "/entityTypes/helper");
 const platformRolesHelper = require(MODULES_BASE_PATH + "/platformRoles/helper");
 const sessionHelpers = require(GENERIC_HELPERS_PATH + "/sessions");
 
-const organisationHelper = require(GENERIC_HELPERS_PATH + "/organisations");
+const organisationHelper = require(MODULES_BASE_PATH + "/organisations/organisations.js");
 
 module.exports = class UsersHelper {
 
@@ -82,7 +82,9 @@ module.exports = class UsersHelper {
 
                 let userAccessRoles = await _getUserRoles(userId);
 
-                let organisations = await organisationHelper.getOrganisationlist(token, userId,userAccessRoles);
+                let userDocument = await database.models.userExtension.findOne({ userId: userId }, { organisations: 1 });
+                let organisations = await organisationHelper.getOrganisationlist(token,userDocument,userAccessRoles);
+
                 let roles = [];
 
                 const getAllRoles  = await Promise.all([
@@ -285,8 +287,8 @@ module.exports = class UsersHelper {
 
                     let role = await _getUserRoles(orgAdminUserId);
 
-                    let organisationsList = await organisationHelper.getOrganisationlist(userToken, orgAdminUserId,role);
                     let userDocument = await database.models.userExtension.findOne({ userId: userId }, { organisations: 1, organisationRoles: 1 });
+                    let organisationsList = await organisationHelper.getOrganisationlist(userToken,userDocument,role);
                     if (!userDocument) {
                         userDocument = await _addUserEntry(profileData.result.response, orgAdminUserId);
                     }
@@ -607,7 +609,7 @@ function _checkStateWithSubEntities(groups, entityTypeId) {
                 _id: entityTypeId
             }, projection);
 
-            if (entityTypeDoc.result) {
+            if (entityTypeDoc.data) {
                 entityTypeDoc = entityTypeDoc.result[0];
                 if (entityTypeDoc && entityTypeDoc.immediateChildrenEntityType &&
                     entityTypeDoc.immediateChildrenEntityType.length > 0) {
@@ -629,75 +631,6 @@ function _checkStateWithSubEntities(groups, entityTypeId) {
             return reject(err);
         }
     });
-}
-
-
-/**
-  * To get organisations list
-  * @method
-  * @name _getOrganisationlist
-  * @param { object } userProfileInfo - user profile information
-  * @param  {String} userId  - userId
-  * @param  {String} userToken  - user access token
-  * @returns {boolean} return boolen value
-  * */
-
-function _getOrganisationlist(token, userId = "") {
-    return new Promise(async (resolve, reject) => {
-        try {
-
-
-            let roles = await _getUserRoles(userId);
-            let organisationsList = [];
-            let sessionOrganisationData = sessionHelpers.get(CONSTANTS.common.ORGANISATIONS_SESSION);
-
-            if (sessionOrganisationData && sessionOrganisationData.length > 0) {
-                organisationsList = sessionOrganisationData;
-            } else {
-
-                let request = {
-                    "filters": {
-                    }
-                }
-
-                let organisationList = await sunbirdService.searchOrganisation(request, token);
-                if (organisationList && organisationList.status && organisationList.status == HTTP_STATUS_CODE.ok.status) {
-                    if (organisationList.result && organisationList.result.response &&
-                        organisationList.result.response && organisationList.result.response.content) {
-                        await Promise.all(organisationList.result.response.content.map(async function (orgInfo) {
-                            organisationsList.push({
-                                label: orgInfo.orgName,
-                                value: orgInfo.id
-                            });
-                        }));
-                        sessionHelpers.set(CONSTANTS.common.ORGANISATIONS_SESSION, organisationsList);
-                    }
-                }
-
-            }
-            if (!roles.includes(CONSTANTS.common.PLATFROM_ADMIN_ROLE)) {
-                let userOrganisations = await database.models.userExtension.findOne({ userId: userId }, { organisations: 1 });
-                let organisations = [];
-                if (userOrganisations && userOrganisations.organisations) {
-                    userOrganisations.organisations.map(organisation => {
-                        organisationsList.map(orgInfo => {
-
-                            if (orgInfo.value == organisation.value) {
-                                organisations.push(orgInfo);
-                            }
-                        });
-                    });
-                }
-                resolve(organisations);
-            } else {
-                resolve(organisationsList);
-            }
-        } catch (err) {
-            return reject(err);
-        }
-    });
-
-
 }
 
 /**

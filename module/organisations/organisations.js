@@ -21,12 +21,11 @@ const sessionHelpers = require(GENERIC_HELPERS_PATH + "/sessions");
   * @returns {boolean} return boolen value
   * */
 
- function getOrganisationlist(token, userId = "",roles=[]) {
+ function getOrganisationlist(token, userDocument = "",roles=[]) {
     return new Promise(async (resolve, reject) => {
         try {
 
-
-            // let roles = await _getUserRoles(userId);
+         
             let organisationsList = [];
             let sessionOrganisationData = sessionHelpers.get(CONSTANTS.common.ORGANISATIONS_SESSION);
 
@@ -55,12 +54,11 @@ const sessionHelpers = require(GENERIC_HELPERS_PATH + "/sessions");
 
             }
             if (!roles.includes(CONSTANTS.common.PLATFROM_ADMIN_ROLE)) {
-                let userOrganisations = await database.models.userExtension.findOne({ userId: userId }, { organisations: 1 });
+                let userOrganisations = userDocument;
                 let organisations = [];
                 if (userOrganisations && userOrganisations.organisations) {
                     userOrganisations.organisations.map(organisation => {
                         organisationsList.map(orgInfo => {
-
                             if (orgInfo.value == organisation.value) {
                                 organisations.push(orgInfo);
                             }
